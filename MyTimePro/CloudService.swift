@@ -110,6 +110,41 @@ actor CloudService: ObservableObject {
         isSubscribed = true
     }
 
+    // MARK: - Private Methods - Notifications
+    private func setupNotifications() {
+        Task { @MainActor in
+            NotificationCenter.default.addObserver(
+                forName: .CKAccountChanged,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task {
+                    await self?.handleiCloudAccountChanged()
+                }
+            }
+
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("CKDatabaseDidReceiveChanges"),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task {
+                    await self?.handleRemoteNotification()
+                }
+            }
+        }
+    }
+
+    private func handleiCloudAccountChanged() {
+        checkiCloudStatus()
+    }
+
+    private func handleRemoteNotification() async {
+        await MainActor.run {
+            requestSync()
+        }
+    }
+
     // MARK: - Private Methods - Sync
     private func performSync() async throws {
         guard await iCloudStatus == .available else { return }
@@ -240,30 +275,6 @@ actor CloudService: ObservableObject {
                 await handleCloudKitError(error)
             }
         }
-    }
-
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(iCloudAccountChanged),
-            name: .CKAccountChanged,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleRemoteNotification),
-            name: NSNotification.Name("CKDatabaseDidReceiveChanges"),
-            object: nil
-        )
-    }
-
-    @objc private func iCloudAccountChanged() {
-        checkiCloudStatus()
-    }
-
-    @objc private func handleRemoteNotification() {
-        requestSync()
     }
 
     // MARK: - Types
