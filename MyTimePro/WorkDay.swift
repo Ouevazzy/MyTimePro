@@ -72,16 +72,12 @@ final class WorkDay: Identifiable {
         let settings = UserSettings.shared
         let calendar = Calendar.current
         
-        // Par défaut, on considère qu'il n'y a pas d'heures standard pour ce jour
         var standardSeconds = 0
         
-        // Si c'est un jour de travail ou une journée compensatoire, on calcule les heures standard
         if type == .work || type == .compensatory {
-            // Convertir le jour de la semaine de 1-7 (dimanche-samedi) à 0-6 (lundi-dimanche)
             let weekday = calendar.component(.weekday, from: date)
             let adjustedWeekday = weekday == 1 ? 6 : weekday - 2
             
-            // Si le jour est configuré comme travaillé dans les paramètres
             if adjustedWeekday >= 0 && adjustedWeekday < settings.workingDays.count && settings.workingDays[adjustedWeekday] {
                 standardSeconds = Int(round(settings.standardDailyHours * 3600))
             }
@@ -98,18 +94,15 @@ final class WorkDay: Identifiable {
             overtimeSeconds = Int(round(workedSeconds)) - standardSeconds
             
         case .vacation, .halfDayVacation, .sickLeave, .holiday:
-            // Ne compte pas dans les heures
             break
             
         case .compensatory:
-            // Déduire les heures standard des heures supplémentaires
             overtimeSeconds = -standardSeconds
             
         case .training:
             totalHours = Double(standardSeconds) / 3600.0
         }
         
-        // Réinitialiser les heures de début/fin/pause pour les journées non travaillées
         if !type.isWorkDay {
             startTime = nil
             endTime = nil
@@ -129,8 +122,10 @@ final class WorkDay: Identifiable {
         }
         
         calculateHours()
-        // Synchro avec CloudKit lorsque les données sont mises à jour
-        CloudService.shared.requestSync()
+        // Appel asynchrone de requestSync
+        Task { @MainActor in
+            await CloudService.shared.requestSync()
+        }
     }
     
     var formattedTotalHours: String {
