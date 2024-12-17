@@ -5,18 +5,20 @@ import CloudKit
 @main
 struct MyTimeProApp: App {
     // MARK: - Properties
-    private let modelContainer: ModelContainer
+    @StateObject private var modelContainer: ModelContainer
     private let cloudKitContainerID = "iCloud.jordan-payez.MyTimePro"
     private let storeName = "MyTimePro.store"
     @Environment(\.scenePhase) private var scenePhase
     
     // MARK: - Initialization
     init() {
+        let container: ModelContainer
         do {
-            modelContainer = try setupContainer()
+            container = try setupContainer()
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error.localizedDescription)")
         }
+        _modelContainer = StateObject(wrappedValue: container)
     }
     
     // MARK: - App Scene
