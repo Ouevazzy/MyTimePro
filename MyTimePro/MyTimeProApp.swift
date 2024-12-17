@@ -5,7 +5,7 @@ import CloudKit
 @main
 struct MyTimeProApp: App {
     // MARK: - Properties
-    let container: ModelContainer
+    private let modelContainer: ModelContainer
     private let cloudKitContainerID = "iCloud.jordan-payez.MyTimePro"
     private let storeName = "MyTimePro.store"
     @Environment(\.scenePhase) private var scenePhase
@@ -13,8 +13,7 @@ struct MyTimeProApp: App {
     // MARK: - Initialization
     init() {
         do {
-            container = try setupModelContainer()
-            setupCloudSync()
+            modelContainer = try setupContainer()
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error.localizedDescription)")
         }
@@ -24,7 +23,7 @@ struct MyTimeProApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(container)
+                .modelContainer(modelContainer)
                 .preferredColorScheme(.dark)
                 .onAppear {
                     Task {
@@ -38,16 +37,10 @@ struct MyTimeProApp: App {
     }
     
     // MARK: - Private Setup Methods
-    private func setupModelContainer() throws -> ModelContainer {
-        // Configuration du schéma
-        let schema = Schema([
-            WorkDay.self
-        ])
-        
-        // URL pour le stockage local
+    private func setupContainer() throws -> ModelContainer {
+        let schema = Schema([WorkDay.self])
         let storeURL = URL.documentsDirectory.appending(path: storeName)
         
-        // Configuration du modèle avec support CloudKit
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             url: storeURL,
@@ -55,18 +48,17 @@ struct MyTimeProApp: App {
             cloudKitDatabase: .private(cloudKitContainerID)
         )
         
-        // Création du conteneur
-        return try ModelContainer(
+        let container = try ModelContainer(
             for: WorkDay.self,
             configurations: modelConfiguration
         )
+        
+        setupCloudSync()
+        return container
     }
     
     private func setupCloudSync() {
-        // Configuration du container CloudKit
         let cloudContainer = CKContainer(identifier: cloudKitContainerID)
-        
-        // Configuration des zones
         let zones = [
             CKRecordZone(zoneName: "MyTimeProZone"),
             CKRecordZone(zoneName: "com.apple.coredata.cloudkit.zone")
@@ -75,7 +67,6 @@ struct MyTimeProApp: App {
         let zoneOperation = CKModifyRecordZonesOperation(recordZonesToSave: zones)
         zoneOperation.qualityOfService = .utility
         
-        // Configuration de la subscription
         let subscription = CKDatabaseSubscription(subscriptionID: "mytimepro-all-changes")
         let notificationInfo = CKSubscription.NotificationInfo()
         notificationInfo.shouldSendContentAvailable = true
@@ -84,17 +75,14 @@ struct MyTimeProApp: App {
         let subscriptionOperation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription])
         subscriptionOperation.qualityOfService = .utility
         
-        // Exécution des opérations
         let database = cloudContainer.privateCloudDatabase
         database.add(zoneOperation)
         database.add(subscriptionOperation)
         
-        // Configuration des notifications de changement
         setupNotificationObservers()
     }
     
     private func setupNotificationObservers() {
-        // Observer les changements distants
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("NSPersistentStoreRemoteChangeNotification"),
             object: nil,
@@ -105,7 +93,6 @@ struct MyTimeProApp: App {
             }
         }
         
-        // Observer les changements de compte iCloud
         NotificationCenter.default.addObserver(
             forName: .CKAccountChanged,
             object: nil,
@@ -116,7 +103,6 @@ struct MyTimeProApp: App {
             }
         }
         
-        // Observer les notifications push CloudKit
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("CKDatabaseDidReceiveChanges"),
             object: nil,
@@ -145,15 +131,15 @@ struct MyTimeProApp: App {
     }
     
     private func handleRemoteChange() async throws {
-        try await container.mainContext.save()
+        try await modelContainer.mainContext.save()
         try await requestSync()
     }
     
     private func requestSync() async throws {
-        try await CloudService.shared.requestSync()
+        await CloudService.shared.requestSync()
     }
     
     private func saveContext() async throws {
-        try await container.mainContext.save()
+        try await modelContainer.mainContext.save()
     }
 }
