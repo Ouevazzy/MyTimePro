@@ -138,7 +138,9 @@ struct MyTimeProApp: App {
         switch newPhase {
         case .active:
             try await CloudService.shared.requestSync()
-            try await saveContext()
+            if let container = modelContainer {
+                try await container.mainContext.save()
+            }
         case .background:
             guard let container = modelContainer else { return }
             try await container.mainContext.save()
