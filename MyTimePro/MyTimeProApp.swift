@@ -137,11 +137,12 @@ struct MyTimeProApp: App {
     private func handleScenePhaseChange(_ newPhase: ScenePhase) async throws {
         switch newPhase {
         case .active:
-            try await requestSync()
             try await CloudService.shared.requestSync()
-        case .background:
             try await saveContext()
-            try await container?.mainContext.save()
+        case .background:
+            guard let container = modelContainer else { return }
+            try await container.mainContext.save()
+            try await CloudService.shared.requestSync()
         default:
             break
         }
