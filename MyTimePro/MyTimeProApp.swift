@@ -19,7 +19,7 @@ struct MyTimeProApp: App {
                     .preferredColorScheme(.dark)
                     .task {
                         await setupCloudSync()
-                        try? await requestSync()
+                        await requestSync()
                     }
                     .onChange(of: scenePhase) { _, newPhase in
                         handleScenePhaseChange(newPhase)
@@ -87,6 +87,7 @@ struct MyTimeProApp: App {
         setupNotificationObservers()
     }
     
+    @MainActor
     private func setupNotificationObservers() {
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("NSPersistentStoreRemoteChangeNotification"),
@@ -94,7 +95,7 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try? await handleRemoteChange()
+                await handleRemoteChange()
             }
         }
         
@@ -104,7 +105,7 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try? await requestSync()
+                await requestSync()
             }
         }
         
@@ -114,39 +115,51 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try? await requestSync()
+                await requestSync()
             }
         }
     }
     
     // MARK: - Event Handlers
+    @MainActor
     private func handleScenePhaseChange(_ newPhase: ScenePhase) {
         switch newPhase {
         case .active:
             Task {
-                try? await requestSync()
+                await requestSync()
             }
         case .background:
             Task {
-                try? await saveContext()
+                await saveContext()
             }
         default:
             break
         }
     }
     
-    private func handleRemoteChange() async throws {
+    @MainActor
+    private func handleRemoteChange() async {
         guard let container = modelContainer else { return }
-        try await container.mainContext.save()
-        try await requestSync()
+        do {
+            try await container.mainContext.save()
+            await requestSync()
+        } catch {
+            print("Error handling remote change: \(error.localizedDescription)")
+        }
     }
     
-    private func requestSync() async throws {
+    @MainActor
+    private func requestSync() async {
         await CloudService.shared.requestSync()
     }
     
-    private func saveContext() async throws {
+    @MainActor
+    private func saveContext() async {
         guard let container = modelContainer else { return }
-        try await container.mainContext.save()
+        do {
+            try await container.mainContext.save()
+        } catch {
+            print("Error saving context: \(error.localizedDescription)")
+        }
     }
 }
