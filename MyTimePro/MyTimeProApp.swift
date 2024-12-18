@@ -27,7 +27,11 @@ struct MyTimeProApp: App {
                     }
                     .onChange(of: scenePhase) { _, newPhase in
                         Task {
-                            await handleScenePhaseChange(newPhase)
+                            do {
+                                try await handleScenePhaseChange(newPhase)
+                            } catch {
+                                print("Error handling scene phase change: \(error)")
+                            }
                         }
                     }
             } else {
@@ -132,18 +136,14 @@ struct MyTimeProApp: App {
     
     // MARK: - Event Handlers
     @MainActor
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) async {
-        do {
-            switch newPhase {
-            case .active:
-                try await requestSync()
-            case .background:
-                try await saveContext()
-            default:
-                break
-            }
-        } catch {
-            print("Error handling scene phase change: \(error)")
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) async throws {
+        switch newPhase {
+        case .active:
+            try await requestSync()
+        case .background:
+            try await saveContext()
+        default:
+            break
         }
     }
     
