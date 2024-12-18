@@ -19,7 +19,11 @@ struct MyTimeProApp: App {
                     .preferredColorScheme(.dark)
                     .task {
                         await setupCloudSync()
-                        await requestSync()
+                        do {
+                            try await requestSync()
+                        } catch {
+                            print("Failed to sync: \(error)")
+                        }
                     }
                     .onChange(of: scenePhase) { _, newPhase in
                         handleScenePhaseChange(newPhase)
@@ -95,7 +99,11 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                await handleRemoteChange()
+                do {
+                    try await handleRemoteChange()
+                } catch {
+                    print("Failed to handle remote change: \(error)")
+                }
             }
         }
         
@@ -105,7 +113,11 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                await requestSync()
+                do {
+                    try await requestSync()
+                } catch {
+                    print("Failed to sync after account change: \(error)")
+                }
             }
         }
         
@@ -115,7 +127,11 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                await requestSync()
+                do {
+                    try await requestSync()
+                } catch {
+                    print("Failed to sync after receiving changes: \(error)")
+                }
             }
         }
     }
@@ -126,11 +142,19 @@ struct MyTimeProApp: App {
         switch newPhase {
         case .active:
             Task {
-                await requestSync()
+                do {
+                    try await requestSync()
+                } catch {
+                    print("Failed to sync on becoming active: \(error)")
+                }
             }
         case .background:
             Task {
-                await saveContext()
+                do {
+                    try await saveContext()
+                } catch {
+                    print("Failed to save context on background: \(error)")
+                }
             }
         default:
             break
@@ -138,28 +162,20 @@ struct MyTimeProApp: App {
     }
     
     @MainActor
-    private func handleRemoteChange() async {
+    private func handleRemoteChange() async throws {
         guard let container = modelContainer else { return }
-        do {
-            try await container.mainContext.save()
-            await requestSync()
-        } catch {
-            print("Error handling remote change: \(error.localizedDescription)")
-        }
+        try await container.mainContext.save()
+        try await requestSync()
     }
     
     @MainActor
-    private func requestSync() async {
-        await CloudService.shared.requestSync()
+    private func requestSync() async throws {
+        try await CloudService.shared.requestSync()
     }
     
     @MainActor
-    private func saveContext() async {
+    private func saveContext() async throws {
         guard let container = modelContainer else { return }
-        do {
-            try await container.mainContext.save()
-        } catch {
-            print("Error saving context: \(error.localizedDescription)")
-        }
+        try await container.mainContext.save()
     }
 }
