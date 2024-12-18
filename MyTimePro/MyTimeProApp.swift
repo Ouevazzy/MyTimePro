@@ -5,41 +5,40 @@ import CloudKit
 @main
 struct MyTimeProApp: App {
     // MARK: - Properties
-    @StateObject private var modelContainer: ModelContainer
+    @State private var modelContainer: ModelContainer?
     private let cloudKitContainerID = "iCloud.jordan-payez.MyTimePro"
     private let storeName = "MyTimePro.store"
     @Environment(\.scenePhase) private var scenePhase
     
-    // MARK: - Initialization
-    init() {
-        let container: ModelContainer
-        do {
-            container = try setupContainer()
-        } catch {
-            fatalError("Failed to initialize ModelContainer: \(error.localizedDescription)")
-        }
-        _modelContainer = StateObject(wrappedValue: container)
-    }
-    
     // MARK: - App Scene
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(modelContainer)
-                .preferredColorScheme(.dark)
-                .onAppear {
-                    Task {
+            if let container = modelContainer {
+                ContentView()
+                    .modelContainer(container)
+                    .preferredColorScheme(.dark)
+                    .task {
+                        await setupCloudSync()
                         try? await requestSync()
                     }
-                }
-                .onChange(of: scenePhase) { _, newPhase in
-                    handleScenePhaseChange(newPhase)
-                }
+                    .onChange(of: scenePhase) { _, newPhase in
+                        handleScenePhaseChange(newPhase)
+                    }
+            } else {
+                ProgressView("Loading...")
+                    .task {
+                        do {
+                            modelContainer = try await setupContainer()
+                        } catch {
+                            print("Failed to initialize ModelContainer: \(error.localizedDescription)")
+                        }
+                    }
+            }
         }
     }
     
     // MARK: - Private Setup Methods
-    private func setupContainer() throws -> ModelContainer {
+    private func setupContainer() async throws -> ModelContainer {
         let schema = Schema([WorkDay.self])
         let storeURL = URL.documentsDirectory.appending(path: storeName)
         
@@ -50,36 +49,40 @@ struct MyTimeProApp: App {
             cloudKitDatabase: .private(cloudKitContainerID)
         )
         
-        let container = try ModelContainer(
-            for: WorkDay.self,
+        return try ModelContainer(
+            for: schema,
             configurations: modelConfiguration
         )
-        
-        setupCloudSync()
-        return container
     }
     
-    private func setupCloudSync() {
+    private func setupCloudSync() async {
         let cloudContainer = CKContainer(identifier: cloudKitContainerID)
+        let database = cloudContainer.privateCloudDatabase
+        
+        // Create zones
         let zones = [
             CKRecordZone(zoneName: "MyTimeProZone"),
             CKRecordZone(zoneName: "com.apple.coredata.cloudkit.zone")
         ]
         
-        let zoneOperation = CKModifyRecordZonesOperation(recordZonesToSave: zones)
-        zoneOperation.qualityOfService = .utility
+        do {
+            try await database.save(zones[0])
+            try await database.save(zones[1])
+        } catch {
+            print("Failed to save zones: \(error.localizedDescription)")
+        }
         
+        // Setup subscription
         let subscription = CKDatabaseSubscription(subscriptionID: "mytimepro-all-changes")
         let notificationInfo = CKSubscription.NotificationInfo()
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
         
-        let subscriptionOperation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription])
-        subscriptionOperation.qualityOfService = .utility
-        
-        let database = cloudContainer.privateCloudDatabase
-        database.add(zoneOperation)
-        database.add(subscriptionOperation)
+        do {
+            try await database.save(subscription)
+        } catch {
+            print("Failed to save subscription: \(error.localizedDescription)")
+        }
         
         setupNotificationObservers()
     }
@@ -91,7 +94,7 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try await handleRemoteChange()
+                try? await handleRemoteChange()
             }
         }
         
@@ -101,7 +104,7 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try await requestSync()
+                try? await requestSync()
             }
         }
         
@@ -111,7 +114,7 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             Task {
-                try await requestSync()
+                try? await requestSync()
             }
         }
     }
@@ -121,11 +124,11 @@ struct MyTimeProApp: App {
         switch newPhase {
         case .active:
             Task {
-                try await requestSync()
+                try? await requestSync()
             }
         case .background:
             Task {
-                try await saveContext()
+                try? await saveContext()
             }
         default:
             break
@@ -133,7 +136,8 @@ struct MyTimeProApp: App {
     }
     
     private func handleRemoteChange() async throws {
-        try await modelContainer.mainContext.save()
+        guard let container = modelContainer else { return }
+        try await container.mainContext.save()
         try await requestSync()
     }
     
@@ -142,6 +146,7 @@ struct MyTimeProApp: App {
     }
     
     private func saveContext() async throws {
-        try await modelContainer.mainContext.save()
+        guard let container = modelContainer else { return }
+        try await container.mainContext.save()
     }
 }
