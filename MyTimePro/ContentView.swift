@@ -55,7 +55,9 @@ struct ContentView: View {
         }
         .tint(.blue)
         .onChange(of: selectedTab) { _, _ in
-            CloudService.shared.requestSync()
+            Task {
+                await CloudService.shared.requestSync()
+            }
         }
     }
 }
