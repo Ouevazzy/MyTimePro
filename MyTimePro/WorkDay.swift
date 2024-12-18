@@ -111,7 +111,8 @@ final class WorkDay: Identifiable {
         }
     }
     
-    func updateData(startTime: Date?, endTime: Date?, breakDuration: TimeInterval) {
+    @MainActor
+    func updateData(startTime: Date?, endTime: Date?, breakDuration: TimeInterval) async {
         if type.isWorkDay {
             self.startTime = startTime
             self.endTime = endTime
@@ -122,10 +123,7 @@ final class WorkDay: Identifiable {
         }
         
         calculateHours()
-        // Appel asynchrone de requestSync
-        Task { @MainActor in
-            await CloudService.shared.requestSync()
-        }
+        await CloudService.shared.requestSync()
     }
     
     var formattedTotalHours: String {
