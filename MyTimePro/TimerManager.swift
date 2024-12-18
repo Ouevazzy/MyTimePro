@@ -60,12 +60,12 @@ class WorkTimerManager: ObservableObject {
         }
     }
     
-    func attemptEndDay() {
+    func attemptEndDay() async {
         if state == .paused {
             pauseTime = lastPauseStart
             showEndDayAlert = true
         } else {
-            endDay()
+            await endDay()
         }
     }
     
@@ -100,7 +100,7 @@ class WorkTimerManager: ObservableObject {
         if let modelContext = getModelContext() {
             modelContext.insert(workDay)
             do {
-                try modelContext.save()
+                try await modelContext.save()
                 // Synchronisation après sauvegarde
                 await CloudService.shared.requestSync()
             } catch {
