@@ -195,9 +195,11 @@ struct CalendarView: View {
                     }
                 }
             }
-            .onChange(of: workDays) { _ in
+            .onChange(of: workDays) { _, newWorkDays in
                 // Synchronisation lorsque les jours de travail changent
-                CloudService.shared.requestSync()
+                Task {
+                    await CloudService.shared.requestSync()
+                }
             }
         }
     }
@@ -208,7 +210,9 @@ struct CalendarView: View {
         do {
             try modelContext.save()
             // Synchronisation après suppression
-            CloudService.shared.requestSync()
+            Task {
+                await CloudService.shared.requestSync()
+            }
         } catch {
             print("Failed to save changes: \(error)")
         }
