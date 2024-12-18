@@ -71,9 +71,11 @@ struct VacationsView: View {
                     }
                 }
             }
-            .onChange(of: workDays) { _ in
+            .onChange(of: workDays) { _, _ in
                 // Synchroniser lorsque les jours de congé changent
-                CloudService.shared.requestSync()
+                Task {
+                    await CloudService.shared.requestSync()
+                }
             }
         }
     }
