@@ -69,7 +69,7 @@ class WorkTimerManager: ObservableObject {
         }
     }
     
-    func endDay() {
+    func endDay() async {
         showEndDayAlert = false
         
         if state == .running {
@@ -90,7 +90,7 @@ class WorkTimerManager: ObservableObject {
             workDay.breakDuration = totalPauseDuration
         }
         
-        workDay.updateData(
+        await workDay.updateData(
             startTime: workDay.startTime,
             endTime: workDay.endTime,
             breakDuration: workDay.breakDuration
@@ -102,7 +102,7 @@ class WorkTimerManager: ObservableObject {
             do {
                 try modelContext.save()
                 // Synchronisation après sauvegarde
-                CloudService.shared.requestSync()
+                await CloudService.shared.requestSync()
             } catch {
                 print("Failed to save work day: \(error.localizedDescription)")
             }
@@ -113,14 +113,14 @@ class WorkTimerManager: ObservableObject {
     }
     
     // MARK: - App Lifecycle Methods
-    func handleEnterBackground() {
+    func handleEnterBackground() async {
         if state == .running {
             saveState()
-            CloudService.shared.requestSync()
+            await CloudService.shared.requestSync()
         }
     }
     
-    func handleEnterForeground() {
+    func handleEnterForeground() async {
         if state == .running {
             updateElapsedTime()
             startTimer()
@@ -134,16 +134,6 @@ class WorkTimerManager: ObservableObject {
             return nil
         }
         
-        // Recherche du ModelContext dans la hiérarchie des vues
-        let viewController = window.rootViewController
-        let mirror = Mirror(reflecting: viewController as Any)
-        for child in mirror.children {
-            if let context = child.value as? ModelContext {
-                return context
-            }
-        }
-        
-        // En dernier recours, essayer de trouver via l'environnement SwiftUI
         let environment = EnvironmentValues()
         return environment.modelContext
     }
