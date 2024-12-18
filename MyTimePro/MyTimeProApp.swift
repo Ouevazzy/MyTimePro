@@ -26,7 +26,9 @@ struct MyTimeProApp: App {
                         }
                     }
                     .onChange(of: scenePhase) { _, newPhase in
-                        handleScenePhaseChange(newPhase)
+                        Task {
+                            await handleScenePhaseChange(newPhase)
+                        }
                     }
             } else {
                 ProgressView("Loading...")
@@ -130,23 +132,19 @@ struct MyTimeProApp: App {
     
     // MARK: - Event Handlers
     @MainActor
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) async {
         switch newPhase {
         case .active:
-            Task {
-                do {
-                    try await requestSync()
-                } catch {
-                    print("Failed to sync on becoming active: \(error)")
-                }
+            do {
+                try await requestSync()
+            } catch {
+                print("Failed to sync on becoming active: \(error)")
             }
         case .background:
-            Task {
-                do {
-                    try await saveContext()
-                } catch {
-                    print("Failed to save context on background: \(error)")
-                }
+            do {
+                try await saveContext()
+            } catch {
+                print("Failed to save context on background: \(error)")
             }
         default:
             break
