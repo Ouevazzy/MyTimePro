@@ -66,7 +66,9 @@ struct WorkDaysListView: View {
         }
         .onChange(of: workDays) { oldValue, newValue in
             if oldValue.count != newValue.count {
-                CloudService.shared.requestSync()
+                Task {
+                    await CloudService.shared.requestSync()
+                }
             }
         }
     }
@@ -159,7 +161,9 @@ struct WorkDaysListView: View {
             }
             do {
                 try modelContext.save()
-                CloudService.shared.requestSync()
+                Task {
+                    await CloudService.shared.requestSync()
+                }
             } catch {
                 print("Failed to save changes: \(error)")
             }
