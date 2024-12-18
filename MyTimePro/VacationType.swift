@@ -78,7 +78,12 @@ class Vacation {
     
     var vacationType: VacationType {
         get { VacationType(rawValue: type) ?? .vacation }
-        set { type = newValue.rawValue; updateNumberOfDays() }
+        set { 
+            type = newValue.rawValue
+            Task { @MainActor in
+                await updateNumberOfDays()
+            }
+        }
     }
     
     var vacationStatus: VacationStatus {
@@ -117,38 +122,30 @@ class Vacation {
         return days
     }
     
-    // Dans la classe Vacation, mettons à jour les méthodes de synchronisation :
-
-        func updateDates(startDate: Date, endDate: Date) {
-            self.startDate = startDate
-            self.endDate = endDate
-            updateNumberOfDays()
-            self.updatedAt = Date()
-            
-            Task {
-                try? await CloudService.shared.requestSync()
-            }
-        }
-        
-        private func updateNumberOfDays() {
-            self.numberOfDays = Vacation.calculateNumberOfDays(
-                type: self.vacationType,
-                startDate: self.startDate,
-                endDate: self.endDate
-            )
-            self.updatedAt = Date()
-            
-            Task {
-                try? await CloudService.shared.requestSync()
-            }
-        }
-        
-        func updateStatus(_ newStatus: VacationStatus) {
-            self.vacationStatus = newStatus
-            self.updatedAt = Date()
-            
-            Task {
-                try? await CloudService.shared.requestSync()
-            }
-        }
+    @MainActor
+    func updateDates(startDate: Date, endDate: Date) async throws {
+        self.startDate = startDate
+        self.endDate = endDate
+        await updateNumberOfDays()
+        self.updatedAt = Date()
+        await CloudService.shared.requestSync()
     }
+    
+    @MainActor
+    private func updateNumberOfDays() async {
+        self.numberOfDays = Vacation.calculateNumberOfDays(
+            type: self.vacationType,
+            startDate: self.startDate,
+            endDate: self.endDate
+        )
+        self.updatedAt = Date()
+        await CloudService.shared.requestSync()
+    }
+    
+    @MainActor
+    func updateStatus(_ newStatus: VacationStatus) async {
+        self.vacationStatus = newStatus
+        self.updatedAt = Date()
+        await CloudService.shared.requestSync()
+    }
+}
