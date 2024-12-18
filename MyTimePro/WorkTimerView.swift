@@ -133,7 +133,9 @@ struct WorkTimerView: View {
             
             if timerManager.state == .running || timerManager.state == .paused {
                 Button(action: {
-                    timerManager.attemptEndDay()
+                    Task {
+                        await timerManager.attemptEndDay()
+                    }
                 }) {
                     buttonLabel(text: "Terminer", color: .red)
                 }
