@@ -70,7 +70,9 @@ struct WorkTimerView: View {
         .background(background)
         .padding(.horizontal)
         .onChange(of: scenePhase) { _, newPhase in
-            handleScenePhaseChange(newPhase)
+            Task {
+                await handleScenePhaseChange(newPhase)
+            }
         }
         .alert("Terminer la journée", isPresented: $timerManager.showEndDayAlert) {
             endDayAlertButtons
@@ -154,7 +156,9 @@ struct WorkTimerView: View {
         Group {
             Button("Annuler", role: .cancel) { }
             Button("Terminer", role: .destructive) {
-                timerManager.endDay()
+                Task {
+                    await timerManager.endDay()
+                }
             }
         }
     }
@@ -187,12 +191,12 @@ struct WorkTimerView: View {
         return String(format: "%dh%02dmin %02d", hours, minutes, seconds)
     }
     
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) async {
         switch newPhase {
         case .background:
-            timerManager.handleEnterBackground()
+            await timerManager.handleEnterBackground()
         case .active:
-            timerManager.handleEnterForeground()
+            await timerManager.handleEnterForeground()
         default:
             break
         }
