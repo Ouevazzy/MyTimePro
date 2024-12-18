@@ -59,7 +59,7 @@ struct MyTimeProApp: App {
         )
     }
     
-    private func setupCloudSync() async {
+    private func setupCloudSync() async throws {
         let cloudContainer = CKContainer(identifier: cloudKitContainerID)
         let database = cloudContainer.privateCloudDatabase
         
@@ -74,6 +74,7 @@ struct MyTimeProApp: App {
             try await database.save(zones[1])
         } catch {
             print("Failed to save zones: \(error.localizedDescription)")
+            throw error
         }
         
         // Setup subscription
@@ -86,6 +87,7 @@ struct MyTimeProApp: App {
             try await database.save(subscription)
         } catch {
             print("Failed to save subscription: \(error.localizedDescription)")
+            throw error
         }
         
         setupNotificationObservers()
@@ -165,7 +167,7 @@ struct MyTimeProApp: App {
     private func handleRemoteChange() async throws {
         guard let container = modelContainer else { return }
         try await container.mainContext.save()
-        try await requestSync()
+        try await CloudService.shared.requestSync()
     }
     
     @MainActor
