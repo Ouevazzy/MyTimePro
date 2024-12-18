@@ -29,7 +29,6 @@ class CloudService: ObservableObject {
     private var isSubscribed = false
     private var isSetup = false
     private var isSyncing = false
-    private let syncQueue = DispatchQueue(label: "com.mytimepro.sync", qos: .utility)
 
     // MARK: - CloudKit Properties
     private var lastChangeToken: CKServerChangeToken? {
@@ -61,22 +60,21 @@ class CloudService: ObservableObject {
         container = CKContainer(identifier: iCloudIdentifier)
         database = container.privateCloudDatabase
         setupNotifications()
-        checkiCloudStatus()
+        Task { await checkiCloudStatus() }
     }
 
     // MARK: - Public Methods
-    func requestSync() {
+    @MainActor
+    func requestSync() async {
         guard !isSyncing else { return }
         isSyncing = true
         
-        Task {
-            do {
-                try await performSync()
-            } catch {
-                await handleCloudKitError(error)
-            }
-            isSyncing = false
+        do {
+            try await performSync()
+        } catch {
+            await handleCloudKitError(error)
         }
+        isSyncing = false
     }
 
     // MARK: - Private Methods
@@ -85,10 +83,21 @@ class CloudService: ObservableObject {
         
         updateStatus(.syncing(progress: 0))
 
-        let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: lastChangeToken)
-        operation.qualityOfService = .utility
+        let changedZoneIDs = try await fetchDatabaseChanges()
         
-        let changedZoneIDs = await withCheckedContinuation { continuation in
+        for zoneID in changedZoneIDs {
+            try await fetchZoneChanges(zoneID)
+        }
+
+        lastSyncDate = Date()
+        updateStatus(.available)
+    }
+    
+    private func fetchDatabaseChanges() async throws -> Set<CKRecordZone.ID> {
+        try await withCheckedThrowingContinuation { continuation in
+            let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: lastChangeToken)
+            operation.qualityOfService = .utility
+            
             var zoneIDs = Set<CKRecordZone.ID>()
             
             operation.recordZoneWithIDChangedBlock = { zoneID in
@@ -106,28 +115,18 @@ class CloudService: ObservableObject {
                 case .success:
                     continuation.resume(returning: zoneIDs)
                 case .failure(let error):
-                    print("Error fetching database changes: \(error)")
-                    continuation.resume(returning: [])
+                    continuation.resume(throwing: error)
                 }
             }
             
             database.add(operation)
         }
-
-        for zoneID in changedZoneIDs {
-            try await fetchZoneChanges(zoneID)
-        }
-
-        lastSyncDate = Date()
-        updateStatus(.available)
     }
 
     private func setupSync() async throws {
         let zone = CKRecordZone(zoneName: "MyTimeProZone")
-        let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
-        operation.qualityOfService = .utility
-
-        try await database.add(operation)
+        try await database.save(zone)
+        
         isSetup = true
         updateStatus(.available)
         
@@ -141,10 +140,7 @@ class CloudService: ObservableObject {
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
 
-        let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription], subscriptionIDsToDelete: [])
-        operation.qualityOfService = .utility
-
-        try await database.add(operation)
+        try await database.save(subscription)
         isSubscribed = true
     }
 
@@ -154,7 +150,9 @@ class CloudService: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.checkiCloudStatus()
+            Task { [weak self] in
+                await self?.checkiCloudStatus()
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -162,16 +160,18 @@ class CloudService: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.requestSync()
+            Task { [weak self] in
+                await self?.requestSync()
+            }
         }
     }
 
     private func fetchZoneChanges(_ zoneID: CKRecordZone.ID) async throws {
-        let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
-        let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: [zoneID], configurationsByRecordZoneID: [zoneID: configuration])
-        operation.qualityOfService = .utility
-
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
+            let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: [zoneID], configurationsByRecordZoneID: [zoneID: configuration])
+            operation.qualityOfService = .utility
+
             operation.recordWasChangedBlock = { record, _ in
                 Task { @MainActor in
                     NotificationCenter.default.post(
@@ -189,7 +189,8 @@ class CloudService: ObservableObject {
                         self?.lastChangeToken = data.serverChangeToken
                     }
                 case .failure(let error):
-                    print("Error fetching zone changes: \(error)")
+                    continuation.resume(throwing: error)
+                    return
                 }
             }
 
@@ -213,29 +214,35 @@ class CloudService: ObservableObject {
         }
     }
 
-    private func handleCloudKitError(_ error: Error) {
+    private func handleCloudKitError(_ error: Error) async {
         if let cloudError = error as? CKError {
-            userMessage = "Erreur iCloud: \(cloudError.localizedDescription)"
-            switch cloudError.code {
-            case .quotaExceeded, .networkFailure, .networkUnavailable:
-                updateStatus(.unavailable)
-            default:
-                updateStatus(.error(cloudError))
+            await MainActor.run {
+                userMessage = "Erreur iCloud: \(cloudError.localizedDescription)"
+                switch cloudError.code {
+                case .quotaExceeded, .networkFailure, .networkUnavailable:
+                    updateStatus(.unavailable)
+                default:
+                    updateStatus(.error(cloudError))
+                }
             }
         } else {
-            updateStatus(.error(error))
+            await MainActor.run {
+                updateStatus(.error(error))
+            }
         }
     }
 
-    private func checkiCloudStatus() {
-        Task {
-            do {
-                let accountStatus = try await container.accountStatus()
+    private func checkiCloudStatus() async {
+        do {
+            let accountStatus = try await container.accountStatus()
+            await MainActor.run {
                 switch accountStatus {
                 case .available:
                     updateStatus(.available)
                     if !isSetup {
-                        try? await setupSync()
+                        Task {
+                            try? await self.setupSync()
+                        }
                     }
                 case .restricted:
                     updateStatus(.restricted)
@@ -246,9 +253,9 @@ class CloudService: ObservableObject {
                 @unknown default:
                     updateStatus(.unknown)
                 }
-            } catch {
-                handleCloudKitError(error)
             }
+        } catch {
+            await handleCloudKitError(error)
         }
     }
 
