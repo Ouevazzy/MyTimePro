@@ -130,7 +130,6 @@ struct HomeTabView: View {
             }
         }
     }
-
     
     // MARK: - Helper Methods
     private func calculateStats(from startDate: Date, to endDate: Date) -> (totalHours: Double, overtimeSeconds: Int) {
@@ -165,11 +164,6 @@ struct HomeTabView: View {
         }
     }
 }
-
-// Move other views to separate files or keep them at the end of HomeTabView.swift
-struct RemainingTimeComponent: View { ... }
-struct StatsSection: View { ... }
-struct VacationSection: View { ... }
 
 #Preview {
     NavigationStack {
