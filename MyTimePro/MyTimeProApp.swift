@@ -133,21 +133,17 @@ struct MyTimeProApp: App {
     // MARK: - Event Handlers
     @MainActor
     private func handleScenePhaseChange(_ newPhase: ScenePhase) async {
-        switch newPhase {
-        case .active:
-            do {
+        do {
+            switch newPhase {
+            case .active:
                 try await requestSync()
-            } catch {
-                print("Failed to sync on becoming active: \(error)")
-            }
-        case .background:
-            do {
+            case .background:
                 try await saveContext()
-            } catch {
-                print("Failed to save context on background: \(error)")
+            default:
+                break
             }
-        default:
-            break
+        } catch {
+            print("Error handling scene phase change: \(error)")
         }
     }
     
