@@ -18,11 +18,11 @@ struct MyTimeProApp: App {
                     .modelContainer(container)
                     .preferredColorScheme(.dark)
                     .task {
-                        await setupCloudSync()
                         do {
+                            try await setupCloudSync()
                             try await requestSync()
                         } catch {
-                            print("Failed to sync: \(error)")
+                            print("Failed to setup cloud sync: \(error)")
                         }
                     }
                     .onChange(of: scenePhase) { _, newPhase in
@@ -69,12 +69,8 @@ struct MyTimeProApp: App {
             CKRecordZone(zoneName: "com.apple.coredata.cloudkit.zone")
         ]
         
-        do {
-            try await database.save(zones[0])
-            try await database.save(zones[1])
-        } catch {
-            print("Failed to save zones: \(error.localizedDescription)")
-            throw error
+        for zone in zones {
+            try await database.save(zone)
         }
         
         // Setup subscription
@@ -83,13 +79,7 @@ struct MyTimeProApp: App {
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
         
-        do {
-            try await database.save(subscription)
-        } catch {
-            print("Failed to save subscription: \(error.localizedDescription)")
-            throw error
-        }
-        
+        try await database.save(subscription)
         setupNotificationObservers()
     }
     
