@@ -92,8 +92,18 @@ struct WorkTimeApp: App {
         ) { _ in
             print("Remote change detected")
             Task {
-                try? await container.mainContext.save()
+                await saveContext()
             }
+        }
+
+    @MainActor
+    private func saveContext() async {
+        do {
+            try await container.mainContext.save()
+        } catch {
+            print("Erreur lors de la sauvegarde du contexte : \(error.localizedDescription)")
+        }
+    }
         }
         
         NotificationCenter.default.addObserver(
