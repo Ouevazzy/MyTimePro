@@ -9,8 +9,10 @@ class CloudService: ObservableObject {
     @Published private(set) var iCloudStatus: CloudStatus = .unknown {
         didSet {
             if iCloudStatus == .available && !isSetup {
+                // Quand iCloud devient disponible et que le setup n'est pas fait, on le fait
                 setupSync()
             } else if iCloudStatus == .available {
+                // Si iCloud est déjà disponible et setup fait, on effectue une synchro initiale si nécessaire
                 performSyncIfNeeded()
             }
         }
@@ -23,18 +25,20 @@ class CloudService: ObservableObject {
     // MARK: - Private Properties
     private let container: CKContainer
     private let database: CKDatabase
-    private let iCloudIdentifier = "iCloud.jordan-payez.MyTimePro"
+    private let iCloudIdentifier = "iCloud.jordan-payez.WorkTimer"
     private var isSubscribed = false
     private var isSetup = false
     private var lastCheckDate: Date = .distantPast
+    // Timer supprimé, on synchronise à la demande ou aux changements d'état iCloud
+    // private var syncTimer: Timer?
 
     private var lastChangeToken: CKServerChangeToken? {
         didSet {
             if let token = lastChangeToken,
                let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true) {
-                UserDefaults.standard.set(data, forKey: "MyTimePro.lastChangeToken")
+                UserDefaults.standard.set(data, forKey: "lastChangeToken")
             } else {
-                UserDefaults.standard.removeObject(forKey: "MyTimePro.lastChangeToken")
+                UserDefaults.standard.removeObject(forKey: "lastChangeToken")
             }
         }
     }
@@ -140,12 +144,13 @@ class CloudService: ObservableObject {
         container = CKContainer(identifier: iCloudIdentifier)
         database = container.privateCloudDatabase
 
-        if let tokenData = UserDefaults.standard.data(forKey: "MyTimePro.lastChangeToken") {
+        if let tokenData = UserDefaults.standard.data(forKey: "lastChangeToken") {
             lastChangeToken = try? NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: tokenData)
         }
 
         setupNotifications()
         checkiCloudStatus()
+        // Pas de timer ici. La synchro est déclenchée par les changements d'état iCloud ou manuellement.
     }
 
     // MARK: - Public Methods
@@ -179,45 +184,10 @@ class CloudService: ObservableObject {
         performSync()
     }
 
-    // MARK: - Data Management Methods
-    func save(_ record: CKRecord, completion: @escaping (Result<CKRecord, Error>) -> Void) {
-        let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
-        
-        operation.modifyRecordsResultBlock = { result in
-            switch result {
-            case .success:
-                if let savedRecord = operation.recordsToSave?.first {
-                    completion(.success(savedRecord))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-        
-        operation.qualityOfService = .userInitiated
-        database.add(operation)
-    }
-    
-    func delete(_ recordID: CKRecord.ID, completion: @escaping (Result<Void, Error>) -> Void) {
-        let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [recordID])
-        
-        operation.modifyRecordsResultBlock = { result in
-            switch result {
-            case .success:
-                completion(.success(()))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-        
-        operation.qualityOfService = .userInitiated
-        database.add(operation)
-    }
-
     // MARK: - Private Methods
     private func shouldPerformStatusCheck() -> Bool {
         let interval = Date().timeIntervalSince(lastCheckDate)
-        return interval > 60
+        return interval > 60 // Vérifie le statut iCloud au plus toutes les 60 secondes
     }
 
     private func handleCloudKitError(_ error: Error) {
@@ -247,13 +217,13 @@ class CloudService: ObservableObject {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleRemoteNotification),
-            name: NSNotification.Name("MyTimePro.DatabaseDidReceiveChanges"),
+            name: NSNotification.Name("CKDatabaseDidReceiveChanges"),
             object: nil
         )
     }
 
     private func setupSync() {
-        let zone = CKRecordZone(zoneName: "MyTimeProZone")
+        let zone = CKRecordZone(zoneName: "WorkTimeZone")
         let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
 
         operation.modifyRecordZonesResultBlock = { [weak self] result in
@@ -263,6 +233,7 @@ class CloudService: ObservableObject {
                     self?.isSetup = true
                     self?.updateStatus(.available)
                     self?.setupSubscription()
+                    // Une fois le setup effectué, on déclenche une synchro initiale
                     self?.performSyncIfNeeded()
                 case .failure(let error):
                     self?.updateStatus(.error(CloudError.syncFailed(error)))
@@ -276,6 +247,7 @@ class CloudService: ObservableObject {
 
     private func performSyncIfNeeded() {
         guard iCloudStatus.isAvailable else { return }
+        // Si aucune synchro n'a été faite ou si c'est une nouvelle installation (pas de token), on fait une synchro complète.
         if lastSyncDate == nil || lastChangeToken == nil {
             performSync()
         }
@@ -284,7 +256,7 @@ class CloudService: ObservableObject {
     private func setupSubscription() {
         guard !isSubscribed else { return }
 
-        let subscription = CKDatabaseSubscription(subscriptionID: "MyTimePro-all-changes")
+        let subscription = CKDatabaseSubscription(subscriptionID: "all-changes")
         let notificationInfo = CKSubscription.NotificationInfo()
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
@@ -348,8 +320,9 @@ class CloudService: ObservableObject {
 
         operation.recordWasChangedBlock = { record, _ in
             DispatchQueue.main.async {
+                // L'application doit écouter "DataDidChange" et mettre à jour sa base locale en conséquence
                 NotificationCenter.default.post(
-                    name: NSNotification.Name("MyTimePro.DataDidChange"),
+                    name: NSNotification.Name("DataDidChange"),
                     object: nil,
                     userInfo: ["record": record]
                 )
@@ -392,5 +365,18 @@ class CloudService: ObservableObject {
     // MARK: - Cleanup
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+}
+// Dans CloudService.swift, ajoutez ces logs
+func checkiCloudStatus() {
+    let container = CKContainer(identifier: "iCloud.jordan-payez.worktimer")
+    print("Checking container:", container.containerIdentifier ?? "No identifier")
+    
+    container.accountStatus { status, error in
+        if let error = error {
+            print("Error checking account status:", error)
+            return
+        }
+        print("Account status:", status.rawValue)
     }
 }

@@ -1,5 +1,5 @@
 import Foundation
-import CloudKit
+import SwiftData
 import SwiftUI
 
 enum WorkDayType: String, Codable, CaseIterable {
@@ -39,20 +39,19 @@ enum WorkDayType: String, Codable, CaseIterable {
     }
 }
 
-class WorkDay: Identifiable, ObservableObject {
-    let id: UUID
-    var cloudKitRecordID: CKRecord.ID?
-    
-    @Published var date: Date
-    @Published var startTime: Date?
-    @Published var endTime: Date?
-    @Published var breakDuration: TimeInterval
-    @Published var totalHours: Double
-    @Published var overtimeSeconds: Int
-    @Published var typeRawValue: String
-    @Published var note: String?
-    @Published var bonusAmount: Double
-    
+@Model
+final class WorkDay: Identifiable {
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var startTime: Date? = nil
+    var endTime: Date? = nil
+    var breakDuration: TimeInterval = 3600 // 1 heure par défaut
+    var totalHours: Double = 0.0
+    var overtimeSeconds: Int = 0
+    var typeRawValue: String = WorkDayType.work.rawValue
+    var note: String? = ""
+    var bonusAmount: Double = 0.0
+
     var type: WorkDayType {
         get { WorkDayType(rawValue: typeRawValue) ?? .work }
         set {
@@ -62,68 +61,27 @@ class WorkDay: Identifiable, ObservableObject {
     }
     
     init(date: Date = Date(), type: WorkDayType = .work) {
-        self.id = UUID()
         self.date = date
         self.typeRawValue = type.rawValue
         self.startTime = UserSettings.shared.lastStartTime
         self.endTime = UserSettings.shared.lastEndTime
-        self.breakDuration = 3600
-        self.totalHours = 0.0
-        self.overtimeSeconds = 0
-        self.note = ""
-        self.bonusAmount = 0.0
         calculateHours()
-    }
-    
-    convenience init?(record: CKRecord) {
-        guard let dateTimestamp = record["date"] as? Date else {
-            return nil
-        }
-        
-        self.init(date: dateTimestamp)
-        
-        self.cloudKitRecordID = record.recordID
-        if let typeString = record["type"] as? String {
-            self.typeRawValue = typeString
-        }
-        self.startTime = record["startTime"] as? Date
-        self.endTime = record["endTime"] as? Date
-        self.breakDuration = record["breakDuration"] as? TimeInterval ?? 3600
-        self.totalHours = record["totalHours"] as? Double ?? 0.0
-        self.overtimeSeconds = record["overtimeSeconds"] as? Int ?? 0
-        self.note = record["note"] as? String
-        self.bonusAmount = record["bonusAmount"] as? Double ?? 0.0
-        
-        calculateHours()
-    }
-    
-    func toRecord() -> CKRecord {
-        let recordID = cloudKitRecordID ?? CKRecord.ID(recordName: id.uuidString)
-        let record = CKRecord(recordType: "WorkDay", recordID: recordID)
-        
-        record["date"] = date as CKRecordValue
-        record["type"] = typeRawValue as CKRecordValue
-        record["startTime"] = startTime as CKRecordValue?
-        record["endTime"] = endTime as CKRecordValue?
-        record["breakDuration"] = breakDuration as CKRecordValue
-        record["totalHours"] = totalHours as CKRecordValue
-        record["overtimeSeconds"] = overtimeSeconds as CKRecordValue
-        record["note"] = note as CKRecordValue?
-        record["bonusAmount"] = bonusAmount as CKRecordValue
-        
-        return record
     }
     
     func calculateHours() {
         let settings = UserSettings.shared
         let calendar = Calendar.current
         
+        // Par défaut, on considère qu'il n'y a pas d'heures standard pour ce jour
         var standardSeconds = 0
         
+        // Si c'est un jour de travail ou une journée compensatoire, on calcule les heures standard
         if type == .work || type == .compensatory {
+            // Convertir le jour de la semaine de 1-7 (dimanche-samedi) à 0-6 (lundi-dimanche)
             let weekday = calendar.component(.weekday, from: date)
             let adjustedWeekday = weekday == 1 ? 6 : weekday - 2
             
+            // Si le jour est configuré comme travaillé dans les paramètres
             if adjustedWeekday >= 0 && adjustedWeekday < settings.workingDays.count && settings.workingDays[adjustedWeekday] {
                 standardSeconds = Int(round(settings.standardDailyHours * 3600))
             }
@@ -140,24 +98,24 @@ class WorkDay: Identifiable, ObservableObject {
             overtimeSeconds = Int(round(workedSeconds)) - standardSeconds
             
         case .vacation, .halfDayVacation, .sickLeave, .holiday:
+            // Ne compte pas dans les heures
             break
             
         case .compensatory:
+            // Déduire les heures standard des heures supplémentaires
             overtimeSeconds = -standardSeconds
             
         case .training:
             totalHours = Double(standardSeconds) / 3600.0
         }
         
+        // Réinitialiser les heures de début/fin/pause pour les journées non travaillées
         if !type.isWorkDay {
             startTime = nil
             endTime = nil
             breakDuration = 0
             bonusAmount = 0
         }
-        
-        // Synchroniser avec CloudKit
-        saveToCloud()
     }
     
     func updateData(startTime: Date?, endTime: Date?, breakDuration: TimeInterval) {
@@ -171,18 +129,6 @@ class WorkDay: Identifiable, ObservableObject {
         }
         
         calculateHours()
-    }
-    
-    private func saveToCloud() {
-        let record = self.toRecord()
-        CloudService.shared.save(record) { result in
-            switch result {
-            case .success(let savedRecord):
-                self.cloudKitRecordID = savedRecord.recordID
-            case .failure(let error):
-                print("Erreur lors de la sauvegarde CloudKit: \(error.localizedDescription)")
-            }
-        }
     }
     
     var formattedTotalHours: String {
