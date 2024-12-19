@@ -1,6 +1,5 @@
 import Foundation
 import SwiftData
-import CloudKit
 
 enum VacationType: String, CaseIterable, Codable {
     case vacation = "Congés payés"
@@ -78,12 +77,7 @@ class Vacation {
     
     var vacationType: VacationType {
         get { VacationType(rawValue: type) ?? .vacation }
-        set { 
-            type = newValue.rawValue
-            Task { @MainActor in
-                await updateNumberOfDays()
-            }
-        }
+        set { type = newValue.rawValue }
     }
     
     var vacationStatus: VacationStatus {
@@ -122,30 +116,14 @@ class Vacation {
         return days
     }
     
-    @MainActor
-    func updateDates(startDate: Date, endDate: Date) async throws {
+    func updateDates(startDate: Date, endDate: Date) {
         self.startDate = startDate
         self.endDate = endDate
-        await updateNumberOfDays()
-        self.updatedAt = Date()
-        await CloudService.shared.requestSync()
-    }
-    
-    @MainActor
-    private func updateNumberOfDays() async {
         self.numberOfDays = Vacation.calculateNumberOfDays(
             type: self.vacationType,
-            startDate: self.startDate,
-            endDate: self.endDate
+            startDate: startDate,
+            endDate: endDate
         )
         self.updatedAt = Date()
-        await CloudService.shared.requestSync()
-    }
-    
-    @MainActor
-    func updateStatus(_ newStatus: VacationStatus) async {
-        self.vacationStatus = newStatus
-        self.updatedAt = Date()
-        await CloudService.shared.requestSync()
     }
 }

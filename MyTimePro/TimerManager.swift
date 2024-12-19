@@ -1,6 +1,5 @@
 import Foundation
 import SwiftData
-import SwiftUI
 
 enum TimerState: String, Codable {
     case notStarted
@@ -27,6 +26,7 @@ class WorkTimerManager: ObservableObject {
     
     // MARK: - Private Properties
     private var timer: Timer?
+    private var modelContext: ModelContext
     private var startTimestamp: Date?
     private var totalPauseDuration: TimeInterval = 0
     private var lastPauseStart: Date?
@@ -42,7 +42,8 @@ class WorkTimerManager: ObservableObject {
     }
     
     // MARK: - Initialization
-    init() {
+    init(modelContext: ModelContext) {
+        self.modelContext = modelContext
         loadSavedState()
     }
     
@@ -60,16 +61,16 @@ class WorkTimerManager: ObservableObject {
         }
     }
     
-    func attemptEndDay() async {
+    func attemptEndDay() {
         if state == .paused {
             pauseTime = lastPauseStart
             showEndDayAlert = true
         } else {
-            await endDay()
+            endDay()
         }
     }
     
-    func endDay() async {
+    func endDay() {
         showEndDayAlert = false
         
         if state == .running {
@@ -90,37 +91,27 @@ class WorkTimerManager: ObservableObject {
             workDay.breakDuration = totalPauseDuration
         }
         
-        await workDay.updateData(
+        workDay.updateData(
             startTime: workDay.startTime,
             endTime: workDay.endTime,
             breakDuration: workDay.breakDuration
         )
         
-        // Sauvegarde SwiftData et synchronisation CloudKit
-        if let modelContext = getModelContext() {
-            modelContext.insert(workDay)
-            do {
-                try await modelContext.save()
-                // Synchronisation après sauvegarde
-                await CloudService.shared.requestSync()
-            } catch {
-                print("Failed to save work day: \(error.localizedDescription)")
-            }
-        }
+        modelContext.insert(workDay)
+        try? modelContext.save()
         
         state = .finished
         saveState()
     }
     
     // MARK: - App Lifecycle Methods
-    func handleEnterBackground() async {
+    func handleEnterBackground() {
         if state == .running {
             saveState()
-            await CloudService.shared.requestSync()
         }
     }
     
-    func handleEnterForeground() async {
+    func handleEnterForeground() {
         if state == .running {
             updateElapsedTime()
             startTimer()
@@ -128,16 +119,6 @@ class WorkTimerManager: ObservableObject {
     }
     
     // MARK: - Private Methods
-    private func getModelContext() -> ModelContext? {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = scene.windows.first else {
-            return nil
-        }
-        
-        let environment = EnvironmentValues()
-        return environment.modelContext
-    }
-    
     private func startNewDay() {
         startTimestamp = Date()
         totalPauseDuration = 0
@@ -215,12 +196,12 @@ class WorkTimerManager: ObservableObject {
         )
         
         if let encoded = try? JSONEncoder().encode(timerData) {
-            UserDefaults.standard.set(encoded, forKey: "MyTimeProTimerData")
+            UserDefaults.standard.set(encoded, forKey: "timerData")
         }
     }
     
     private func loadSavedState() {
-        guard let data = UserDefaults.standard.data(forKey: "MyTimeProTimerData"),
+        guard let data = UserDefaults.standard.data(forKey: "timerData"),
               let timerData = try? JSONDecoder().decode(TimerData.self, from: data) else {
             return
         }

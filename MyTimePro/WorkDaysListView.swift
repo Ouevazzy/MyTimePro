@@ -38,42 +38,37 @@ struct WorkDaysListView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: 0) {
-            // En-tête avec le nom du mois et navigation
-            monthNavigationHeader
-            
-            // Statistiques mensuelles
-            MonthlyStatsHeader(stats: monthlyStats)
-            
-            // Liste des jours de travail
-            workDaysList
-        }
-        .navigationTitle("Journées de Travail")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                addButton
+        NavigationStack {
+            VStack(spacing: 0) {
+                // En-tête avec le nom du mois et navigation
+                monthNavigationHeader
+                
+                // Statistiques mensuelles
+                MonthlyStatsHeader(stats: monthlyStats)
+                
+                // Liste des jours de travail
+                workDaysList
             }
-        }
-        .sheet(isPresented: $showAddWorkDayView) {
-            NavigationStack {
-                AddEditWorkDayView(workDay: WorkDay(date: Date(), type: .work))
+            .navigationTitle("Journées de Travail")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    addButton
+                }
             }
-        }
-        .sheet(item: $selectedWorkDay) { workDay in
-            NavigationStack {
-                AddEditWorkDayView(workDay: workDay)
+            .sheet(isPresented: $showAddWorkDayView) {
+                NavigationStack {
+                    AddEditWorkDayView(workDay: WorkDay(date: Date(), type: .work))
+                }
             }
-        }
-        .onChange(of: workDays) { oldValue, newValue in
-            if oldValue.count != newValue.count {
-                Task {
-                    await CloudService.shared.requestSync()
+            .sheet(item: $selectedWorkDay) { workDay in
+                NavigationStack {
+                    AddEditWorkDayView(workDay: workDay)
                 }
             }
         }
     }
     
-    // MARK: - View Components
+    // MARK: - Views Components
     private var monthNavigationHeader: some View {
         HStack {
             Button(action: { navigateToPreviousMonth() }) {
@@ -159,14 +154,7 @@ struct WorkDaysListView: View {
                 let workDay = days[index]
                 modelContext.delete(workDay)
             }
-            do {
-                try modelContext.save()
-                Task {
-                    await CloudService.shared.requestSync()
-                }
-            } catch {
-                print("Failed to save changes: \(error)")
-            }
+            try? modelContext.save()
         }
     }
     
@@ -352,6 +340,7 @@ struct WorkDayRow: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     NavigationStack {
         WorkDaysListView()

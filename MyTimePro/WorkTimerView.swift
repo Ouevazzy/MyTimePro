@@ -6,7 +6,7 @@ struct WorkTimerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var timerManager: WorkTimerManager = WorkTimerManager()
+    @StateObject private var timerManager: WorkTimerManager
     @AppStorage("standardDailyHours") private var standardDailyHours: Double = 8.0
     
     // MARK: - Constants
@@ -18,6 +18,11 @@ struct WorkTimerView: View {
         static let contentPadding: CGFloat = 15
         static let spacing: CGFloat = 8
         static let statusIndicatorSize: CGFloat = 8
+    }
+    
+    // MARK: - Initialization
+    init(modelContext: ModelContext) {
+        _timerManager = StateObject(wrappedValue: WorkTimerManager(modelContext: modelContext))
     }
     
     // MARK: - Computed Properties
@@ -70,9 +75,7 @@ struct WorkTimerView: View {
         .background(background)
         .padding(.horizontal)
         .onChange(of: scenePhase) { _, newPhase in
-            Task {
-                await handleScenePhaseChange(newPhase)
-            }
+            handleScenePhaseChange(newPhase)
         }
         .alert("Terminer la journée", isPresented: $timerManager.showEndDayAlert) {
             endDayAlertButtons
@@ -133,9 +136,7 @@ struct WorkTimerView: View {
             
             if timerManager.state == .running || timerManager.state == .paused {
                 Button(action: {
-                    Task {
-                        await timerManager.attemptEndDay()
-                    }
+                    timerManager.attemptEndDay()
                 }) {
                     buttonLabel(text: "Terminer", color: .red)
                 }
@@ -158,9 +159,7 @@ struct WorkTimerView: View {
         Group {
             Button("Annuler", role: .cancel) { }
             Button("Terminer", role: .destructive) {
-                Task {
-                    await timerManager.endDay()
-                }
+                timerManager.endDay()
             }
         }
     }
@@ -193,19 +192,41 @@ struct WorkTimerView: View {
         return String(format: "%dh%02dmin %02d", hours, minutes, seconds)
     }
     
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) async {
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
         switch newPhase {
         case .background:
-            await timerManager.handleEnterBackground()
+            timerManager.handleEnterBackground()
         case .active:
-            await timerManager.handleEnterForeground()
+            timerManager.handleEnterForeground()
         default:
             break
         }
     }
 }
 
+// MARK: - Preview
 #Preview {
-    WorkTimerView()
-        .modelContainer(for: WorkDay.self, inMemory: true)
+    WorkTimerView(modelContext: ModelContext(try! ModelContainer(for: WorkDay.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))))
+        .preferredColorScheme(.dark)
+}
+
+// MARK: - Supporting Views
+struct TimeDisplayView: View {
+    let title: String
+    let time: String
+    let isTitleSecondary: Bool
+    let alignment: HorizontalAlignment
+    
+    var body: some View {
+        VStack(alignment: alignment, spacing: 6) {
+            Text(title)
+                .font(isTitleSecondary ? .subheadline : .headline)
+                .foregroundColor(isTitleSecondary ? .secondary : .primary)
+            
+            Text(time)
+                .font(.system(.title2, design: .rounded))
+                .foregroundColor(isTitleSecondary ? .secondary : .primary)
+                .fixedSize()
+        }
+    }
 }

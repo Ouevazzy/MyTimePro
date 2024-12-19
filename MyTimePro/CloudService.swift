@@ -1,9 +1,7 @@
 import Foundation
 import CloudKit
 import SwiftUI
-import SwiftData
 
-@MainActor
 class CloudService: ObservableObject {
     static let shared = CloudService()
 
@@ -11,9 +9,11 @@ class CloudService: ObservableObject {
     @Published private(set) var iCloudStatus: CloudStatus = .unknown {
         didSet {
             if iCloudStatus == .available && !isSetup {
-                Task {
-                    try? await setupSync()
-                }
+                // Quand iCloud devient disponible et que le setup n'est pas fait, on le fait
+                setupSync()
+            } else if iCloudStatus == .available {
+                // Si iCloud est déjà disponible et setup fait, on effectue une synchro initiale si nécessaire
+                performSyncIfNeeded()
             }
         }
     }
@@ -25,237 +25,21 @@ class CloudService: ObservableObject {
     // MARK: - Private Properties
     private let container: CKContainer
     private let database: CKDatabase
-    private let iCloudIdentifier = "iCloud.jordan-payez.MyTimePro"
+    private let iCloudIdentifier = "iCloud.jordan-payez.WorkTimer"
     private var isSubscribed = false
     private var isSetup = false
-    private var isSyncing = false
+    private var lastCheckDate: Date = .distantPast
+    // Timer supprimé, on synchronise à la demande ou aux changements d'état iCloud
+    // private var syncTimer: Timer?
 
-    // MARK: - CloudKit Properties
     private var lastChangeToken: CKServerChangeToken? {
-        get {
-            guard let tokenData = UserDefaults.standard.data(forKey: "lastChangeToken"),
-                  let token = try? NSKeyedUnarchiver.unarchivedObject(
-                    ofClass: CKServerChangeToken.self,
-                    from: tokenData
-                  ) else {
-                return nil
-            }
-            return token
-        }
-        set {
-            if let token = newValue,
-               let data = try? NSKeyedArchiver.archivedData(
-                withRootObject: token,
-                requiringSecureCoding: true
-               ) {
+        didSet {
+            if let token = lastChangeToken,
+               let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true) {
                 UserDefaults.standard.set(data, forKey: "lastChangeToken")
             } else {
                 UserDefaults.standard.removeObject(forKey: "lastChangeToken")
             }
-        }
-    }
-
-    // MARK: - Initialization
-    private init() {
-        container = CKContainer(identifier: iCloudIdentifier)
-        database = container.privateCloudDatabase
-        setupNotifications()
-        Task { await checkiCloudStatus() }
-    }
-
-    // MARK: - Public Methods
-    @MainActor
-    func requestSync() async {
-        guard !isSyncing else { return }
-        isSyncing = true
-        
-        do {
-            try await performSync()
-        } catch {
-            await handleCloudKitError(error)
-        }
-        isSyncing = false
-    }
-
-    // MARK: - Private Methods
-    private func performSync() async throws {
-        guard iCloudStatus == .available else { return }
-        
-        updateStatus(.syncing(progress: 0))
-
-        let changedZoneIDs = try await fetchDatabaseChanges()
-        
-        for zoneID in changedZoneIDs {
-            try await fetchZoneChanges(zoneID)
-        }
-
-        lastSyncDate = Date()
-        updateStatus(.available)
-    }
-    
-    private func fetchDatabaseChanges() async throws -> Set<CKRecordZone.ID> {
-        try await withCheckedThrowingContinuation { continuation in
-            let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: lastChangeToken)
-            operation.qualityOfService = .utility
-            
-            var zoneIDs = Set<CKRecordZone.ID>()
-            
-            operation.recordZoneWithIDChangedBlock = { zoneID in
-                zoneIDs.insert(zoneID)
-            }
-            
-            operation.changeTokenUpdatedBlock = { [weak self] token in
-                Task { @MainActor in
-                    self?.lastChangeToken = token
-                }
-            }
-            
-            operation.fetchDatabaseChangesResultBlock = { result in
-                switch result {
-                case .success:
-                    continuation.resume(returning: zoneIDs)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
-            
-            database.add(operation)
-        }
-    }
-
-    private func setupSync() async throws {
-        let zone = CKRecordZone(zoneName: "MyTimeProZone")
-        try await database.save(zone)
-        
-        isSetup = true
-        updateStatus(.available)
-        
-        try await setupSubscription()
-        try await performSync()
-    }
-
-    private func setupSubscription() async throws {
-        let subscription = CKDatabaseSubscription(subscriptionID: "mytimepro-all-changes")
-        let notificationInfo = CKSubscription.NotificationInfo()
-        notificationInfo.shouldSendContentAvailable = true
-        subscription.notificationInfo = notificationInfo
-
-        try await database.save(subscription)
-        isSubscribed = true
-    }
-
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            forName: .CKAccountChanged,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { [weak self] in
-                await self?.checkiCloudStatus()
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: NSNotification.Name("CKDatabaseDidReceiveChanges"),
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { [weak self] in
-                await self?.requestSync()
-            }
-        }
-    }
-
-    private func fetchZoneChanges(_ zoneID: CKRecordZone.ID) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
-            let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: [zoneID], configurationsByRecordZoneID: [zoneID: configuration])
-            operation.qualityOfService = .utility
-
-            operation.recordWasChangedBlock = { record, _ in
-                Task { @MainActor in
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("DataDidChange"),
-                        object: nil,
-                        userInfo: ["record": record]
-                    )
-                }
-            }
-
-            operation.recordZoneFetchResultBlock = { [weak self] zoneID, result in
-                switch result {
-                case .success(let data):
-                    Task { @MainActor in
-                        self?.lastChangeToken = data.serverChangeToken
-                    }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                    return
-                }
-            }
-
-            operation.fetchRecordZoneChangesResultBlock = { result in
-                switch result {
-                case .success:
-                    continuation.resume()
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
-
-            database.add(operation)
-        }
-    }
-
-    private func updateStatus(_ newStatus: CloudStatus) {
-        iCloudStatus = newStatus
-        if case .error(let error) = newStatus {
-            lastError = error
-        }
-    }
-
-    private func handleCloudKitError(_ error: Error) async {
-        if let cloudError = error as? CKError {
-            await MainActor.run {
-                userMessage = "Erreur iCloud: \(cloudError.localizedDescription)"
-                switch cloudError.code {
-                case .quotaExceeded, .networkFailure, .networkUnavailable:
-                    updateStatus(.unavailable)
-                default:
-                    updateStatus(.error(cloudError))
-                }
-            }
-        } else {
-            await MainActor.run {
-                updateStatus(.error(error))
-            }
-        }
-    }
-
-    private func checkiCloudStatus() async {
-        do {
-            let accountStatus = try await container.accountStatus()
-            await MainActor.run {
-                switch accountStatus {
-                case .available:
-                    updateStatus(.available)
-                    if !isSetup {
-                        Task {
-                            try? await self.setupSync()
-                        }
-                    }
-                case .restricted:
-                    updateStatus(.restricted)
-                case .noAccount:
-                    updateStatus(.unavailable)
-                case .couldNotDetermine, .temporarilyUnavailable:
-                    updateStatus(.unknown)
-                @unknown default:
-                    updateStatus(.unknown)
-                }
-            }
-        } catch {
-            await handleCloudKitError(error)
         }
     }
 
@@ -281,6 +65,15 @@ class CloudService: ObservableObject {
                 let nse1 = e1 as NSError
                 let nse2 = e2 as NSError
                 return nse1.domain == nse2.domain && nse1.code == nse2.code
+            default:
+                return false
+            }
+        }
+
+        var isAvailable: Bool {
+            switch self {
+            case .available, .syncing:
+                return true
             default:
                 return false
             }
@@ -324,5 +117,266 @@ class CloudService: ObservableObject {
             case .error: return .orange
             }
         }
+    }
+
+    enum CloudError: LocalizedError {
+        case iCloudNotAvailable
+        case syncFailed(Error)
+        case dataNotFound
+        case subscriptionFailed(Error)
+
+        var errorDescription: String? {
+            switch self {
+            case .iCloudNotAvailable:
+                return "iCloud n'est pas disponible"
+            case .syncFailed(let error):
+                return "Échec de synchronisation: \(error.localizedDescription)"
+            case .dataNotFound:
+                return "Données non trouvées"
+            case .subscriptionFailed(let error):
+                return "Échec de l'abonnement: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    // MARK: - Initialization
+    private init() {
+        container = CKContainer(identifier: iCloudIdentifier)
+        database = container.privateCloudDatabase
+
+        if let tokenData = UserDefaults.standard.data(forKey: "lastChangeToken") {
+            lastChangeToken = try? NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: tokenData)
+        }
+
+        setupNotifications()
+        checkiCloudStatus()
+        // Pas de timer ici. La synchro est déclenchée par les changements d'état iCloud ou manuellement.
+    }
+
+    // MARK: - Public Methods
+    func checkiCloudStatus() {
+        guard shouldPerformStatusCheck() else { return }
+        container.accountStatus { [weak self] status, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.handleCloudKitError(error)
+                    return
+                }
+
+                switch status {
+                case .available:
+                    self?.updateStatus(.available)
+                case .restricted:
+                    self?.updateStatus(.restricted)
+                case .noAccount:
+                    self?.updateStatus(.unavailable)
+                case .couldNotDetermine, .temporarilyUnavailable:
+                    self?.updateStatus(.unknown)
+                @unknown default:
+                    self?.updateStatus(.unknown)
+                }
+            }
+        }
+    }
+
+    func requestSync() {
+        guard iCloudStatus.isAvailable else { return }
+        performSync()
+    }
+
+    // MARK: - Private Methods
+    private func shouldPerformStatusCheck() -> Bool {
+        let interval = Date().timeIntervalSince(lastCheckDate)
+        return interval > 60 // Vérifie le statut iCloud au plus toutes les 60 secondes
+    }
+
+    private func handleCloudKitError(_ error: Error) {
+        if let cloudError = error as? CKError {
+            DispatchQueue.main.async {
+                self.userMessage = "Erreur iCloud: \(cloudError.localizedDescription)"
+            }
+            switch cloudError.code {
+            case .quotaExceeded, .networkFailure, .networkUnavailable:
+                updateStatus(.unavailable)
+            default:
+                updateStatus(.error(cloudError))
+            }
+        } else {
+            updateStatus(.error(error))
+        }
+    }
+
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(iCloudAccountChanged),
+            name: .CKAccountChanged,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleRemoteNotification),
+            name: NSNotification.Name("CKDatabaseDidReceiveChanges"),
+            object: nil
+        )
+    }
+
+    private func setupSync() {
+        let zone = CKRecordZone(zoneName: "WorkTimeZone")
+        let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
+
+        operation.modifyRecordZonesResultBlock = { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.isSetup = true
+                    self?.updateStatus(.available)
+                    self?.setupSubscription()
+                    // Une fois le setup effectué, on déclenche une synchro initiale
+                    self?.performSyncIfNeeded()
+                case .failure(let error):
+                    self?.updateStatus(.error(CloudError.syncFailed(error)))
+                }
+            }
+        }
+
+        operation.qualityOfService = .utility
+        database.add(operation)
+    }
+
+    private func performSyncIfNeeded() {
+        guard iCloudStatus.isAvailable else { return }
+        // Si aucune synchro n'a été faite ou si c'est une nouvelle installation (pas de token), on fait une synchro complète.
+        if lastSyncDate == nil || lastChangeToken == nil {
+            performSync()
+        }
+    }
+
+    private func setupSubscription() {
+        guard !isSubscribed else { return }
+
+        let subscription = CKDatabaseSubscription(subscriptionID: "all-changes")
+        let notificationInfo = CKSubscription.NotificationInfo()
+        notificationInfo.shouldSendContentAvailable = true
+        subscription.notificationInfo = notificationInfo
+
+        let operation = CKModifySubscriptionsOperation(
+            subscriptionsToSave: [subscription],
+            subscriptionIDsToDelete: []
+        )
+
+        operation.modifySubscriptionsResultBlock = { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.isSubscribed = true
+                    self?.lastSyncDate = Date()
+                case .failure(let error):
+                    self?.updateStatus(.error(CloudError.subscriptionFailed(error)))
+                }
+            }
+        }
+
+        operation.qualityOfService = .utility
+        database.add(operation)
+    }
+
+    private func performSync() {
+        updateStatus(.syncing(progress: 0))
+
+        let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: lastChangeToken)
+
+        operation.changeTokenUpdatedBlock = { [weak self] token in
+            self?.lastChangeToken = token
+        }
+
+        operation.recordZoneWithIDChangedBlock = { [weak self] zoneID in
+            self?.fetchZoneChanges(zoneID)
+        }
+
+        operation.fetchDatabaseChangesResultBlock = { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.lastSyncDate = Date()
+                    self?.updateStatus(.available)
+                case .failure(let error):
+                    self?.updateStatus(.error(CloudError.syncFailed(error)))
+                }
+            }
+        }
+
+        operation.qualityOfService = .utility
+        database.add(operation)
+    }
+
+    private func fetchZoneChanges(_ zoneID: CKRecordZone.ID) {
+        let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
+        let operation = CKFetchRecordZoneChangesOperation(
+            recordZoneIDs: [zoneID],
+            configurationsByRecordZoneID: [zoneID: configuration]
+        )
+
+        operation.recordWasChangedBlock = { record, _ in
+            DispatchQueue.main.async {
+                // L'application doit écouter "DataDidChange" et mettre à jour sa base locale en conséquence
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("DataDidChange"),
+                    object: nil,
+                    userInfo: ["record": record]
+                )
+            }
+        }
+
+        operation.recordZoneFetchResultBlock = { [weak self] zoneID, result in
+            switch result {
+            case .success(let resultData):
+                self?.lastChangeToken = resultData.serverChangeToken
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self?.handleCloudKitError(error)
+                }
+            }
+        }
+
+        operation.qualityOfService = .utility
+        database.add(operation)
+    }
+
+    private func updateStatus(_ newStatus: CloudStatus) {
+        DispatchQueue.main.async {
+            self.iCloudStatus = newStatus
+            if case .error(let error) = newStatus {
+                self.lastError = error
+            }
+        }
+    }
+
+    // MARK: - Notification Handlers
+    @objc private func iCloudAccountChanged(_ notification: Notification) {
+        checkiCloudStatus()
+    }
+
+    @objc private func handleRemoteNotification(_ notification: Notification) {
+        requestSync()
+    }
+
+    // MARK: - Cleanup
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+// Dans CloudService.swift, ajoutez ces logs
+func checkiCloudStatus() {
+    let container = CKContainer(identifier: "iCloud.jordan-payez.worktimer")
+    print("Checking container:", container.containerIdentifier ?? "No identifier")
+    
+    container.accountStatus { status, error in
+        if let error = error {
+            print("Error checking account status:", error)
+            return
+        }
+        print("Account status:", status.rawValue)
     }
 }

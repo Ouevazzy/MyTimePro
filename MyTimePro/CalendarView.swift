@@ -185,7 +185,9 @@ struct CalendarView: View {
             }
             .sheet(isPresented: $showingAddWorkDay) {
                 NavigationStack {
-                    AddEditWorkDayView(workDay: WorkDay(date: calendar.startOfDay(for: selectedDate)))
+                    AddEditWorkDayView(
+                        workDay: WorkDay(date: calendar.startOfDay(for: selectedDate))
+                    )
                 }
             }
             .sheet(isPresented: $showingEditSheet) {
@@ -195,27 +197,12 @@ struct CalendarView: View {
                     }
                 }
             }
-            .onChange(of: workDays) { _, newWorkDays in
-                // Synchronisation lorsque les jours de travail changent
-                Task {
-                    await CloudService.shared.requestSync()
-                }
-            }
         }
     }
     
-    // MARK: - Private Methods
     private func deleteWorkDay(_ workDay: WorkDay) {
         modelContext.delete(workDay)
-        do {
-            try modelContext.save()
-            // Synchronisation après suppression
-            Task {
-                await CloudService.shared.requestSync()
-            }
-        } catch {
-            print("Failed to save changes: \(error)")
-        }
+        try? modelContext.save()
         selectedWorkDay = nil
     }
     
@@ -338,7 +325,7 @@ struct CalendarCell: View {
                     
                     // Affichage du bonus si présent
                     if workDay.bonusAmount > 0 {
-                        Text("+\(String(format: "%.0f", workDay.bonusAmount))")
+                        Text("+" + String(format: "%.0f", workDay.bonusAmount))
                             .font(.system(size: 9))
                             .foregroundColor(.orange)
                     }
@@ -357,12 +344,5 @@ struct CalendarCell: View {
             return Color(.systemGray6)
         }
         return .clear
-    }
-}
-
-#Preview {
-    NavigationStack {
-        CalendarView()
-            .modelContainer(for: WorkDay.self, inMemory: true)
     }
 }
