@@ -53,7 +53,9 @@ struct AddEditWorkDayView: View {
                     
                     DatePicker("Temps de Pause", selection: $breakDuration, displayedComponents: .hourAndMinute)
                         .onChange(of: breakDuration) { _, _ in
-                            updateWorkDay()
+                            Task {
+                                await updateWorkDay()
+                            }
                         }
                         .datePickerStyle(.compact)
                 }
@@ -89,7 +91,9 @@ struct AddEditWorkDayView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Enregistrer") {
-                    saveWorkDay()
+                    Task {
+                        await saveWorkDay()
+                    }
                 }
                 .disabled(!isFormValid())
             }
@@ -98,9 +102,10 @@ struct AddEditWorkDayView: View {
             loadWorkDay()
         }
         .onChange(of: selectedType) { _, _ in
-            // Force le recalcul des heures lors du changement de type
-            workDay.type = selectedType
-            updateWorkDay()
+            Task {
+                workDay.type = selectedType
+                await updateWorkDay()
+            }
         }
     }
     
@@ -140,19 +145,19 @@ struct AddEditWorkDayView: View {
         note = workDay.note ?? ""
     }
     
-    private func updateWorkDay() {
+    private func updateWorkDay() async {
         workDay.date = date
         workDay.type = selectedType
         
         if selectedType == .work {
-            workDay.updateData(
+            await workDay.updateData(
                 startTime: startTime,
                 endTime: endTime,
                 breakDuration: breakDuration.timeIntervalSince(Calendar.current.startOfDay(for: breakDuration))
             )
             workDay.bonusAmount = bonusAmount
         } else {
-            workDay.updateData(
+            await workDay.updateData(
                 startTime: nil,
                 endTime: nil,
                 breakDuration: 0
@@ -161,8 +166,8 @@ struct AddEditWorkDayView: View {
         }
     }
     
-    private func saveWorkDay() {
-        updateWorkDay()
+    private func saveWorkDay() async {
+        await updateWorkDay()
         workDay.note = note
         
         do {
@@ -172,7 +177,7 @@ struct AddEditWorkDayView: View {
             try modelContext.save()
             
             // Synchronisation avec CloudKit
-            CloudService.shared.requestSync()
+            await CloudService.shared.requestSync()
         } catch {
             print("Failed to save WorkDay: \(error.localizedDescription)")
         }
