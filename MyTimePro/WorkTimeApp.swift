@@ -99,9 +99,13 @@ struct WorkTimeApp: App {
     @MainActor
     private func saveContext() async {
         do {
-            try await container.mainContext.save()
+            try await Task { @MainActor in
+                try container.mainContext.save()
+            }.value
         } catch {
             print("Erreur lors de la sauvegarde du contexte : \(error.localizedDescription)")
+        }
+    }
         }
     }
         }
