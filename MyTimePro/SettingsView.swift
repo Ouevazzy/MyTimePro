@@ -1,162 +1,221 @@
 import SwiftUI
-import SwiftData
+import CloudKit
+
+enum ExportType: String, CaseIterable {
+    case pdf = "PDF"
+    case csv = "CSV"
+}
 
 struct SettingsView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.colorScheme) private var colorScheme
-    @Bindable private var settings = UserSettings.shared
-    @StateObject private var cloudService = CloudService.shared
-    @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
-
-    @State private var weeklyHours: Double = 41.0
-    @State private var showingHoursPicker = false
-    @State private var selectedHours: Double = 8.0
-    @State private var showResetAlert = false
-    @State private var showVacationDetails = false
-    @State private var selectedYear = Calendar.current.component(.year, from: Date())
-    @State private var selectedMonth = Calendar.current.component(.month, from: Date())
-    @State private var showingShareSheet = false
-    @State private var pdfData: Data?
-    @State private var exportType: ExportType?
-
+    @AppStorage("weeklyHours") private var weeklyHours: Double = 35
+    @AppStorage("dailyHours") private var dailyHours: Double = 7
+    @AppStorage("vacationDays") private var vacationDays: Double = 25
+    @AppStorage("workingDays") private var workingDays: Set<Int> = Set(1...5)
+    
+    @State private var showingExportSheet = false
+    @State private var selectedExportType: ExportType = .pdf
+    @State private var iCloudStatus: String = ""
+    
+    private let calendar = Calendar.current
+    
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
-                workTimeSection
-                displaySection
                 cloudSection
                 exportSection
+                workSettingsSection
                 aboutSection
                 resetSection
             }
             .navigationTitle("Réglages")
-        }
-        .sheet(isPresented: $showingHoursPicker) {
-            NavigationStack {
-                WeeklyHoursPickerView(
-                    hours: $weeklyHours,
-                    isPresented: $showingHoursPicker,
-                    onSave: saveWeeklyHours
-                )
+            .onAppear {
+                checkICloudStatus()
             }
-        }
-        .sheet(isPresented: $showVacationDetails) {
-            VacationsView()
-        }
-        .sheet(item: $exportType) { type in
-            NavigationStack {
-                List {
-                    if type == .annual {
-                        Section {
-                            Picker("Année", selection: $selectedYear) {
-                                ForEach((2020...currentYear), id: \.self) { year in
-                                    Text("\(year)").tag(year)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                        }
-                    } else {
-                        Section {
-                            HStack {
-                                Picker("Mois", selection: $selectedMonth) {
-                                    ForEach(1...12, id: \.self) { month in
-                                        Text(monthName(month: month)).tag(month)
-                                    }
-                                }
-                                .pickerStyle(.wheel)
-                                .frame(maxWidth: .infinity)
-
-                                Picker("Année", selection: $selectedYear) {
-                                    ForEach((2020...currentYear), id: \.self) { year in
-                                        Text("\(year)").tag(year)
-                                    }
-                                }
-                                .pickerStyle(.wheel)
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
-                    }
-
-                    Section {
-                        Button(action: generateAndSharePDF) {
-                            HStack {
-                                Spacer()
-                                Label("Générer le PDF", systemImage: "doc.badge.arrow.up")
-                                    .foregroundColor(.blue)
-                                Spacer()
-                            }
-                        }
-                    }
-                }
-                .navigationTitle(type == .annual ? "Export annuel" : "Export mensuel")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Fermer") {
-                            exportType = nil
-                        }
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            if let data = pdfData {
-                ShareSheet(items: [data])
-            }
-        }
-        .alert("Réinitialiser les données", isPresented: $showResetAlert) {
-            Button("Annuler", role: .cancel) { }
-            Button("Réinitialiser", role: .destructive) {
-                Task {
-                    await resetSettings()
-                }
-            }
-        } message: {
-            Text("Cette action réinitialisera tous les paramètres à leurs valeurs par défaut. Cette action est irréversible.")
         }
     }
-
-    private var workTimeSection: some View {
-        Section {
+    
+    // Section Cloud
+    private var cloudSection: some View {
+        Section(header: Text("iCloud")) {
+            Text("Statut: \(iCloudStatus)")
+            Button("Synchroniser maintenant") {
+                Task {
+                    await syncWithICloud()
+                }
+            }
+        }
+    }
+    
+    // Section Export
+    private var exportSection: some View {
+        Section(header: Text("Export")) {
+            Picker("Format", selection: $selectedExportType) {
+                ForEach(ExportType.allCases, id: \.self) { type in
+                    Text(type.rawValue)
+                }
+            }
+            
+            Button("Exporter le mois actuel") {
+                exportCurrentMonth()
+            }
+            
+            Button("Exporter l'année \(currentYear)") {
+                exportCurrentYear()
+            }
+        }
+    }
+    
+    // Section paramètres de travail
+    private var workSettingsSection: some View {
+        Section(header: Text("Paramètres de travail")) {
             weeklyHoursRow
             workingDaysToggles
             dailyHoursRow
             vacationDaysRow
-        } header: {
-            Text("HORAIRES DE TRAVAIL")
-        } footer: {
-            Text("Les heures par jour sont automatiquement calculées en fonction des heures hebdomadaires et des jours travaillés")
         }
     }
-
-    private var displaySection: some View {
+    
+    private var weeklyHoursRow: some View {
+        NavigationLink(destination: WeeklyHoursPickerView(weeklyHours: $weeklyHours)) {
+            HStack {
+                Text("Heures hebdomadaires")
+                Spacer()
+                Text("\(weeklyHours, specifier: "%.1f")h")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    private var workingDaysToggles: some View {
+        ForEach(1...7, id: \.self) { day in
+            Toggle(calendar.weekdaySymbols[day-1], isOn: Binding(
+                get: { workingDays.contains(day) },
+                set: { isOn in
+                    if isOn {
+                        workingDays.insert(day)
+                    } else {
+                        workingDays.remove(day)
+                    }
+                }
+            ))
+        }
+    }
+    
+    private var dailyHoursRow: some View {
+        HStack {
+            Text("Heures quotidiennes")
+            Spacer()
+            Text("\(dailyHours, specifier: "%.1f")h")
+        }
+    }
+    
+    private var vacationDaysRow: some View {
+        HStack {
+            Text("Jours de congés")
+            Spacer()
+            Text("\(vacationDays, specifier: "%.0f") jours")
+        }
+    }
+    
+    // Section À propos
+    private var aboutSection: some View {
+        Section(header: Text("À propos")) {
+            Text("Version 1.0")
+            Link("Site web", destination: URL(string: "https://mytimepro.app")!)
+        }
+    }
+    
+    // Section Réinitialisation
+    private var resetSection: some View {
         Section {
-            Toggle("Format décimal", isOn: $settings.useDecimalHours)
-        } header: {
-            Text("AFFICHAGE")
-        } footer: {
-            Text("Le format décimal affiche les heures en nombres décimaux (ex: 8.5h au lieu de 8h30)")
+            Button("Réinitialiser les paramètres", role: .destructive) {
+                resetSettings()
+            }
         }
     }
-
-    private func resetSettings() async {
-        settings.resetToDefaults()
+    
+    // MARK: - Fonctions Cloud
+    private func checkICloudStatus() {
+        CKContainer.default().accountStatus { (accountStatus, error) in
+            DispatchQueue.main.async {
+                switch accountStatus {
+                case .available:
+                    self.iCloudStatus = "Disponible"
+                case .noAccount:
+                    self.iCloudStatus = "Pas de compte"
+                case .restricted:
+                    self.iCloudStatus = "Restreint"
+                case .couldNotDetermine:
+                    self.iCloudStatus = "Indéterminé"
+                @unknown default:
+                    self.iCloudStatus = "Inconnu"
+                }
+            }
+        }
+    }
+    
+    private func syncWithICloud() async {
         do {
-            try modelContext.save()
-            await CloudService.shared.requestSync()
+            let settings = Settings(
+                weeklyHours: weeklyHours,
+                dailyHours: dailyHours,
+                vacationDays: vacationDays,
+                workingDays: workingDays
+            )
+            try await CloudKitManager.shared.saveSettings(settings)
         } catch {
-            print("Failed to save after reset: \(error)")
+            print("Erreur de synchronisation: \(error)")
         }
     }
-
-    private func saveWeeklyHours(_ newValue: Double) {
-        settings.weeklyHours = newValue
-        updateDailyHours()
+    
+    // MARK: - Utilitaires
+    private var currentYear: Int {
+        return Calendar.current.component(.year, from: Date())
     }
+    
+    private func monthName(for date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "fr_FR")
+        dateFormatter.dateFormat = "MMMM yyyy"
+        return dateFormatter.string(from: date)
+    }
+    
+    private func exportCurrentMonth() {
+        if selectedExportType == .pdf {
+            generateAndSharePDF()
+        } else {
+            generateAndShareCSV()
+        }
+    }
+    
+    private func exportCurrentYear() {
+        // Implémentation de l'export annuel à venir
+    }
+    
+    private func generateAndSharePDF() {
+        // Implémentation de la génération PDF à venir
+    }
+    
+    private func generateAndShareCSV() {
+        // Implémentation de la génération CSV à venir
+    }
+    
+    private func resetSettings() {
+        weeklyHours = 35
+        dailyHours = 7
+        vacationDays = 25
+        workingDays = Set(1...5)
+    }
+}
 
-    private func updateDailyHours() {
-        let workingDaysCount = settings.workingDays.filter { $0 }.count
-        guard workingDaysCount > 0 else { return }
-        settings.standardDailyHours = (settings.weeklyHours / Double(workingDaysCount)).rounded(to: 2)
+struct WeeklyHoursPickerView: View {
+    @Binding var weeklyHours: Double
+    
+    var body: some View {
+        VStack {
+            Slider(value: $weeklyHours, in: 0...60, step: 0.5)
+            Text("\(weeklyHours, specifier: "%.1f") heures")
+        }
+        .padding()
     }
 }
