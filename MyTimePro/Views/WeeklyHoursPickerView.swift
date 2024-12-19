@@ -1,35 +1,18 @@
 import SwiftUI
 
 struct WeeklyHoursPickerView: View {
-    @Binding var hours: Double
-    @Binding var isPresented: Bool
-    let onSave: (Double) -> Void
+    @Binding var weeklyHours: Double
     
     var body: some View {
         Form {
-            Stepper(value: $hours, in: 0...80, step: 0.5) {
-                HStack {
-                    Text("Heures par semaine")
-                    Spacer()
-                    Text("\(hours, specifier: "%.1f")h")
-                        .foregroundColor(.accentColor)
+            Section(header: Text("Heures hebdomadaires")) {
+                Slider(value: $weeklyHours, in: 0...60, step: 0.5) {
+                    Text("\(weeklyHours, specifier: "%.1f") heures")
                 }
+                Text("\(weeklyHours, specifier: "%.1f") heures")
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .navigationTitle("Heures hebdomadaires")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Annuler") {
-                    isPresented = false
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Enregistrer") {
-                    onSave(hours)
-                    isPresented = false
-                }
-            }
-        }
     }
 }
