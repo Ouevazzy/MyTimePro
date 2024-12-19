@@ -1,68 +1,75 @@
 import SwiftUI
-import SwiftData
+import CloudKit
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @AppStorage("selectedTab") private var selectedTab = 0
-    private let settings = UserSettings.shared
+    @StateObject private var settingsViewModel = SettingsViewModel()
+    @State private var isRestoring = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Vue Accueil
-            NavigationStack {
-                HomeTabView()
+        TabView {
+            NavigationView {
+                TimeRecordingView()
             }
             .tabItem {
-                Label("Accueil", systemImage: "house.fill")
+                Label("Enregistrer", systemImage: "clock")
             }
-            .tag(0)
             
-            // Vue principale : Liste des journées
-            NavigationStack {
-                WorkDaysListView()
+            NavigationView {
+                StatisticsView()
             }
             .tabItem {
-                Label("Journées", systemImage: "list.bullet")
+                Label("Statistiques", systemImage: "chart.bar")
             }
-            .tag(1)
             
-            // Vue Calendrier
-            NavigationStack {
-                CalendarView()
-            }
-            .tabItem {
-                Label("Calendrier", systemImage: "calendar")
-            }
-            .tag(2)
-            
-            // Vue statistiques
-            NavigationStack {
-                StatsView()
-            }
-            .tabItem {
-                Label("Stats", systemImage: "chart.bar.fill")
-            }
-            .tag(3)
-            
-            // Vue paramètres
-            NavigationStack {
+            NavigationView {
                 SettingsView()
             }
             .tabItem {
                 Label("Réglages", systemImage: "gear")
             }
-            .tag(4)
         }
-        .tint(.blue)
-        .onChange(of: selectedTab) { _, _ in
-            Task {
-                await CloudService.shared.requestSync()
+        .onAppear {
+            checkAndRestoreData()
+        }
+        .alert("Message", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
+        }
+    }
+    
+    private func checkAndRestoreData() {
+        Task {
+            do {
+                if try await CloudKitManager.shared.shouldRestoreData() {
+                    isRestoring = true
+                    try await restoreData()
+                    isRestoring = false
+                }
+            } catch {
+                await MainActor.run {
+                    alertMessage = error.localizedDescription
+                    showingAlert = true
+                }
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: WorkDay.self, inMemory: true)
+    
+    private func restoreData() async throws {
+        guard let settings = try await CloudKitManager.shared.fetchSettings() else {
+            return
+        }
+        
+        await MainActor.run {
+            UserDefaults.standard.set(settings.weeklyHours, forKey: "weeklyHours")
+            UserDefaults.standard.set(settings.dailyHours, forKey: "dailyHours")
+            UserDefaults.standard.set(settings.vacationDays, forKey: "vacationDays")
+            UserDefaults.standard.set(Array(settings.workingDays), forKey: "workingDays")
+            
+            alertMessage = "Données restaurées avec succès"
+            showingAlert = true
+        }
+    }
 }
