@@ -3,61 +3,48 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("selectedTab") private var selectedTab = 0
-    private let settings = UserSettings.shared
+    @StateObject private var cloudService = CloudService.shared
+    @State private var showingSyncError = false
+    @State private var errorMessage = ""
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Vue Accueil
-            NavigationStack {
-                HomeTabView()
-            }
-            .tabItem {
-                Label("Accueil", systemImage: "house.fill")
-            }
-            .tag(0)
+        TabView {
+            HomeTabView()
+                .tabItem {
+                    Label("Accueil", systemImage: "house")
+                }
             
-            // Vue principale : Liste des journées
-            NavigationStack {
-                WorkDaysListView()
-            }
-            .tabItem {
-                Label("Journées", systemImage: "list.bullet")
-            }
-            .tag(1)
+            WorkDaysListView()
+                .tabItem {
+                    Label("Historique", systemImage: "clock")
+                }
             
-            // Vue Calendrier
-            NavigationStack {
-                CalendarView()
-            }
-            .tabItem {
-                Label("Calendrier", systemImage: "calendar")
-            }
-            .tag(2)
+            StatsView()
+                .tabItem {
+                    Label("Statistiques", systemImage: "chart.bar")
+                }
             
-            // Vue statistiques
-            NavigationStack {
-                StatsView()
-            }
-            .tabItem {
-                Label("Stats", systemImage: "chart.bar.fill")
-            }
-            .tag(3)
-            
-            // Vue paramètres
-            NavigationStack {
-                SettingsView()
-            }
-            .tabItem {
-                Label("Réglages", systemImage: "gear")
-            }
-            .tag(4)
+            SettingsView()
+                .tabItem {
+                    Label("Paramètres", systemImage: "gear")
+                }
         }
-        .tint(.blue)
+        .task {
+            await syncData()
+        }
+        .alert("Erreur de synchronisation", isPresented: $showingSyncError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: WorkDay.self, inMemory: true)
+    
+    private func syncData() async {
+        do {
+            try await cloudService.syncWithCloud(context: modelContext)
+        } catch {
+            showingSyncError = true
+            errorMessage = error.localizedDescription
+        }
+    }
 }
