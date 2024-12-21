@@ -3,7 +3,7 @@ import SwiftData
 
 struct WorkDaysListView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var userSettings = UserSettings.shared
+    private let userSettings = UserSettings.shared
     
     // Fetch request pour les journées de travail non supprimées
     @Query(filter: #Predicate<WorkDay> { workDay in
@@ -45,7 +45,7 @@ struct WorkDaysListView: View {
             }
             .sheet(isPresented: $showingAddSheet) {
                 NavigationStack {
-                    AddEditWorkDayView(workDay: nil)
+                    AddEditWorkDayView(workDay: WorkDay())
                 }
             }
             .sheet(isPresented: $showingEditSheet) {
@@ -89,7 +89,7 @@ struct WorkDaysListView: View {
 
 struct WorkDayRowView: View {
     let workDay: WorkDay
-    @StateObject private var userSettings = UserSettings.shared
+    private let userSettings = UserSettings.shared
     
     var body: some View {
         HStack {
