@@ -5,12 +5,9 @@ import CloudKit
 @main
 struct WorkTimeApp: App {
     // MARK: - Properties
-    let container: ModelContainer
+    private let modelContainer: ModelContainer
     private let cloudKitContainerID = "iCloud.jordan-payez.MyTimePro"
-    @StateObject private var cloudService = CloudService.shared
-    
-    // Ajout du delegate adapter
-    @UIApplicationDelegateAdaptor(UIApplicationDelegateAdapterWithCloudKit.self) var delegate
+    private let cloudKitZoneName = "MyTimeProZone"
     
     // MARK: - Initialization
     init() {
@@ -18,22 +15,21 @@ struct WorkTimeApp: App {
         do {
             let schema = Schema([WorkDay.self])
             
+            // Configuration SwiftData avec CloudKit
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 url: URL.documentsDirectory.appending(path: "MyTimePro.store"),
-                allowsSave: true,
-                cloudKitDatabase: .private(cloudKitContainerID)
+                cloudKitContainerIdentifier: cloudKitContainerID,
+                cloudKitSynchronizationZoneName: cloudKitZoneName
             )
             
-            container = try ModelContainer(
+            modelContainer = try ModelContainer(
                 for: WorkDay.self,
                 configurations: modelConfiguration
             )
             
             print("📱 ModelContainer initialized successfully")
-            
-            // Configure les notifications en arrière-plan pour CloudKit
-            configureBackgroundTasks()
+            setupCloudKit()
             
         } catch {
             print("❌ Failed to initialize ModelContainer: \(error.localizedDescription)")
@@ -41,16 +37,11 @@ struct WorkTimeApp: App {
         }
     }
     
-    // MARK: - Body
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(container)
+                .modelContainer(modelContainer)
                 .preferredColorScheme(.dark)
-                .environmentObject(cloudService)
-                .task {
-                    await setupCloudKitSync()
-                }
                 .onAppear {
                     registerForPushNotifications()
                 }
@@ -58,80 +49,66 @@ struct WorkTimeApp: App {
     }
     
     // MARK: - Private Methods
-    private func setupCloudKitSync() async {
-        print("📱 Setting up CloudKit sync")
-        let cloudContainer = CKContainer(identifier: cloudKitContainerID)
+    private func setupCloudKit() {
+        print("📱 Setting up CloudKit")
         
-        do {
-            let accountStatus = try await cloudContainer.accountStatus()
-            if accountStatus == .available {
+        // Configurer le container CloudKit
+        let container = CKContainer(identifier: cloudKitContainerID)
+        
+        // Vérifier l'état du compte iCloud
+        container.accountStatus { status, error in
+            if let error = error {
+                print("❌ CloudKit Account Error: \(error.localizedDescription)")
+                return
+            }
+            
+            if status == .available {
                 print("📱 iCloud account is available")
                 
-                // Création de la zone personnalisée
-                let customZone = CKRecordZone(zoneName: "WorkTimeZone")
-                let modifyOperation = CKModifyRecordZonesOperation(recordZonesToSave: [customZone])
+                // Configuration de la zone personnalisée
+                let customZone = CKRecordZone(zoneName: cloudKitZoneName)
+                let operation = CKModifyRecordZonesOperation(recordZonesToSave: [customZone])
                 
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                    modifyOperation.modifyRecordZonesResultBlock = { result in
-                        switch result {
-                        case .success:
-                            print("📱 CloudKit zone setup success")
-                            continuation.resume()
-                        case .failure(let error):
-                            print("❌ CloudKit zone setup error: \(error.localizedDescription)")
-                            continuation.resume(throwing: error)
-                        }
+                operation.modifyRecordZonesResultBlock = { result in
+                    switch result {
+                    case .success:
+                        print("📱 CloudKit zone setup success")
+                        setupSubscription(container: container)
+                    case .failure(let error):
+                        print("❌ CloudKit zone setup error: \(error.localizedDescription)")
                     }
-                    
-                    cloudContainer.privateCloudDatabase.add(modifyOperation)
                 }
                 
-                // Configuration des subscriptions
-                await setupSubscriptions(container: cloudContainer)
-                
+                container.privateCloudDatabase.add(operation)
             } else {
-                print("⚠️ iCloud account is not available: \(accountStatus)")
+                print("❌ iCloud account is not available: \(status)")
             }
-        } catch {
-            print("❌ Error setting up CloudKit sync: \(error.localizedDescription)")
         }
     }
     
-    private func setupSubscriptions(container: CKContainer) async {
+    private func setupSubscription(container: CKContainer) {
         print("📱 Setting up CloudKit subscriptions")
-        do {
-            // Subscription pour tous les changements
-            let subscription = CKDatabaseSubscription(subscriptionID: "mytimepro-all-changes")
-            let notificationInfo = CKSubscription.NotificationInfo()
-            notificationInfo.shouldSendContentAvailable = true
-            subscription.notificationInfo = notificationInfo
-            
-            try await container.privateCloudDatabase.save(subscription)
-            print("📱 Database subscription saved successfully")
-            
-            // Subscription pour les changements spécifiques aux WorkDays
-            let predicate = NSPredicate(value: true)
-            let querySubscription = CKQuerySubscription(
-                recordType: "WorkDay",
-                predicate: predicate,
-                subscriptionID: "mytimepro-workday-changes",
-                options: [.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate]
-            )
-            querySubscription.notificationInfo = notificationInfo
-            
-            try await container.privateCloudDatabase.save(querySubscription)
-            print("📱 WorkDay subscription saved successfully")
-            
-        } catch {
-            print("❌ Error setting up subscriptions: \(error.localizedDescription)")
+        
+        // Subscription pour tous les changements de la base de données
+        let subscriptionID = "mytimepro-all-changes"
+        let subscription = CKDatabaseSubscription(subscriptionID: subscriptionID)
+        let notificationInfo = CKSubscription.NotificationInfo()
+        notificationInfo.shouldSendContentAvailable = true
+        subscription.notificationInfo = notificationInfo
+        
+        let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription])
+        operation.qualityOfService = .utility
+        
+        operation.modifySubscriptionsResultBlock = { result in
+            switch result {
+            case .success:
+                print("📱 CloudKit subscription setup success")
+            case .failure(let error):
+                print("❌ CloudKit subscription error: \(error.localizedDescription)")
+            }
         }
-    }
-    
-    private func configureBackgroundTasks() {
-        print("📱 Configuring background tasks")
-        if UIApplication.shared.backgroundRefreshStatus == .available {
-            UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalMinimum)
-        }
+        
+        container.privateCloudDatabase.add(operation)
     }
     
     private func registerForPushNotifications() {
@@ -146,6 +123,25 @@ struct WorkTimeApp: App {
             if let error = error {
                 print("❌ Push notification authorization error: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    private func cleanupDeletedRecords(context: ModelContext) {
+        print("📱 Cleaning up deleted records")
+        
+        let descriptor = FetchDescriptor<WorkDay>(predicate: #Predicate<WorkDay> { workDay in
+            workDay.isDeleted
+        })
+        
+        do {
+            let deletedRecords = try context.fetch(descriptor)
+            for record in deletedRecords {
+                context.delete(record)
+            }
+            try context.save()
+            print("📱 Successfully cleaned up \(deletedRecords.count) deleted records")
+        } catch {
+            print("❌ Error cleaning up deleted records: \(error)")
         }
     }
 }
