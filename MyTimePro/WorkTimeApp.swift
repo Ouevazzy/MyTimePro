@@ -19,8 +19,7 @@ struct WorkTimeApp: App {
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 url: URL.documentsDirectory.appending(path: "MyTimePro.store"),
-                cloudKitContainerIdentifier: cloudKitContainerID,
-                cloudKitSynchronizationZoneName: cloudKitZoneName
+                cloudKitDatabase: .private(cloudKitContainerID)
             )
             
             modelContainer = try ModelContainer(
