@@ -1,7 +1,6 @@
 import Foundation
 import SwiftData
 import SwiftUI
-import CloudKit
 
 enum WorkDayType: String, Codable, CaseIterable {
     case work = "Travail"
@@ -41,7 +40,7 @@ enum WorkDayType: String, Codable, CaseIterable {
 }
 
 @Model
-final class WorkDay: Identifiable {
+final class WorkDay {
     // MARK: - Properties
     var id: UUID = UUID()
     var date: Date = Date()
@@ -57,6 +56,7 @@ final class WorkDay: Identifiable {
     // Ajout des propriétés pour CloudKit
     var cloudKitRecordID: String?
     var lastModified: Date = Date()
+    @Attribute(.unique) var uniqueIdentifier: String = UUID().uuidString
     var isDeleted: Bool = false
     
     var type: WorkDayType {
@@ -74,7 +74,7 @@ final class WorkDay: Identifiable {
         self.typeRawValue = type.rawValue
         self.startTime = UserSettings.shared.lastStartTime
         self.endTime = UserSettings.shared.lastEndTime
-        self.cloudKitRecordID = "workday_\(id.uuidString)"
+        self.cloudKitRecordID = "workday_\(uniqueIdentifier)"
         self.lastModified = Date()
         calculateHours()
     }
@@ -84,74 +84,10 @@ final class WorkDay: Identifiable {
         lastModified = Date()
     }
     
-    func toCloudKitRecord() -> CKRecord {
-        let recordID = CKRecord.ID(recordName: cloudKitRecordID ?? "workday_\(id.uuidString)", zoneID: CKRecordZone.ID(zoneName: "WorkTimeZone"))
-        let record = CKRecord(recordType: "WorkDay", recordID: recordID)
-        
-        record.setValue(id.uuidString, forKey: "id")
-        record.setValue(date, forKey: "date")
-        record.setValue(startTime, forKey: "startTime")
-        record.setValue(endTime, forKey: "endTime")
-        record.setValue(breakDuration, forKey: "breakDuration")
-        record.setValue(totalHours, forKey: "totalHours")
-        record.setValue(overtimeSeconds, forKey: "overtimeSeconds")
-        record.setValue(typeRawValue, forKey: "typeRawValue")
-        record.setValue(note, forKey: "note")
-        record.setValue(bonusAmount, forKey: "bonusAmount")
-        record.setValue(isDeleted, forKey: "isDeleted")
-        record.setValue(lastModified, forKey: "lastModified")
-        
-        return record
-    }
-    
-    static func fromCloudKitRecord(_ record: CKRecord) -> WorkDay {
-        let workDay = WorkDay()
-        
-        if let idString = record.value(forKey: "id") as? String,
-           let uuid = UUID(uuidString: idString) {
-            workDay.id = uuid
-        }
-        
-        if let date = record.value(forKey: "date") as? Date {
-            workDay.date = date
-        }
-        
-        workDay.startTime = record.value(forKey: "startTime") as? Date
-        workDay.endTime = record.value(forKey: "endTime") as? Date
-        
-        if let breakDuration = record.value(forKey: "breakDuration") as? TimeInterval {
-            workDay.breakDuration = breakDuration
-        }
-        
-        if let totalHours = record.value(forKey: "totalHours") as? Double {
-            workDay.totalHours = totalHours
-        }
-        
-        if let overtimeSeconds = record.value(forKey: "overtimeSeconds") as? Int {
-            workDay.overtimeSeconds = overtimeSeconds
-        }
-        
-        if let typeRawValue = record.value(forKey: "typeRawValue") as? String {
-            workDay.typeRawValue = typeRawValue
-        }
-        
-        workDay.note = record.value(forKey: "note") as? String
-        
-        if let bonusAmount = record.value(forKey: "bonusAmount") as? Double {
-            workDay.bonusAmount = bonusAmount
-        }
-        
-        if let isDeleted = record.value(forKey: "isDeleted") as? Bool {
-            workDay.isDeleted = isDeleted
-        }
-        
-        if let lastModified = record.value(forKey: "lastModified") as? Date {
-            workDay.lastModified = lastModified
-        }
-        
-        workDay.cloudKitRecordID = record.recordID.recordName
-        
-        return workDay
+    // Mark entry as deleted instead of actual deletion
+    func markAsDeleted() {
+        isDeleted = true
+        updateLastModified()
     }
     
     // MARK: - Calculation Methods
