@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import CloudKit
 
 enum WorkDayType: String, Codable, CaseIterable {
     case work = "Travail"
@@ -41,6 +42,7 @@ enum WorkDayType: String, Codable, CaseIterable {
 
 @Model
 final class WorkDay: Identifiable {
+    // MARK: - Properties
     var id: UUID = UUID()
     var date: Date = Date()
     var startTime: Date? = nil
@@ -51,37 +53,118 @@ final class WorkDay: Identifiable {
     var typeRawValue: String = WorkDayType.work.rawValue
     var note: String? = ""
     var bonusAmount: Double = 0.0
-
+    
+    // Ajout des propriétés pour CloudKit
+    var cloudKitRecordID: String?
+    var lastModified: Date = Date()
+    var isDeleted: Bool = false
+    
     var type: WorkDayType {
         get { WorkDayType(rawValue: typeRawValue) ?? .work }
         set {
             typeRawValue = newValue.rawValue
             calculateHours()
+            updateLastModified()
         }
     }
     
+    // MARK: - Initialization
     init(date: Date = Date(), type: WorkDayType = .work) {
         self.date = date
         self.typeRawValue = type.rawValue
         self.startTime = UserSettings.shared.lastStartTime
         self.endTime = UserSettings.shared.lastEndTime
+        self.cloudKitRecordID = "workday_\(id.uuidString)"
+        self.lastModified = Date()
         calculateHours()
     }
     
+    // MARK: - CloudKit Methods
+    func updateLastModified() {
+        lastModified = Date()
+    }
+    
+    func toCloudKitRecord() -> CKRecord {
+        let recordID = CKRecord.ID(recordName: cloudKitRecordID ?? "workday_\(id.uuidString)", zoneID: CKRecordZone.ID(zoneName: "WorkTimeZone"))
+        let record = CKRecord(recordType: "WorkDay", recordID: recordID)
+        
+        record.setValue(id.uuidString, forKey: "id")
+        record.setValue(date, forKey: "date")
+        record.setValue(startTime, forKey: "startTime")
+        record.setValue(endTime, forKey: "endTime")
+        record.setValue(breakDuration, forKey: "breakDuration")
+        record.setValue(totalHours, forKey: "totalHours")
+        record.setValue(overtimeSeconds, forKey: "overtimeSeconds")
+        record.setValue(typeRawValue, forKey: "typeRawValue")
+        record.setValue(note, forKey: "note")
+        record.setValue(bonusAmount, forKey: "bonusAmount")
+        record.setValue(isDeleted, forKey: "isDeleted")
+        record.setValue(lastModified, forKey: "lastModified")
+        
+        return record
+    }
+    
+    static func fromCloudKitRecord(_ record: CKRecord) -> WorkDay {
+        let workDay = WorkDay()
+        
+        if let idString = record.value(forKey: "id") as? String,
+           let uuid = UUID(uuidString: idString) {
+            workDay.id = uuid
+        }
+        
+        if let date = record.value(forKey: "date") as? Date {
+            workDay.date = date
+        }
+        
+        workDay.startTime = record.value(forKey: "startTime") as? Date
+        workDay.endTime = record.value(forKey: "endTime") as? Date
+        
+        if let breakDuration = record.value(forKey: "breakDuration") as? TimeInterval {
+            workDay.breakDuration = breakDuration
+        }
+        
+        if let totalHours = record.value(forKey: "totalHours") as? Double {
+            workDay.totalHours = totalHours
+        }
+        
+        if let overtimeSeconds = record.value(forKey: "overtimeSeconds") as? Int {
+            workDay.overtimeSeconds = overtimeSeconds
+        }
+        
+        if let typeRawValue = record.value(forKey: "typeRawValue") as? String {
+            workDay.typeRawValue = typeRawValue
+        }
+        
+        workDay.note = record.value(forKey: "note") as? String
+        
+        if let bonusAmount = record.value(forKey: "bonusAmount") as? Double {
+            workDay.bonusAmount = bonusAmount
+        }
+        
+        if let isDeleted = record.value(forKey: "isDeleted") as? Bool {
+            workDay.isDeleted = isDeleted
+        }
+        
+        if let lastModified = record.value(forKey: "lastModified") as? Date {
+            workDay.lastModified = lastModified
+        }
+        
+        workDay.cloudKitRecordID = record.recordID.recordName
+        
+        return workDay
+    }
+    
+    // MARK: - Calculation Methods
     func calculateHours() {
         let settings = UserSettings.shared
         let calendar = Calendar.current
         
-        // Par défaut, on considère qu'il n'y a pas d'heures standard pour ce jour
         var standardSeconds = 0
         
-        // Si c'est un jour de travail ou une journée compensatoire, on calcule les heures standard
         if type == .work || type == .compensatory {
-            // Convertir le jour de la semaine de 1-7 (dimanche-samedi) à 0-6 (lundi-dimanche)
             let weekday = calendar.component(.weekday, from: date)
             let adjustedWeekday = weekday == 1 ? 6 : weekday - 2
             
-            // Si le jour est configuré comme travaillé dans les paramètres
             if adjustedWeekday >= 0 && adjustedWeekday < settings.workingDays.count && settings.workingDays[adjustedWeekday] {
                 standardSeconds = Int(round(settings.standardDailyHours * 3600))
             }
@@ -98,26 +181,26 @@ final class WorkDay: Identifiable {
             overtimeSeconds = Int(round(workedSeconds)) - standardSeconds
             
         case .vacation, .halfDayVacation, .sickLeave, .holiday:
-            // Ne compte pas dans les heures
             break
             
         case .compensatory:
-            // Déduire les heures standard des heures supplémentaires
             overtimeSeconds = -standardSeconds
             
         case .training:
             totalHours = Double(standardSeconds) / 3600.0
         }
         
-        // Réinitialiser les heures de début/fin/pause pour les journées non travaillées
         if !type.isWorkDay {
             startTime = nil
             endTime = nil
             breakDuration = 0
             bonusAmount = 0
         }
+        
+        updateLastModified()
     }
     
+    // MARK: - Update Methods
     func updateData(startTime: Date?, endTime: Date?, breakDuration: TimeInterval) {
         if type.isWorkDay {
             self.startTime = startTime
@@ -129,8 +212,10 @@ final class WorkDay: Identifiable {
         }
         
         calculateHours()
+        updateLastModified()
     }
     
+    // MARK: - Formatting Methods
     var formattedTotalHours: String {
         UserSettings.shared.useDecimalHours
         ? String(format: "%.2f", totalHours)
