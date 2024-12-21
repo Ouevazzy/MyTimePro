@@ -9,6 +9,9 @@ struct WorkTimeApp: App {
     private let cloudKitContainerID = "iCloud.jordan-payez.MyTimePro"
     @StateObject private var cloudService = CloudService.shared
     
+    // Ajout du delegate adapter
+    @UIApplicationDelegateAdaptor(UIApplicationDelegateAdapterWithCloudKit.self) var delegate
+    
     // MARK: - Initialization
     init() {
         print("📱 Initializing WorkTimeApp")
