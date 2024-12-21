@@ -4,7 +4,14 @@ import SwiftUI
 class UserSettings: ObservableObject {
     static let shared = UserSettings()
     
-    @Published @AppStorage("lastStartTime") private var lastStartTimeString: String = ""
+    let userDefaults = UserDefaults.standard
+    
+    @Published var lastStartTimeString: String {
+        didSet {
+            userDefaults.set(lastStartTimeString, forKey: "lastStartTime")
+        }
+    }
+    
     var lastStartTime: Date? {
         get {
             guard !lastStartTimeString.isEmpty,
@@ -23,7 +30,12 @@ class UserSettings: ObservableObject {
         }
     }
     
-    @Published @AppStorage("lastEndTime") private var lastEndTimeString: String = ""
+    @Published var lastEndTimeString: String {
+        didSet {
+            userDefaults.set(lastEndTimeString, forKey: "lastEndTime")
+        }
+    }
+    
     var lastEndTime: Date? {
         get {
             guard !lastEndTimeString.isEmpty,
@@ -42,16 +54,59 @@ class UserSettings: ObservableObject {
         }
     }
     
-    @Published @AppStorage("standardDailyHours") var standardDailyHours: Double = 7.4
-    @Published @AppStorage("useDecimalHours") var useDecimalHours: Bool = false
+    @Published var standardDailyHours: Double {
+        didSet {
+            userDefaults.set(standardDailyHours, forKey: "standardDailyHours")
+        }
+    }
     
-    @Published @AppStorage("mondayEnabled") var mondayEnabled: Bool = true
-    @Published @AppStorage("tuesdayEnabled") var tuesdayEnabled: Bool = true
-    @Published @AppStorage("wednesdayEnabled") var wednesdayEnabled: Bool = true
-    @Published @AppStorage("thursdayEnabled") var thursdayEnabled: Bool = true
-    @Published @AppStorage("fridayEnabled") var fridayEnabled: Bool = true
-    @Published @AppStorage("saturdayEnabled") var saturdayEnabled: Bool = false
-    @Published @AppStorage("sundayEnabled") var sundayEnabled: Bool = false
+    @Published var useDecimalHours: Bool {
+        didSet {
+            userDefaults.set(useDecimalHours, forKey: "useDecimalHours")
+        }
+    }
+    
+    @Published var mondayEnabled: Bool {
+        didSet {
+            userDefaults.set(mondayEnabled, forKey: "mondayEnabled")
+        }
+    }
+    
+    @Published var tuesdayEnabled: Bool {
+        didSet {
+            userDefaults.set(tuesdayEnabled, forKey: "tuesdayEnabled")
+        }
+    }
+    
+    @Published var wednesdayEnabled: Bool {
+        didSet {
+            userDefaults.set(wednesdayEnabled, forKey: "wednesdayEnabled")
+        }
+    }
+    
+    @Published var thursdayEnabled: Bool {
+        didSet {
+            userDefaults.set(thursdayEnabled, forKey: "thursdayEnabled")
+        }
+    }
+    
+    @Published var fridayEnabled: Bool {
+        didSet {
+            userDefaults.set(fridayEnabled, forKey: "fridayEnabled")
+        }
+    }
+    
+    @Published var saturdayEnabled: Bool {
+        didSet {
+            userDefaults.set(saturdayEnabled, forKey: "saturdayEnabled")
+        }
+    }
+    
+    @Published var sundayEnabled: Bool {
+        didSet {
+            userDefaults.set(sundayEnabled, forKey: "sundayEnabled")
+        }
+    }
     
     var workingDays: [Bool] {
         [mondayEnabled, tuesdayEnabled, wednesdayEnabled, thursdayEnabled, fridayEnabled, saturdayEnabled, sundayEnabled]
@@ -63,5 +118,37 @@ class UserSettings: ObservableObject {
         return formatter
     }()
     
-    private init() {}
+    private init() {
+        // Initialisation des valeurs depuis UserDefaults
+        self.lastStartTimeString = userDefaults.string(forKey: "lastStartTime") ?? ""
+        self.lastEndTimeString = userDefaults.string(forKey: "lastEndTime") ?? ""
+        self.standardDailyHours = userDefaults.double(forKey: "standardDailyHours")
+        if self.standardDailyHours == 0 { self.standardDailyHours = 7.4 }
+        
+        self.useDecimalHours = userDefaults.bool(forKey: "useDecimalHours")
+        
+        self.mondayEnabled = userDefaults.bool(forKey: "mondayEnabled")
+        if !userDefaults.contains(key: "mondayEnabled") { self.mondayEnabled = true }
+        
+        self.tuesdayEnabled = userDefaults.bool(forKey: "tuesdayEnabled")
+        if !userDefaults.contains(key: "tuesdayEnabled") { self.tuesdayEnabled = true }
+        
+        self.wednesdayEnabled = userDefaults.bool(forKey: "wednesdayEnabled")
+        if !userDefaults.contains(key: "wednesdayEnabled") { self.wednesdayEnabled = true }
+        
+        self.thursdayEnabled = userDefaults.bool(forKey: "thursdayEnabled")
+        if !userDefaults.contains(key: "thursdayEnabled") { self.thursdayEnabled = true }
+        
+        self.fridayEnabled = userDefaults.bool(forKey: "fridayEnabled")
+        if !userDefaults.contains(key: "fridayEnabled") { self.fridayEnabled = true }
+        
+        self.saturdayEnabled = userDefaults.bool(forKey: "saturdayEnabled")
+        self.sundayEnabled = userDefaults.bool(forKey: "sundayEnabled")
+    }
+}
+
+extension UserDefaults {
+    func contains(key: String) -> Bool {
+        return object(forKey: key) != nil
+    }
 }
