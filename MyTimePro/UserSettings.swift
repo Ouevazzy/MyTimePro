@@ -17,6 +17,7 @@ class UserSettings: ObservableObject {
     @Published var fridayEnabled: Bool
     @Published var saturdayEnabled: Bool
     @Published var sundayEnabled: Bool
+    @Published var annualVacationDays: Double
     
     var lastStartTime: Date? {
         get {
@@ -81,6 +82,7 @@ class UserSettings: ObservableObject {
         self.fridayEnabled = true
         self.saturdayEnabled = false
         self.sundayEnabled = false
+        self.annualVacationDays = 25.0  // Valeur par défaut de 25 jours de congés annuels
         
         // Chargement des valeurs depuis UserDefaults
         if let startTime = userDefaults.string(forKey: "lastStartTime") {
@@ -127,6 +129,10 @@ class UserSettings: ObservableObject {
             self.sundayEnabled = userDefaults.bool(forKey: "sundayEnabled")
         }
         
+        if userDefaults.object(forKey: "annualVacationDays") != nil {
+            self.annualVacationDays = userDefaults.double(forKey: "annualVacationDays")
+        }
+        
         // Configuration des observers pour sauvegarder les changements
         setupObservers()
     }
@@ -146,6 +152,7 @@ class UserSettings: ObservableObject {
             userDefaults.set(self.fridayEnabled, forKey: "fridayEnabled")
             userDefaults.set(self.saturdayEnabled, forKey: "saturdayEnabled")
             userDefaults.set(self.sundayEnabled, forKey: "sundayEnabled")
+            userDefaults.set(self.annualVacationDays, forKey: "annualVacationDays")
         }
     }
 }
