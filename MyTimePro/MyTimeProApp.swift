@@ -9,15 +9,17 @@ struct MyTimeProApp: App {
     
     init() {
         do {
+            // Configuration avec historique de persistance
             let schema = Schema([WorkDay.self])
             
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 url: URL.documentsDirectory.appending(path: "MyTimePro.store"),
                 allowsSave: true,
-                cloudKitDatabase: .private(cloudKitContainerID)
+                cloudKitDatabase: .automatic
             )
             
+            // Création du container
             container = try ModelContainer(
                 for: WorkDay.self,
                 configurations: modelConfiguration
@@ -40,8 +42,10 @@ struct MyTimeProApp: App {
     }
     
     private func setupCloudKitSync() {
+        // Configuration du container CloudKit
         let cloudContainer = CKContainer(identifier: cloudKitContainerID)
         
+        // Vérification de l'état iCloud
         cloudContainer.accountStatus { status, error in
             if let error = error {
                 print("CloudKit Account Error:", error.localizedDescription)
@@ -49,16 +53,20 @@ struct MyTimeProApp: App {
             }
             
             if status == .available {
+                // Configuration de la synchronisation de base de données
                 let subscription = CKDatabaseSubscription(subscriptionID: "mytime-all-changes")
                 let notificationInfo = CKSubscription.NotificationInfo()
                 notificationInfo.shouldSendContentAvailable = true
                 subscription.notificationInfo = notificationInfo
                 
+                // Configuration de la modification
                 let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription])
                 operation.qualityOfService = .userInitiated
                 
+                // Envoi de l'opération
                 cloudContainer.privateCloudDatabase.add(operation)
                 
+                // Configuration d'une seule zone
                 let customZone = CKRecordZone(zoneName: "MyTimeZone")
                 let zoneOperation = CKModifyRecordZonesOperation(recordZonesToSave: [customZone])
                 
@@ -76,6 +84,7 @@ struct MyTimeProApp: App {
             }
         }
         
+        // Observation des notifications pour les changements
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("NSPersistentStoreRemoteChangeNotification"),
             object: nil,
@@ -99,6 +108,7 @@ struct MyTimeProApp: App {
     private func setupZoneSubscription(container: CKContainer) {
         _ = CKRecordZone.ID(zoneName: "MyTimeZone", ownerName: CKCurrentUserDefaultName)
         
+        // Création de la subscription pour la zone spécifique
         let predicate = NSPredicate(value: true)
         let subscription = CKQuerySubscription(
             recordType: "WorkDay",
