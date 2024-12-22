@@ -53,7 +53,7 @@ final class WorkDay {
     var note: String?
     var bonusAmount: Double
     
-    // Ajout des propriétés pour CloudKit
+    // CloudKit properties
     var cloudKitRecordID: String
     var lastModified: Date
     var isDeleted: Bool
@@ -69,7 +69,9 @@ final class WorkDay {
     
     // MARK: - Initialization
     init(date: Date = Date(), type: WorkDayType = .work) {
-        self.id = UUID()
+        let uuid = UUID()
+        
+        self.id = uuid
         self.date = date
         self.startTime = UserSettings.shared.lastStartTime
         self.endTime = UserSettings.shared.lastEndTime
@@ -79,7 +81,7 @@ final class WorkDay {
         self.typeRawValue = type.rawValue
         self.note = ""
         self.bonusAmount = 0.0
-        self.cloudKitRecordID = "workday_\(self.id.uuidString)"
+        self.cloudKitRecordID = "workday_\(uuid.uuidString)"
         self.lastModified = Date()
         self.isDeleted = false
         
