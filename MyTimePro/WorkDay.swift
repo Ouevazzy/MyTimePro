@@ -40,75 +40,48 @@ enum WorkDayType: String, Codable, CaseIterable {
 }
 
 @Model
-final class WorkDay {
-    // MARK: - Properties with default values
+final class WorkDay: Identifiable {
     var id: UUID = UUID()
     var date: Date = Date()
-    var startTime: Date?
-    var endTime: Date?
+    var startTime: Date? = nil
+    var endTime: Date? = nil
     var breakDuration: TimeInterval = 3600 // 1 heure par défaut
     var totalHours: Double = 0.0
     var overtimeSeconds: Int = 0
     var typeRawValue: String = WorkDayType.work.rawValue
-    var note: String?
+    var note: String? = ""
     var bonusAmount: Double = 0.0
-    
-    // CloudKit properties with default values
-    var cloudKitRecordID: String = ""
-    var lastModified: Date = Date()
-    var isDeleted: Bool = false
-    
+
     var type: WorkDayType {
         get { WorkDayType(rawValue: typeRawValue) ?? .work }
         set {
             typeRawValue = newValue.rawValue
             calculateHours()
-            updateLastModified()
         }
     }
     
-    // MARK: - Initialization
     init(date: Date = Date(), type: WorkDayType = .work) {
-        let uuid = UUID()
-        
         self.date = date
         self.typeRawValue = type.rawValue
-        self.cloudKitRecordID = "workday_\(uuid.uuidString)"
-        self.id = uuid
-        
-        // Initialiser les heures de début/fin depuis les paramètres
-        if let lastStart = UserSettings.shared.lastStartTime {
-            self.startTime = lastStart
-        }
-        if let lastEnd = UserSettings.shared.lastEndTime {
-            self.endTime = lastEnd
-        }
-        
+        self.startTime = UserSettings.shared.lastStartTime
+        self.endTime = UserSettings.shared.lastEndTime
         calculateHours()
     }
     
-    // MARK: - CloudKit Methods
-    func updateLastModified() {
-        lastModified = Date()
-    }
-    
-    // Mark entry as deleted instead of actual deletion
-    func markAsDeleted() {
-        isDeleted = true
-        updateLastModified()
-    }
-    
-    // MARK: - Calculation Methods
     func calculateHours() {
         let settings = UserSettings.shared
         let calendar = Calendar.current
         
+        // Par défaut, on considère qu'il n'y a pas d'heures standard pour ce jour
         var standardSeconds = 0
         
+        // Si c'est un jour de travail ou une journée compensatoire, on calcule les heures standard
         if type == .work || type == .compensatory {
+            // Convertir le jour de la semaine de 1-7 (dimanche-samedi) à 0-6 (lundi-dimanche)
             let weekday = calendar.component(.weekday, from: date)
             let adjustedWeekday = weekday == 1 ? 6 : weekday - 2
             
+            // Si le jour est configuré comme travaillé dans les paramètres
             if adjustedWeekday >= 0 && adjustedWeekday < settings.workingDays.count && settings.workingDays[adjustedWeekday] {
                 standardSeconds = Int(round(settings.standardDailyHours * 3600))
             }
@@ -125,26 +98,26 @@ final class WorkDay {
             overtimeSeconds = Int(round(workedSeconds)) - standardSeconds
             
         case .vacation, .halfDayVacation, .sickLeave, .holiday:
+            // Ne compte pas dans les heures
             break
             
         case .compensatory:
+            // Déduire les heures standard des heures supplémentaires
             overtimeSeconds = -standardSeconds
             
         case .training:
             totalHours = Double(standardSeconds) / 3600.0
         }
         
+        // Réinitialiser les heures de début/fin/pause pour les journées non travaillées
         if !type.isWorkDay {
             startTime = nil
             endTime = nil
             breakDuration = 0
             bonusAmount = 0
         }
-        
-        updateLastModified()
     }
     
-    // MARK: - Update Methods
     func updateData(startTime: Date?, endTime: Date?, breakDuration: TimeInterval) {
         if type.isWorkDay {
             self.startTime = startTime
@@ -156,10 +129,8 @@ final class WorkDay {
         }
         
         calculateHours()
-        updateLastModified()
     }
     
-    // MARK: - Formatting Methods
     var formattedTotalHours: String {
         UserSettings.shared.useDecimalHours
         ? String(format: "%.2f", totalHours)

@@ -1,156 +1,224 @@
 import SwiftUI
 import SwiftData
 
+// Structure pour stocker les statistiques annuelles de vacances
+struct YearlyVacationStats {
+    let totalDays: Double
+    let remainingDays: Double
+}
+
+// Vue principale des vacances
 struct VacationsView: View {
     @Environment(\.modelContext) private var modelContext
-    @ObservedObject private var userSettings = UserSettings.shared
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
+    @State private var selectedYear = Calendar.current.component(.year, from: Date())
     
-    // Fetch request pour les congés
-    @Query(filter: #Predicate<WorkDay> { workDay in
-        (workDay.typeRawValue == "Congé" || workDay.typeRawValue == "Demi-journée de congé") && !workDay.isDeleted
-    }, sort: \WorkDay.date) private var vacations: [WorkDay]
+    let settings = UserSettings.shared
     
-    // Fetch request pour les RTT
-    @Query(filter: #Predicate<WorkDay> { workDay in
-        workDay.typeRawValue == "Journée compensatoire" && !workDay.isDeleted
-    }, sort: \WorkDay.date) private var compensatoryDays: [WorkDay]
-    
-    // Année actuelle
-    private var currentYear: Int {
-        Calendar.current.component(.year, from: Date())
+    // Calculer la plage d'années disponibles
+    private var availableYears: [Int] {
+        let calendar = Calendar.current
+        let years = workDays.map { calendar.component(.year, from: $0.date) }
+        guard let minYear = years.min(), let maxYear = years.max() else {
+            return [calendar.component(.year, from: Date())]
+        }
+        return Array(minYear...maxYear)
     }
     
-    // Congés de l'année en cours
-    private var currentYearVacations: [WorkDay] {
-        vacations.filter { Calendar.current.component(.year, from: $0.date) == currentYear }
-    }
-    
-    // RTT de l'année en cours
-    private var currentYearCompensatory: [WorkDay] {
-        compensatoryDays.filter { Calendar.current.component(.year, from: $0.date) == currentYear }
+    private var yearlyStats: YearlyVacationStats {
+        let filteredWorkDays = workDays.filter { workDay in
+            Calendar.current.component(.year, from: workDay.date) == selectedYear
+        }
+        
+        let vacationDays = filteredWorkDays.reduce(0.0) { total, day in
+            switch day.type {
+            case .vacation:
+                return total + 1
+            case .halfDayVacation:
+                return total + 0.5
+            default:
+                return total
+            }
+        }
+        
+        return YearlyVacationStats(
+            totalDays: vacationDays,
+            remainingDays: Double(settings.annualVacationDays) - vacationDays
+        )
     }
     
     var body: some View {
         NavigationStack {
-            ScrollView(.vertical) {
-                statsView
-                    .padding()
+            VStack(spacing: 0) {
+                // En-tête avec sélecteur d'année et navigation
+                yearSelector
                 
-                if !compensatoryDays.isEmpty {
-                    compensatoryView
-                }
+                // Statistiques annuelles
+                statsHeader
                 
-                if !vacations.isEmpty {
-                    vacationsView
-                }
+                Divider()
+                
+                // Liste des congés
+                vacationsList
             }
             .navigationTitle("Congés")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Fermer") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
     
-    // Vue des statistiques
-    private var statsView: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Vue d'ensemble \(currentYear)")
-                .font(.headline)
-            
-            HStack(spacing: 12) {
-                let remainingDays = userSettings.annualVacationDays - Double(currentYearVacations.count)
-                let totalRTT = currentYearCompensatory.count
-                let totalExtra = currentYearCompensatory.reduce(0.0) { sum, day in
-                    sum + abs(Double(day.overtimeSeconds) / 3600.0)
+    private var yearSelector: some View {
+        HStack {
+            Button(action: {
+                withAnimation {
+                    if let index = availableYears.firstIndex(of: selectedYear),
+                       index > 0 {
+                        selectedYear = availableYears[index - 1]
+                    }
                 }
-                
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.title2)
+                    .foregroundColor(availableYears.first == selectedYear ? .gray : .blue)
+            }
+            .disabled(availableYears.first == selectedYear)
+            
+            Spacer()
+            
+            Menu {
+                ForEach(availableYears, id: \.self) { year in
+                    Button(String(year)) {
+                        selectedYear = year
+                    }
+                }
+            } label: {
+                Text("\(selectedYear)")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                withAnimation {
+                    if let index = availableYears.firstIndex(of: selectedYear),
+                       index < availableYears.count - 1 {
+                        selectedYear = availableYears[index + 1]
+                    }
+                }
+            }) {
+                Image(systemName: "chevron.right")
+                    .font(.title2)
+                    .foregroundColor(availableYears.last == selectedYear ? .gray : .blue)
+            }
+            .disabled(availableYears.last == selectedYear)
+        }
+        .padding()
+        .background(Color(.systemGroupedBackground))
+    }
+    
+    private var statsHeader: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 20) {
                 StatBox(
-                    title: "Jours de congés restants",
-                    value: String(format: "%.1f", remainingDays),
+                    title: "Solde restant",
+                    value: String(format: "%.1f j", yearlyStats.remainingDays),
+                    icon: "calendar.badge.clock",
                     color: .blue
                 )
                 
                 StatBox(
-                    title: "RTT cumulés",
-                    value: "\(totalRTT)",
+                    title: "Utilisés",
+                    value: String(format: "%.1f j", yearlyStats.totalDays),
+                    icon: "checkmark.circle",
                     color: .green
                 )
             }
-        }
-    }
-    
-    // Vue des RTT
-    private var compensatoryView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("RTT")
-                .font(.headline)
-                .padding(.horizontal)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(compensatoryDays) { workDay in
-                        CompensatoryCard(workDay: workDay)
-                    }
-                }
-                .padding(.horizontal)
-            }
+            .padding(.horizontal)
         }
         .padding(.vertical)
+        .background(Color(.systemGroupedBackground))
     }
     
-    // Vue des congés
-    private var vacationsView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Congés")
-                .font(.headline)
-                .padding(.horizontal)
+    private var vacationsList: some View {
+        List {
+            let filteredWorkDays = workDays.filter {
+                Calendar.current.component(.year, from: $0.date) == selectedYear &&
+                ($0.type == .vacation || $0.type == .halfDayVacation)
+            }.sorted(by: { $0.date > $1.date })
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(vacations) { workDay in
-                        VacationCard(workDay: workDay)
-                    }
+            if filteredWorkDays.isEmpty {
+                Text("Aucun congé pour cette année")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowBackground(Color.clear)
+            } else {
+                ForEach(filteredWorkDays) { workDay in
+                    VacationRow(workDay: workDay)
                 }
-                .padding(.horizontal)
             }
         }
-        .padding(.vertical)
+        .listStyle(.insetGrouped)
     }
 }
 
-// Carte pour RTT
-struct CompensatoryCard: View {
+struct VacationRow: View {
     let workDay: WorkDay
     
     var body: some View {
-        VStack(spacing: 12) {
-            Text(workDay.date.formatted(date: .abbreviated, time: .omitted))
-                .font(.headline)
+        HStack {
+            Image(systemName: workDay.type == .vacation ? "sun.max.fill" : "sun.min.fill")
+                .foregroundColor(.orange)
             
-            Text(workDay.formattedOvertimeHours)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(workDay.type == .vacation ? "Congé" : "Demi-journée")
+                    .font(.headline)
+                
+                HStack {
+                    Text(formatDate(workDay.date))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        
+                    Text("•")
+                        .foregroundColor(.secondary)
+                    
+                    Text(workDay.type == .vacation ? "1 j" : "0.5 j")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                if let note = workDay.note, !note.isEmpty {
+                    Text(note)
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .lineLimit(1)
+                }
+            }
         }
-        .frame(width: 120)
-        .padding()
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(10)
+        .padding(.vertical, 4)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        dateFormatter.locale = Locale(identifier: "fr_FR")
+        return dateFormatter.string(from: date)
     }
 }
 
-// Carte pour Congés
-struct VacationCard: View {
-    let workDay: WorkDay
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Text(workDay.date.formatted(date: .abbreviated, time: .omitted))
-                .font(.headline)
-            
-            Text(workDay.type.rawValue)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(width: 120)
-        .padding()
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(10)
-    }
+#Preview {
+    VacationsView()
+        .modelContainer(for: WorkDay.self, inMemory: true)
 }

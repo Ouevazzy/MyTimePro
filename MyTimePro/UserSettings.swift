@@ -1,158 +1,163 @@
-import Foundation
 import SwiftUI
 
-class UserSettings: ObservableObject {
+@Observable
+class UserSettings {
     static let shared = UserSettings()
+    private let defaults = UserDefaults.standard
     
-    let userDefaults = UserDefaults.standard
-    
-    @Published var lastStartTimeString: String
-    @Published var lastEndTimeString: String
-    @Published var standardDailyHours: Double
-    @Published var useDecimalHours: Bool
-    @Published var mondayEnabled: Bool
-    @Published var tuesdayEnabled: Bool
-    @Published var wednesdayEnabled: Bool
-    @Published var thursdayEnabled: Bool
-    @Published var fridayEnabled: Bool
-    @Published var saturdayEnabled: Bool
-    @Published var sundayEnabled: Bool
-    @Published var annualVacationDays: Double
-    
-    var lastStartTime: Date? {
-        get {
-            guard !lastStartTimeString.isEmpty,
-                  let date = timeOnlyFormatter.date(from: lastStartTimeString) else { return nil }
-            return Calendar.current.date(bySettingHour: Calendar.current.component(.hour, from: date),
-                                       minute: Calendar.current.component(.minute, from: date),
-                                       second: 0,
-                                       of: Date()) ?? nil
-        }
-        set {
-            if let date = newValue {
-                lastStartTimeString = timeOnlyFormatter.string(from: date)
-                userDefaults.set(lastStartTimeString, forKey: "lastStartTime")
-            } else {
-                lastStartTimeString = ""
-                userDefaults.removeObject(forKey: "lastStartTime")
-            }
-        }
-    }
-    
-    var lastEndTime: Date? {
-        get {
-            guard !lastEndTimeString.isEmpty,
-                  let date = timeOnlyFormatter.date(from: lastEndTimeString) else { return nil }
-            return Calendar.current.date(bySettingHour: Calendar.current.component(.hour, from: date),
-                                       minute: Calendar.current.component(.minute, from: date),
-                                       second: 0,
-                                       of: Date()) ?? nil
-        }
-        set {
-            if let date = newValue {
-                lastEndTimeString = timeOnlyFormatter.string(from: date)
-                userDefaults.set(lastEndTimeString, forKey: "lastEndTime")
-            } else {
-                lastEndTimeString = ""
-                userDefaults.removeObject(forKey: "lastEndTime")
-            }
+    // MARK: - Paramètres de temps de travail
+    var weeklyHours: Double {
+        didSet {
+            defaults.set(weeklyHours, forKey: "weeklyHours")
+            updateDailyHours()
         }
     }
     
     var workingDays: [Bool] {
-        [mondayEnabled, tuesdayEnabled, wednesdayEnabled, thursdayEnabled, fridayEnabled, saturdayEnabled, sundayEnabled]
+        didSet {
+            if let encoded = try? JSONEncoder().encode(workingDays) {
+                defaults.set(encoded, forKey: "workingDays")
+            }
+            updateDailyHours()
+        }
     }
     
-    private let timeOnlyFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
+    var standardDailyHours: Double {
+        didSet {
+            defaults.set(standardDailyHours, forKey: "standardDailyHours")
+        }
+    }
     
+    var annualVacationDays: Int {
+        didSet {
+            defaults.set(annualVacationDays, forKey: "annualVacationDays")
+        }
+    }
+    
+    // MARK: - Préférences d'affichage
+    var useDecimalHours: Bool {
+        didSet {
+            defaults.set(useDecimalHours, forKey: "useDecimalHours")
+        }
+    }
+    
+    // MARK: - État de l'application
+    private(set) var isFirstLaunch: Bool {
+        didSet {
+            defaults.set(!isFirstLaunch, forKey: "hasLaunchedBefore")
+        }
+    }
+    
+    var hasCompletedOnboarding: Bool {
+        didSet {
+            defaults.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding")
+        }
+    }
+    
+    // MARK: - Dernières heures utilisées
+    var lastStartTime: Date {
+        get {
+            let timeInterval = defaults.double(forKey: "lastStartTimeInterval")
+            return timeInterval == 0 ? Date() : Date(timeIntervalSince1970: timeInterval)
+        }
+        set {
+            defaults.set(newValue.timeIntervalSince1970, forKey: "lastStartTimeInterval")
+        }
+    }
+    
+    var lastEndTime: Date {
+        get {
+            let timeInterval = defaults.double(forKey: "lastEndTimeInterval")
+            return timeInterval == 0 ? Date() : Date(timeIntervalSince1970: timeInterval)
+        }
+        set {
+            defaults.set(newValue.timeIntervalSince1970, forKey: "lastEndTimeInterval")
+        }
+    }
+    
+    // MARK: - Constantes
+    private let defaultWeeklyHours: Double = 40.0
+    private let defaultWorkingDays: [Bool] = [true, true, true, true, true, false, false]
+    private let defaultDailyHours: Double = 8.0
+    private let defaultVacationDays: Int = 25
+    
+    // MARK: - Initialisation privée (Singleton)
     private init() {
-        // Initialisation des propriétés
-        self.lastStartTimeString = ""
-        self.lastEndTimeString = ""
-        self.standardDailyHours = 7.4
+        // Initialiser avec les valeurs par défaut
+        self.weeklyHours = defaultWeeklyHours
+        self.workingDays = defaultWorkingDays
+        self.standardDailyHours = defaultDailyHours
+        self.annualVacationDays = defaultVacationDays
         self.useDecimalHours = false
-        self.mondayEnabled = true
-        self.tuesdayEnabled = true
-        self.wednesdayEnabled = true
-        self.thursdayEnabled = true
-        self.fridayEnabled = true
-        self.saturdayEnabled = false
-        self.sundayEnabled = false
-        self.annualVacationDays = 25.0  // Valeur par défaut de 25 jours de congés annuels
+        self.isFirstLaunch = true
+        self.hasCompletedOnboarding = false
         
-        // Chargement des valeurs depuis UserDefaults
-        if let startTime = userDefaults.string(forKey: "lastStartTime") {
-            self.lastStartTimeString = startTime
-        }
-        
-        if let endTime = userDefaults.string(forKey: "lastEndTime") {
-            self.lastEndTimeString = endTime
-        }
-        
-        if userDefaults.object(forKey: "standardDailyHours") != nil {
-            self.standardDailyHours = userDefaults.double(forKey: "standardDailyHours")
-        }
-        
-        if userDefaults.object(forKey: "useDecimalHours") != nil {
-            self.useDecimalHours = userDefaults.bool(forKey: "useDecimalHours")
-        }
-        
-        if userDefaults.object(forKey: "mondayEnabled") != nil {
-            self.mondayEnabled = userDefaults.bool(forKey: "mondayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "tuesdayEnabled") != nil {
-            self.tuesdayEnabled = userDefaults.bool(forKey: "tuesdayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "wednesdayEnabled") != nil {
-            self.wednesdayEnabled = userDefaults.bool(forKey: "wednesdayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "thursdayEnabled") != nil {
-            self.thursdayEnabled = userDefaults.bool(forKey: "thursdayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "fridayEnabled") != nil {
-            self.fridayEnabled = userDefaults.bool(forKey: "fridayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "saturdayEnabled") != nil {
-            self.saturdayEnabled = userDefaults.bool(forKey: "saturdayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "sundayEnabled") != nil {
-            self.sundayEnabled = userDefaults.bool(forKey: "sundayEnabled")
-        }
-        
-        if userDefaults.object(forKey: "annualVacationDays") != nil {
-            self.annualVacationDays = userDefaults.double(forKey: "annualVacationDays")
-        }
-        
-        // Configuration des observers pour sauvegarder les changements
-        setupObservers()
+        // Charger les valeurs sauvegardées
+        loadSavedSettings()
+        updateDailyHours()
     }
     
-    private func setupObservers() {
-        self.objectWillChange.sink { [weak self] _ in
-            guard let self = self else { return }
-            
-            userDefaults.set(self.lastStartTimeString, forKey: "lastStartTime")
-            userDefaults.set(self.lastEndTimeString, forKey: "lastEndTime")
-            userDefaults.set(self.standardDailyHours, forKey: "standardDailyHours")
-            userDefaults.set(self.useDecimalHours, forKey: "useDecimalHours")
-            userDefaults.set(self.mondayEnabled, forKey: "mondayEnabled")
-            userDefaults.set(self.tuesdayEnabled, forKey: "tuesdayEnabled")
-            userDefaults.set(self.wednesdayEnabled, forKey: "wednesdayEnabled")
-            userDefaults.set(self.thursdayEnabled, forKey: "thursdayEnabled")
-            userDefaults.set(self.fridayEnabled, forKey: "fridayEnabled")
-            userDefaults.set(self.saturdayEnabled, forKey: "saturdayEnabled")
-            userDefaults.set(self.sundayEnabled, forKey: "sundayEnabled")
-            userDefaults.set(self.annualVacationDays, forKey: "annualVacationDays")
+    // MARK: - Méthodes privées
+    private func loadSavedSettings() {
+        if let savedHours = defaults.object(forKey: "weeklyHours") as? Double {
+            self.weeklyHours = savedHours
+        }
+        
+        if let savedDaysData = defaults.data(forKey: "workingDays"),
+           let savedDays = try? JSONDecoder().decode([Bool].self, from: savedDaysData) {
+            self.workingDays = savedDays
+        }
+        
+        if let savedDailyHours = defaults.object(forKey: "standardDailyHours") as? Double {
+            self.standardDailyHours = savedDailyHours
+        }
+        
+        if let savedVacationDays = defaults.object(forKey: "annualVacationDays") as? Int {
+            self.annualVacationDays = savedVacationDays
+        }
+        
+        self.useDecimalHours = defaults.bool(forKey: "useDecimalHours")
+        self.isFirstLaunch = !defaults.bool(forKey: "hasLaunchedBefore")
+        self.hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
+    }
+    
+    private func updateDailyHours() {
+        let workingDaysCount = workingDays.filter { $0 }.count
+        if workingDaysCount > 0 {
+            standardDailyHours = weeklyHours / Double(workingDaysCount)
+        }
+    }
+    
+    // MARK: - Méthodes publiques
+    func resetToDefaults() {
+        weeklyHours = defaultWeeklyHours
+        workingDays = defaultWorkingDays
+        standardDailyHours = defaultDailyHours
+        annualVacationDays = defaultVacationDays
+        useDecimalHours = false
+        hasCompletedOnboarding = false
+        lastStartTime = Date()
+        lastEndTime = Date()
+        updateDailyHours()
+    }
+    
+    func updateLastUsedTimes(start: Date?, end: Date?) {
+        if let start = start {
+            lastStartTime = start
+        }
+        if let end = end {
+            lastEndTime = end
+        }
+    }
+    
+    func formatHours(_ hours: Double) -> String {
+        if useDecimalHours {
+            return String(format: "%.2f", hours)
+        } else {
+            let totalMinutes = Int(hours * 60)
+            let h = totalMinutes / 60
+            let m = totalMinutes % 60
+            return String(format: "%dh%02d", h, m)
         }
     }
 }
