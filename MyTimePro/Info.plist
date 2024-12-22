@@ -10,5 +10,7 @@
     <array>
         <string>remote-notification</string>
     </array>
+    <key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
+    <true/>
 </dict>
 </plist>
