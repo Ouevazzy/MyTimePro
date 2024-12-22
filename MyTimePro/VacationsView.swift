@@ -7,18 +7,12 @@ struct VacationsView: View {
     
     // Fetch request pour les congés
     @Query(filter: #Predicate<WorkDay> { workDay in
-        let vacationType = WorkDayType.vacation
-        let halfDayType = WorkDayType.halfDayVacation
-        return (workDay.typeRawValue == vacationType.rawValue || 
-                workDay.typeRawValue == halfDayType.rawValue) && 
-                !workDay.isDeleted
+        (workDay.typeRawValue == "Congé" || workDay.typeRawValue == "Demi-journée de congé") && !workDay.isDeleted
     }, sort: \WorkDay.date) private var vacations: [WorkDay]
     
     // Fetch request pour les RTT
     @Query(filter: #Predicate<WorkDay> { workDay in
-        let compensatoryType = WorkDayType.compensatory
-        return workDay.typeRawValue == compensatoryType.rawValue && 
-               !workDay.isDeleted
+        workDay.typeRawValue == "Journée compensatoire" && !workDay.isDeleted
     }, sort: \WorkDay.date) private var compensatoryDays: [WorkDay]
     
     // Année actuelle
