@@ -6,7 +6,7 @@ struct AddEditWorkDayView: View {
     @Environment(\.modelContext) private var modelContext
     private let userSettings = UserSettings.shared
     
-    var workDay: WorkDay
+    let workDay: WorkDay?
 
     @State private var date: Date
     @State private var startTime: Date
@@ -16,13 +16,22 @@ struct AddEditWorkDayView: View {
     @State private var alertMessage = ""
     @State private var showAlert = false
     
-    init(workDay: WorkDay) {
+    init(workDay: WorkDay?) {
         self.workDay = workDay
-        _date = State(initialValue: workDay.date)
-        _startTime = State(initialValue: workDay.startTime ?? Calendar.current.startOfDay(for: .now))
-        _endTime = State(initialValue: workDay.endTime ?? Calendar.current.startOfDay(for: .now))
-        _breakDuration = State(initialValue: Double(workDay.breakDuration / 60.0))
-        _type = State(initialValue: workDay.type)
+        
+        if let existingWorkDay = workDay {
+            _date = State(initialValue: existingWorkDay.date)
+            _startTime = State(initialValue: existingWorkDay.startTime ?? Calendar.current.startOfDay(for: .now))
+            _endTime = State(initialValue: existingWorkDay.endTime ?? Calendar.current.startOfDay(for: .now))
+            _breakDuration = State(initialValue: Double(existingWorkDay.breakDuration / 60.0))
+            _type = State(initialValue: existingWorkDay.type)
+        } else {
+            _date = State(initialValue: Date())
+            _startTime = State(initialValue: userSettings.lastStartTime ?? Calendar.current.startOfDay(for: .now))
+            _endTime = State(initialValue: userSettings.lastEndTime ?? Calendar.current.startOfDay(for: .now))
+            _breakDuration = State(initialValue: 60.0)
+            _type = State(initialValue: .work)
+        }
     }
     
     var body: some View {
@@ -33,7 +42,7 @@ struct AddEditWorkDayView: View {
                 timeSelectionView
             }
         }
-        .navigationTitle(workDay.id == UUID() ? "Nouvelle journée" : "Modifier la journée")
+        .navigationTitle(workDay == nil ? "Nouvelle journée" : "Modifier la journée")
         .alert("Erreur", isPresented: $showAlert) {
             Button("OK") {}
         } message: {
@@ -95,9 +104,14 @@ struct AddEditWorkDayView: View {
     }
     
     private func saveWorkDay() {
+        let workDayToSave = workDay ?? WorkDay()
+        
         if !type.isWorkDay {
-            workDay.date = date
-            workDay.type = type
+            workDayToSave.date = date
+            workDayToSave.type = type
+            if workDay == nil {
+                modelContext.insert(workDayToSave)
+            }
             try? modelContext.save()
             dismiss()
             return
@@ -115,14 +129,17 @@ struct AddEditWorkDayView: View {
             return
         }
         
-        workDay.date = date
-        workDay.type = type
-        workDay.updateData(
+        workDayToSave.date = date
+        workDayToSave.type = type
+        workDayToSave.updateData(
             startTime: startDate,
             endTime: endDate,
             breakDuration: breakDuration * 60
         )
         
+        if workDay == nil {
+            modelContext.insert(workDayToSave)
+        }
         try? modelContext.save()
         dismiss()
     }
