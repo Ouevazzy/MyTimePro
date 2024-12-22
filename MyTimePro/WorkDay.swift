@@ -42,22 +42,21 @@ enum WorkDayType: String, Codable, CaseIterable {
 @Model
 final class WorkDay {
     // MARK: - Properties
-    var id: UUID = UUID()
-    var date: Date = Date()
-    var startTime: Date? = nil
-    var endTime: Date? = nil
-    var breakDuration: TimeInterval = 3600 // 1 heure par défaut
-    var totalHours: Double = 0.0
-    var overtimeSeconds: Int = 0
-    var typeRawValue: String = WorkDayType.work.rawValue
-    var note: String? = ""
-    var bonusAmount: Double = 0.0
+    var id: UUID
+    var date: Date
+    var startTime: Date?
+    var endTime: Date?
+    var breakDuration: TimeInterval
+    var totalHours: Double
+    var overtimeSeconds: Int
+    var typeRawValue: String
+    var note: String?
+    var bonusAmount: Double
     
     // Ajout des propriétés pour CloudKit
-    var cloudKitRecordID: String?
-    var lastModified: Date = Date()
-    @Attribute(.unique) var uniqueIdentifier: String = UUID().uuidString
-    var isDeleted: Bool = false
+    var cloudKitRecordID: String
+    var lastModified: Date
+    var isDeleted: Bool
     
     var type: WorkDayType {
         get { WorkDayType(rawValue: typeRawValue) ?? .work }
@@ -70,12 +69,20 @@ final class WorkDay {
     
     // MARK: - Initialization
     init(date: Date = Date(), type: WorkDayType = .work) {
+        self.id = UUID()
         self.date = date
-        self.typeRawValue = type.rawValue
         self.startTime = UserSettings.shared.lastStartTime
         self.endTime = UserSettings.shared.lastEndTime
-        self.cloudKitRecordID = "workday_\(uniqueIdentifier)"
+        self.breakDuration = 3600 // 1 heure par défaut
+        self.totalHours = 0.0
+        self.overtimeSeconds = 0
+        self.typeRawValue = type.rawValue
+        self.note = ""
+        self.bonusAmount = 0.0
+        self.cloudKitRecordID = "workday_\(self.id.uuidString)"
         self.lastModified = Date()
+        self.isDeleted = false
+        
         calculateHours()
     }
     
