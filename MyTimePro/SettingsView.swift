@@ -1,96 +1,112 @@
-import SwiftUI
-import SwiftData
-
-struct SettingsView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var userSettings = UserSettings.shared
-    
-    @Query private var workDays: [WorkDay]
-    
-    @State private var showingDeleteConfirmation = false
-    @State private var showingDeleteAllConfirmation = false
-    @State private var showingExportView = false
-    
-    var exportFileURL: URL? {
-        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-            else { return nil }
-        return documentsDirectory.appendingPathComponent("rapport.pdf")
-    }
+struct WeeklyHoursPickerView: View {
+    @Binding var hours: Double
+    @Binding var isPresented: Bool
+    let onSave: (Double) -> Void
     
     var body: some View {
-        List {
-            Section("Heures de travail journalières") {
+        Form {
+            Stepper(value: $hours, in: 0...80, step: 0.5) {
                 HStack {
-                    TextField("7.4", value: $userSettings.standardDailyHours, format: .number)
-                        .keyboardType(.decimalPad)
-                    Text("heures")
-                }
-            }
-            
-            Section("Jours de travail") {
-                Toggle("Lundi", isOn: $userSettings.mondayEnabled)
-                Toggle("Mardi", isOn: $userSettings.tuesdayEnabled)
-                Toggle("Mercredi", isOn: $userSettings.wednesdayEnabled)
-                Toggle("Jeudi", isOn: $userSettings.thursdayEnabled)
-                Toggle("Vendredi", isOn: $userSettings.fridayEnabled)
-                Toggle("Samedi", isOn: $userSettings.saturdayEnabled)
-                Toggle("Dimanche", isOn: $userSettings.sundayEnabled)
-            }
-            
-            Section {
-                Toggle("Format décimal", isOn: $userSettings.useDecimalHours)
-            } header: {
-                Text("Affichage")
-            } footer: {
-                Text("Format décimal : 7.50 heures au lieu de 7h30")
-            }
-            
-            Section("Congés") {
-                HStack {
-                    TextField("25", value: $userSettings.annualVacationDays, format: .number)
-                        .keyboardType(.decimalPad)
-                    Text("jours par an")
-                }
-            }
-            
-            Section {
-                Button(role: .destructive) {
-                    showingDeleteConfirmation = true
-                } label: {
-                    Label("Supprimer les données", systemImage: "trash")
-                        .foregroundStyle(.red)
-                }
-                
-                Button(role: .destructive) {
-                    showingDeleteAllConfirmation = true
-                } label: {
-                    Label("Tout supprimer", systemImage: "trash.circle.fill")
-                        .foregroundStyle(.red)
+                    Text("Heures par semaine")
+                    Spacer()
+                    Text("\(hours, specifier: "%.1f")h")
+                        .foregroundColor(.accentColor)
                 }
             }
         }
-        .navigationTitle("Paramètres")
-        .alert("Confirmation", isPresented: $showingDeleteConfirmation, actions: {
-            Button("Annuler", role: .cancel) {}
-            Button("Supprimer", role: .destructive) {
-                try? modelContext.delete(model: WorkDay.self)
-                dismiss()
+        .navigationTitle("Heures hebdomadaires")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Annuler") {
+                    isPresented = false
+                }
             }
-        }, message: {
-            Text("Êtes-vous sûr de vouloir supprimer toutes les données de l'application ? Cette action est irréversible.")
-        })
-        .alert("Suppression des données", isPresented: $showingDeleteAllConfirmation, actions: {
-            Button("Annuler", role: .cancel) {}
-            Button("Supprimer", role: .destructive) {
-                try? modelContext.delete(model: WorkDay.self)
-                // Reset user settings to default values
-                UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
-                UserDefaults.standard.synchronize()
-                dismiss()
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Enregistrer") {
+                    onSave(hours)
+                    isPresented = false
+                }
             }
-        }, message: {
-            Text("Attention, cette action est irréversible et supprimera toutes les données, y compris vos paramètres.")
-        })
+        }
     }
+}
+
+struct VacationDetailsView: View {
+    let stats: (used: Double, remaining: Double)
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    DetailRow(
+                        title: "Jours restants",
+                        value: stats.remaining,
+                        icon: "calendar.badge.clock",
+                        color: .blue
+                    )
+                    
+                    DetailRow(
+                        title: "Jours utilisés",
+                        value: stats.used,
+                        icon: "checkmark.circle.fill",
+                        color: .green
+                    )
+                }
+            }
+            .navigationTitle("Détails des congés")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Fermer") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DetailRow: View {
+    let title: String
+    let value: Double
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+            }
+            
+            Spacer()
+            
+            Text(String(format: "%.1f j", value))
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+extension Double {
+    func rounded(to places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
+    }
+}
+
+extension Bundle {
+    var appVersionString: String {
+        let version = infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
+}
+
+#Preview {
+    SettingsView()
+        .modelContainer(for: WorkDay.self, inMemory: true)
 }
