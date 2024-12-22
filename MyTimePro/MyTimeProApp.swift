@@ -13,18 +13,12 @@ struct MyTimeProApp: App {
             
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
-                url: URL.documentsDirectory.appending(path: "MyTimePro.store"),
-                allowsSave: true,
-                cloudKitDatabase: .automatic,
-                groupContainer: nil,
-                isStoredInMemoryOnly: false,
-                shouldDeleteOldDataOnModelMismatch: false
+                cloudKitDatabase: .automatic
             )
             
             container = try ModelContainer(
                 for: WorkDay.self,
-                configurations: modelConfiguration,
-                migrationOptions: .reconcileMigration
+                configurations: modelConfiguration
             )
             
         } catch {
@@ -67,7 +61,6 @@ struct MyTimeProApp: App {
                 // Configuration d'une seule zone pour MyTimePro
                 let customZone = CKRecordZone(zoneName: "MyTimeZone")
                 let zoneOperation = CKModifyRecordZonesOperation(recordZonesToSave: [customZone])
-                zoneOperation.configuration.isLongLived = true
                 
                 zoneOperation.modifyRecordZonesResultBlock = { result in
                     switch result {
@@ -89,8 +82,8 @@ struct MyTimeProApp: App {
             queue: .main
         ) { _ in
             print("Remote change detected")
-            Task {
-                try? await container.mainContext.save()
+            Task { @MainActor in
+                try? container.mainContext.save()
             }
         }
         
@@ -106,7 +99,6 @@ struct MyTimeProApp: App {
     private func setupZoneSubscription(container: CKContainer) {
         let zoneID = CKRecordZone.ID(zoneName: "MyTimeZone", ownerName: CKCurrentUserDefaultName)
         
-        let predicate = NSPredicate(value: true)
         let subscription = CKRecordZoneSubscription(
             zoneID: zoneID,
             subscriptionID: "mytime-zone-changes"
