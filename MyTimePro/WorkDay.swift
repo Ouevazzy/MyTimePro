@@ -41,22 +41,22 @@ enum WorkDayType: String, Codable, CaseIterable {
 
 @Model
 final class WorkDay {
-    // MARK: - Properties
-    var id: UUID
-    var date: Date
+    // MARK: - Properties with default values
+    var id: UUID = UUID()
+    var date: Date = Date()
     var startTime: Date?
     var endTime: Date?
-    var breakDuration: TimeInterval
-    var totalHours: Double
-    var overtimeSeconds: Int
-    var typeRawValue: String
+    var breakDuration: TimeInterval = 3600 // 1 heure par défaut
+    var totalHours: Double = 0.0
+    var overtimeSeconds: Int = 0
+    var typeRawValue: String = WorkDayType.work.rawValue
     var note: String?
-    var bonusAmount: Double
+    var bonusAmount: Double = 0.0
     
-    // CloudKit properties
-    var cloudKitRecordID: String
-    var lastModified: Date
-    var isDeleted: Bool
+    // CloudKit properties with default values
+    var cloudKitRecordID: String = ""
+    var lastModified: Date = Date()
+    var isDeleted: Bool = false
     
     var type: WorkDayType {
         get { WorkDayType(rawValue: typeRawValue) ?? .work }
@@ -71,19 +71,18 @@ final class WorkDay {
     init(date: Date = Date(), type: WorkDayType = .work) {
         let uuid = UUID()
         
-        self.id = uuid
         self.date = date
-        self.startTime = UserSettings.shared.lastStartTime
-        self.endTime = UserSettings.shared.lastEndTime
-        self.breakDuration = 3600 // 1 heure par défaut
-        self.totalHours = 0.0
-        self.overtimeSeconds = 0
         self.typeRawValue = type.rawValue
-        self.note = ""
-        self.bonusAmount = 0.0
         self.cloudKitRecordID = "workday_\(uuid.uuidString)"
-        self.lastModified = Date()
-        self.isDeleted = false
+        self.id = uuid
+        
+        // Initialiser les heures de début/fin depuis les paramètres
+        if let lastStart = UserSettings.shared.lastStartTime {
+            self.startTime = lastStart
+        }
+        if let lastEnd = UserSettings.shared.lastEndTime {
+            self.endTime = lastEnd
+        }
         
         calculateHours()
     }
