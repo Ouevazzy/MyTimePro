@@ -1,7 +1,5 @@
-import SwiftUI
-import SwiftData
-import CloudKit
 
+<<<<<<< Updated upstream
 @main
 struct MyTimeProApp: App {
     let container: ModelContainer
@@ -92,3 +90,5 @@ struct MyTimeProApp: App {
         privateDatabase.add(operation)
     }
 }
+=======
+>>>>>>> Stashed changes
