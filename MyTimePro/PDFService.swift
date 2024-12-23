@@ -371,4 +371,3 @@ class PDFService {
             return formatter
         }()
     }
-
