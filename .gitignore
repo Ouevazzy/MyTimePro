@@ -1,0 +1,10 @@
+# Xcode
+.DS_Store
+xcuserdata/
+*.xcodeproj/*
+-l.xcodeproj/project.pbxproj
+-l.xcodeproj/xcshareddata/
+-l.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+DerivedData/
+*.xcuserstate
