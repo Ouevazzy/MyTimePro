@@ -1,4 +1,3 @@
-import Foundation
 import CloudKit
 import SwiftUI
 import SwiftData
@@ -24,7 +23,7 @@ class CloudService: ObservableObject {
     // MARK: - Private Properties
     private let container: CKContainer
     private let database: CKDatabase
-    private let iCloudIdentifier = "iCloud.jordan-payez.MyTimePro"
+    private let iCloudIdentifier = \"iCloud.jordan-payez.MyTimePro\"
     private var isSubscribed = false
     private var isSetup = false
     private var lastCheckDate: Date = .distantPast
@@ -48,7 +47,7 @@ class CloudService: ObservableObject {
     }
 
     func checkiCloudStatus() {
-        print("Checking container:", container.containerIdentifier ?? "No identifier")
+        print(\"Checking container:\", container.containerIdentifier ?? \"No identifier\")
         guard shouldPerformStatusCheck() else { return }
         
         container.accountStatus { [weak self] status, error in
@@ -83,7 +82,7 @@ class CloudService: ObservableObject {
     private func setupSubscription() {
         guard !isSubscribed else { return }
 
-        let subscription = CKDatabaseSubscription(subscriptionID: "all-changes")
+        let subscription = CKDatabaseSubscription(subscriptionID: \"all-changes\")
         let notificationInfo = CKSubscription.NotificationInfo()
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
@@ -146,11 +145,11 @@ class CloudService: ObservableObject {
             DispatchQueue.main.async {
                 switch cloudError.code {
                 case .quotaExceeded:
-                    self.userMessage = "Espace iCloud insuffisant"
+                    self.userMessage = \"Espace iCloud insuffisant\"
                 case .networkFailure, .networkUnavailable:
-                    self.userMessage = "Problème de connexion réseau"
+                    self.userMessage = \"Problème de connexion réseau\"
                 case .notAuthenticated:
-                    self.userMessage = "Veuillez vous connecter à iCloud"
+                    self.userMessage = \"Veuillez vous connecter à iCloud\"
                 default:
                     self.userMessage = cloudError.localizedDescription
                 }
@@ -202,28 +201,28 @@ class CloudService: ObservableObject {
         var description: String {
             switch self {
             case .unknown:
-                return "Vérification..."
+                return \"Vérification...\"
             case .available:
-                return "Synchronisé"
+                return \"Synchronisé\"
             case .unavailable:
-                return "iCloud non disponible"
+                return \"iCloud non disponible\"
             case .restricted:
-                return "Accès restreint"
+                return \"Accès restreint\"
             case .syncing(let progress):
-                return "Synchronisation \(Int(progress * 100))%"
+                return \"Synchronisation \\(Int(progress * 100))%\"
             case .error(let error):
-                return "Erreur: \(error.localizedDescription)"
+                return \"Erreur: \\(error.localizedDescription)\"
             }
         }
 
         var iconName: String {
             switch self {
-            case .unknown: return "questionmark.circle"
-            case .available: return "checkmark.circle"
-            case .unavailable: return "xmark.circle"
-            case .restricted: return "exclamationmark.triangle"
-            case .syncing: return "arrow.triangle.2.circlepath"
-            case .error: return "exclamationmark.circle"
+            case .unknown: return \"questionmark.circle\"
+            case .available: return \"checkmark.circle\"
+            case .unavailable: return \"xmark.circle\"
+            case .restricted: return \"exclamationmark.triangle\"
+            case .syncing: return \"arrow.triangle.2.circlepath\"
+            case .error: return \"exclamationmark.circle\"
             }
         }
 
@@ -243,4 +242,6 @@ class CloudService: ObservableObject {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
+}`,
+  `message`: `Mise à jour de CloudService avec le bon identifiant et les améliorations de synchronisation`
 }
