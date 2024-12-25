@@ -2,15 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleIdentifier</key>
-    <string>jordan-payez.MyTimePro.MyTimePro</string>
-    <key>CFBundleDisplayName</key>
-    <string>MyTimePro</string>
+    <key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
+    <true/>
     <key>UIBackgroundModes</key>
     <array>
         <string>remote-notification</string>
+        <string>fetch</string>
+        <string>processing</string>
     </array>
-    <key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
-    <true/>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.mytimepro.backgroundtask</string>
+    </array>
 </dict>
 </plist>

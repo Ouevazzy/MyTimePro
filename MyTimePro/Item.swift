@@ -1,6 +1,6 @@
 //
 //  Item.swift
-//  WorkTime
+//  MyTimePro
 //
 //  Created by Jordan Payez on 23/11/2024.
 //

@@ -4,52 +4,31 @@ import SwiftData
 struct CalendarView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
+    
     @State private var selectedDate = Date()
     @State private var showingAddWorkDay = false
     @State private var showingEditSheet = false
     @State private var selectedWorkDay: WorkDay?
     
     private let calendar = Calendar.current
-    private let daysInWeek = 7
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
     
     // Jours de la semaine commençant par lundi
     private let weekDaySymbols: [String] = {
         var symbols = Calendar.current.shortWeekdaySymbols
+        // Par défaut, shortWeekdaySymbols : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        // On déplace "Sun" à la fin pour avoir un tableau commençant par "Mon"
         let sunday = symbols.remove(at: 0)
         symbols.append(sunday)
         return symbols.map { $0.lowercased() }
     }()
     
+    // On délègue la génération des dates à une fonction dédiée
     private var monthDates: [Date?] {
-        let interval = calendar.dateInterval(of: .month, for: selectedDate)!
-        let firstDayOfMonth = interval.start
-        
-        let numberOfDaysInMonth = calendar.range(of: .day, in: .month, for: firstDayOfMonth)!.count
-        
-        // Ajustement pour commencer le lundi
-        var firstWeekday = calendar.component(.weekday, from: firstDayOfMonth) - 2
-        if firstWeekday < 0 { firstWeekday += 7 }
-        
-        var dates: [Date?] = []
-        
-        for _ in 0..<firstWeekday {
-            dates.append(nil)
-        }
-        
-        for dayOffset in 0..<numberOfDaysInMonth {
-            if let date = calendar.date(byAdding: .day, value: dayOffset, to: firstDayOfMonth) {
-                dates.append(date)
-            }
-        }
-        
-        while (dates.count % 7) != 0 {
-            dates.append(nil)
-        }
-        
-        return dates
+        computeMonthDates(for: selectedDate)
     }
     
+    // Formatter pour le texte du mois et de l’année
     private var monthAndYear: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
@@ -66,9 +45,10 @@ struct CalendarView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // En-tête avec le mois et les boutons de navigation
+                    
+                    // MARK: - En-tête de navigation (mois +/-)
                     HStack {
-                        Button(action: previousMonth) {
+                        Button(action: { shiftMonth(by: -1) }) {
                             Image(systemName: "chevron.left")
                                 .foregroundColor(.blue)
                                 .font(.title2)
@@ -81,7 +61,7 @@ struct CalendarView: View {
                         
                         Spacer()
                         
-                        Button(action: nextMonth) {
+                        Button(action: { shiftMonth(by: 1) }) {
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.blue)
                                 .font(.title2)
@@ -89,7 +69,7 @@ struct CalendarView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Bouton Aujourd'hui
+                    // MARK: - Bouton "Aujourd'hui"
                     if !isSelectedDateToday {
                         Button(action: goToToday) {
                             Text("Aujourd'hui")
@@ -102,7 +82,7 @@ struct CalendarView: View {
                         }
                     }
                     
-                    // Jours de la semaine
+                    // MARK: - Jours de la semaine
                     HStack {
                         ForEach(weekDaySymbols, id: \.self) { symbol in
                             Text(symbol)
@@ -111,9 +91,9 @@ struct CalendarView: View {
                         }
                     }
                     
-                    // Grille des jours
+                    // MARK: - Grille des jours du mois
                     LazyVGrid(columns: columns, spacing: 1) {
-                        ForEach(Array(monthDates.enumerated()), id: \.offset) { index, date in
+                        ForEach(Array(monthDates.enumerated()), id: \.offset) { _, date in
                             if let date = date {
                                 let workDay = findWorkDay(for: date)
                                 CalendarCell(
@@ -135,7 +115,7 @@ struct CalendarView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Affichage des détails de la journée sélectionnée
+                    // MARK: - Détails de la journée sélectionnée
                     if let workDay = selectedWorkDay {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(formatDate(workDay.date))
@@ -185,9 +165,8 @@ struct CalendarView: View {
             }
             .sheet(isPresented: $showingAddWorkDay) {
                 NavigationStack {
-                    AddEditWorkDayView(
-                        workDay: WorkDay(date: calendar.startOfDay(for: selectedDate))
-                    )
+                    // On initialise le WorkDay à la date "début de journée" pour éviter les soucis de comparaison
+                    AddEditWorkDayView(workDay: WorkDay(date: calendar.startOfDay(for: selectedDate)))
                 }
             }
             .sheet(isPresented: $showingEditSheet) {
@@ -200,43 +179,88 @@ struct CalendarView: View {
         }
     }
     
+    // MARK: - Fonctions utilitaires
+    
+    /// Calcule la liste des dates (et des nil) à afficher pour le mois de `date`.
+    private func computeMonthDates(for date: Date) -> [Date?] {
+        // Intervalle du mois
+        guard let interval = calendar.dateInterval(of: .month, for: date) else {
+            return []
+        }
+        
+        let firstDayOfMonth = interval.start
+        guard let numberOfDaysInMonth = calendar.range(of: .day, in: .month, for: firstDayOfMonth)?.count else {
+            return []
+        }
+        
+        // Calcul de l’index du premier jour (pour aligner sur lundi)
+        // calendar.firstWeekday = 2 pour la France => lundi
+        let startDayIndex = (calendar.component(.weekday, from: firstDayOfMonth)
+                             - calendar.firstWeekday + 7) % 7
+        
+        // Génération du tableau
+        var dates: [Date?] = []
+        
+        // On ajoute des cases vides avant le premier jour
+        for _ in 0..<startDayIndex {
+            dates.append(nil)
+        }
+        
+        // On ajoute toutes les dates du mois
+        for dayOffset in 0..<numberOfDaysInMonth {
+            if let date = calendar.date(byAdding: .day, value: dayOffset, to: firstDayOfMonth) {
+                dates.append(date)
+            }
+        }
+        
+        // On complète pour faire un multiple de 7
+        while dates.count % 7 != 0 {
+            dates.append(nil)
+        }
+        
+        return dates
+    }
+    
+    /// Navigation vers le mois précédent ou suivant
+    private func shiftMonth(by offset: Int) {
+        if let newDate = calendar.date(byAdding: .month, value: offset, to: selectedDate) {
+            withAnimation {
+                selectedDate = newDate
+                selectedWorkDay = nil
+            }
+        }
+    }
+    
+    /// Supprime un WorkDay de la base de données
     private func deleteWorkDay(_ workDay: WorkDay) {
         modelContext.delete(workDay)
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            // Gérer l’erreur si besoin (alerte, message, etc.)
+            print("Erreur lors de la suppression : \(error)")
+        }
         selectedWorkDay = nil
     }
     
+    /// Met la date sélectionnée à aujourd’hui
     private func goToToday() {
         withAnimation {
-            selectedDate = Date()
-            selectedWorkDay = findWorkDay(for: selectedDate)
+            let today = calendar.startOfDay(for: Date())
+            selectedDate = today
+            selectedWorkDay = findWorkDay(for: today)
         }
     }
     
-    private func previousMonth() {
-        if let newDate = calendar.date(byAdding: .month, value: -1, to: selectedDate) {
-            withAnimation {
-                selectedDate = newDate
-                selectedWorkDay = nil
-            }
-        }
-    }
-    
-    private func nextMonth() {
-        if let newDate = calendar.date(byAdding: .month, value: 1, to: selectedDate) {
-            withAnimation {
-                selectedDate = newDate
-                selectedWorkDay = nil
-            }
-        }
-    }
-    
+    /// Trouve le WorkDay correspondant à `date`
     private func findWorkDay(for date: Date) -> WorkDay? {
         workDays.first { workDay in
+            // Compare en "même jour"
             calendar.isDate(workDay.date, inSameDayAs: date)
         }
     }
     
+    /// Formatte une date en string localisée
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
@@ -245,11 +269,13 @@ struct CalendarView: View {
     }
 }
 
+// MARK: - Sous-vue : Ligne de détail d’une journée
 struct CalendarDetailRow: View {
     let workDay: WorkDay
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
+            
             // Section gauche avec type et heures
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
@@ -266,6 +292,7 @@ struct CalendarDetailRow: View {
                 }
             }
             
+            // Note si présente
             if let note = workDay.note, !note.isEmpty {
                 Text(note)
                     .font(.footnote)
@@ -283,7 +310,9 @@ struct CalendarDetailRow: View {
                     if workDay.overtimeSeconds != 0 {
                         Text(workDay.formattedOvertimeHours)
                             .font(.subheadline)
-                            .foregroundColor(workDay.overtimeSeconds > 0 ? .green : .red)
+                            .foregroundColor(
+                                workDay.overtimeSeconds > 0 ? .green : .red
+                            )
                     }
                     
                     if workDay.bonusAmount > 0 {
@@ -298,10 +327,12 @@ struct CalendarDetailRow: View {
     }
 }
 
+// MARK: - Sous-vue : Case du calendrier
 struct CalendarCell: View {
     let date: Date
     let workDay: WorkDay?
     let isSelected: Bool
+    
     private let calendar = Calendar.current
     
     private var dayNumber: String {
