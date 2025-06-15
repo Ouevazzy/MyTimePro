@@ -73,9 +73,7 @@ struct AddEditWorkDayView: View {
                 }
             } header: {
                 Text("DÉTAILS DE LA JOURNÉE")
-            } footer: {
-                EmptyView().padding(.bottom, 2) // Subtle extra spacing
-            }
+            } // Removed footer for standard spacing with insetGrouped style
             
             // Section Bonus
             if selectedType == .work {
@@ -84,9 +82,7 @@ struct AddEditWorkDayView: View {
                         .keyboardType(.decimalPad)
                 } header: {
                     Text("BONUS")
-                } footer: {
-                    EmptyView().padding(.bottom, 2) // Subtle extra spacing
-                }
+                } // Removed footer for standard spacing with insetGrouped style
             }
             
             // Section Note
@@ -97,6 +93,7 @@ struct AddEditWorkDayView: View {
                 Text("NOTE")
             } // No footer for the last section or it might add too much space at the end
         }
+        .formStyle(.insetGrouped) // Apply inset grouped form style
         .navigationTitle("Ajouter/Modifier Journée")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
