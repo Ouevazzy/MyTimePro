@@ -87,7 +87,7 @@ struct SettingsView: View {
                         
                         // Cards pour chaque section
                         workTimeCard
-                        displayCard
+                        appearanceCard // displayCard is now part of appearanceCard
                         exportCard
                         aboutCard
                         resetCard
@@ -182,8 +182,8 @@ struct SettingsView: View {
                 Spacer()
                 
                 Circle()
-                    .fill(LinearGradient(
-                        colors: [.blue, .purple],
+                    .fill(LinearGradient( // Keeping gradient for profile picture
+                        colors: [ThemeManager.shared.currentAccentColor, .purple], // Using accent color in gradient
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ))
@@ -210,8 +210,8 @@ struct SettingsView: View {
                     title: "Heures Hebdo",
                     value: String(format: "%.1f", settings.weeklyHours) + "h",
                     icon: "clock.fill",
-                    color: .blue,
-                    iconBackground: .blue.opacity(0.2),
+                    color: ThemeManager.shared.currentAccentColor, // Updated
+                    iconBackground: ThemeManager.shared.currentAccentColor.opacity(0.2), // Updated
                     animate: animateWorkHours
                 )
                 
@@ -233,7 +233,7 @@ struct SettingsView: View {
         SettingsCard(
             title: "Horaires de travail",
             icon: "clock.fill",
-            color: .blue,
+            color: ThemeManager.shared.currentAccentColor, // Updated
             isExpanded: activeSection == .workTime,
             onToggle: {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
@@ -260,12 +260,12 @@ struct SettingsView: View {
                             Spacer()
                             
                             Image(systemName: "slider.horizontal.3")
-                                .foregroundColor(.blue)
+                                .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                         }
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue.opacity(0.1))
+                                .fill(ThemeManager.shared.currentAccentColor.opacity(0.1)) // Updated
                         )
                     }
                 }
@@ -279,7 +279,7 @@ struct SettingsView: View {
                         ForEach(weekDays.indices, id: \.self) { index in
                             HStack {
                                 Image(systemName: index < 5 ? "briefcase.fill" : "house.fill")
-                                    .foregroundColor(index < 5 ? .blue : .orange)
+                                    .foregroundColor(index < 5 ? ThemeManager.shared.currentAccentColor : .orange) // Updated
                                     .frame(width: 22)
                                 
                                 Text(weekDays[index])
@@ -287,7 +287,7 @@ struct SettingsView: View {
                                 Spacer()
                                 
                                 Toggle("", isOn: $settings.workingDays[index])
-                                    .tint(index < 5 ? .blue : .orange)
+                                    .tint(index < 5 ? ThemeManager.shared.currentAccentColor : .orange) // Updated
                                     .onChange(of: settings.workingDays[index]) { _, _ in
                                         updateDailyHours()
                                     }
@@ -297,7 +297,7 @@ struct SettingsView: View {
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(settings.workingDays[index] ?
-                                          (index < 5 ? Color.blue.opacity(0.1) : Color.orange.opacity(0.1)) :
+                                          (index < 5 ? ThemeManager.shared.currentAccentColor.opacity(0.1) : Color.orange.opacity(0.1)) : // Updated
                                           Color(.systemGray6))
                             )
                         }
@@ -404,12 +404,12 @@ struct SettingsView: View {
                         Button(action: { showVacationDetails = true }) {
                             Text("Voir les détails des congés")
                                 .font(.subheadline)
-                                .foregroundColor(.blue)
+                                .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.blue, lineWidth: 1)
+                                        .stroke(ThemeManager.shared.currentAccentColor, lineWidth: 1) // Updated
                                 )
                         }
                     }
@@ -419,35 +419,55 @@ struct SettingsView: View {
         }
     }
     
-    private var displayCard: some View {
+    // displayCard's content is merged into appearanceCard
+    // private var displayCard: some View { ... } // This is removed or commented out
+
+    private var appearanceCard: some View {
         SettingsCard(
-            title: "Affichage",
-            icon: "display",
-            color: .purple,
-            isExpanded: activeSection == .display,
+            title: "Apparence et Affichage", // Updated title
+            icon: "paintbrush.fill", // New icon
+            color: ThemeManager.shared.currentAccentColor, // Dynamic color
+            isExpanded: activeSection == .appearance,
             onToggle: {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                    activeSection = activeSection == .display ? nil : .display
+                    activeSection = activeSection == .appearance ? nil : .appearance
                 }
             }
         ) {
-            VStack(spacing: 15) {
-                // Timer dans l'accueil
-                Toggle("Timer dans l'accueil", isOn: Binding(
-                    get: { settings.showTimerInHome },
-                    set: { newValue in
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                            settings.showTimerInHome = newValue
+            VStack(spacing: 20) { // Increased spacing for better layout
+                // Accent Color Picker
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Couleur d'accentuation")
+                        .font(.headline)
+
+                    Picker("Couleur", selection: $settings.accentColorName) {
+                        ForEach(UserSettings.AccentColor.allCases) { colorCase in
+                            HStack {
+                                Circle()
+                                    .fill(colorCase.color)
+                                    .frame(width: 20, height: 20)
+                                Text(colorCase.localizedName).tag(colorCase.rawValue)
+                            }
                         }
                     }
-                ))
-                    .tint(.blue)
+                    .pickerStyle(.navigationLink) // Provides a new view for selection, good for many options
+                    .tint(ThemeManager.shared.currentAccentColor) // Tints the picker chevron/selection
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(ThemeManager.shared.currentAccentColor.opacity(0.1))
+                )
+
+                // Timer dans l'accueil (moved from displayCard)
+                Toggle("Afficher le minuteur sur l'accueil", isOn: $settings.showTimerInHome)
+                    .tint(ThemeManager.shared.currentAccentColor)
                 
-                // Format des heures
-                Toggle("Format décimal", isOn: $settings.useDecimalHours)
-                    .tint(.blue)
+                // Format des heures (moved from displayCard)
+                Toggle("Utiliser le format décimal pour les heures (ex: 7.50h)", isOn: $settings.useDecimalHours)
+                    .tint(ThemeManager.shared.currentAccentColor)
             }
-            .padding(.vertical, 5)
+            .padding() // Add padding to the content of the card
         }
     }
     
@@ -580,7 +600,7 @@ struct SettingsView: View {
                 NavigationLink(destination: SyncDetailsView()) {
                     Text("Options de synchronisation avancées")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                 }
                 .padding(.top, 8)
             }
@@ -691,10 +711,10 @@ struct SettingsView: View {
 
 // MARK: - Supporting Types
 enum SettingsSection {
-    case workTime, display, export, about, reset
+    case workTime, appearance, export, about, reset // Replaced display with appearance
 }
 
-enum AppTheme: String, CaseIterable, Identifiable {
+enum AppTheme: String, CaseIterable, Identifiable { // This is for Light/Dark mode, not accent color
     case system, light, dark
     var id: String { self.rawValue }
 }
@@ -739,40 +759,43 @@ struct SettingsCard<Content: View>: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            Button(action: onToggle) {
-                HStack {
-                    Image(systemName: icon)
-                        .font(.title3)
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(color)
-                        .cornerRadius(10)
-                    
-                    Text(title)
-                        .font(.headline)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+        StandardCardView(paddingAmount: 0) { // Outer padding handled by content or header
+            VStack(spacing: 0) {
+                // Header
+                Button(action: onToggle) {
+                    HStack {
+                        Image(systemName: icon)
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .frame(width: 36, height: 36)
+                            .background(color)
+                            .cornerRadius(10)
+
+                        Text(title)
+                            .font(.headline)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    }
+                    .contentShape(Rectangle())
+                    .padding() // Padding for the button itself inside the card
+                    // .background(Color(.systemBackground)) // Background provided by StandardCardView
                 }
-                .contentShape(Rectangle())
-                .padding()
-                .background(Color(.systemBackground))
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            // Content
-            if isExpanded {
-                content
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                .buttonStyle(PlainButtonStyle())
+
+                // Content
+                if isExpanded {
+                    content
+                        // .padding() // Content specific padding, if StandardCardView's isn't enough
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        // .clipShape(RoundedRectangle(cornerRadius: 15)) // Handled by StandardCardView
+        // .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2) // Handled by StandardCardView
     }
 }
 
@@ -785,35 +808,31 @@ struct StatisticCard: View {
     let animate: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top) {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.system(size: 18))
-                    .frame(width: 36, height: 36)
-                    .background(iconBackground)
-                    .cornerRadius(8)
+        StandardCardView {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top) {
+                    Image(systemName: icon)
+                        .foregroundColor(color)
+                        .font(.system(size: 18))
+                        .frame(width: 36, height: 36)
+                        .background(iconBackground)
+                        .cornerRadius(8)
+
+                    Spacer()
+
+                    Text(title)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
                 
-                Spacer()
-                
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text(value)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .scaleEffect(animate ? 1.0 : 0.7)
+                    .opacity(animate ? 1.0 : 0.5)
             }
-            
-            Text(value)
-                .font(.title3)
-                .fontWeight(.bold)
-                .scaleEffect(animate ? 1.0 : 0.7)
-                .opacity(animate ? 1.0 : 0.5)
+            .frame(maxWidth: .infinity) // Ensure VStack takes full width inside card
         }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        )
     }
 }
 
@@ -875,7 +894,7 @@ struct ImprovedWeeklyHoursPickerView: View {
             // Valeur actuelle
             Text(String(format: "%.1f", hours) + "h")
                 .font(.system(size: 60, weight: .bold, design: .rounded))
-                .foregroundColor(.blue)
+                .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                 .padding(.top, 20)
             
             // Slider
@@ -891,7 +910,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                 }
                 
                 Slider(value: $hours, in: 0...80, step: 0.5)
-                    .tint(.blue)
+                    .tint(ThemeManager.shared.currentAccentColor) // Updated
                     .scaleEffect(x: animateSlider ? 1.0 : 0.9, y: 1.0)
                     .onAppear {
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.5).delay(0.3)) {
@@ -919,7 +938,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                                 .padding(.horizontal, 12)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .fill(selectedPreset == preset.value ? Color.blue : Color(.systemGray5))
+                                        .fill(selectedPreset == preset.value ? ThemeManager.shared.currentAccentColor : Color(.systemGray5)) // Updated
                                 )
                                 .foregroundColor(selectedPreset == preset.value ? .white : .primary)
                         }
@@ -954,9 +973,9 @@ struct ImprovedWeeklyHoursPickerView: View {
                             .padding(.horizontal, 15)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.blue, lineWidth: 1)
+                                    .stroke(ThemeManager.shared.currentAccentColor, lineWidth: 1) // Updated
                             )
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                     }
                     
                     Spacer()
@@ -987,9 +1006,9 @@ struct ImprovedWeeklyHoursPickerView: View {
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.blue, lineWidth: 1)
+                                .stroke(ThemeManager.shared.currentAccentColor, lineWidth: 1) // Updated
                         )
-                        .foregroundColor(.blue)
+                        .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                 }
                 
                 Button(action: {
@@ -1002,7 +1021,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue)
+                                .fill(ThemeManager.shared.currentAccentColor) // Updated
                         )
                         .foregroundColor(.white)
                 }

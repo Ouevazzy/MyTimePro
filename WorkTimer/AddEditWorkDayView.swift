@@ -73,6 +73,8 @@ struct AddEditWorkDayView: View {
                 }
             } header: {
                 Text("DÉTAILS DE LA JOURNÉE")
+            } footer: {
+                EmptyView().padding(.bottom, 2) // Subtle extra spacing
             }
             
             // Section Bonus
@@ -82,6 +84,8 @@ struct AddEditWorkDayView: View {
                         .keyboardType(.decimalPad)
                 } header: {
                     Text("BONUS")
+                } footer: {
+                    EmptyView().padding(.bottom, 2) // Subtle extra spacing
                 }
             }
             
@@ -91,7 +95,7 @@ struct AddEditWorkDayView: View {
                     .lineLimit(3...6)
             } header: {
                 Text("NOTE")
-            }
+            } // No footer for the last section or it might add too much space at the end
         }
         .navigationTitle("Ajouter/Modifier Journée")
         .navigationBarTitleDisplayMode(.inline)

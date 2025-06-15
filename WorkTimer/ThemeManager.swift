@@ -4,8 +4,9 @@ import SwiftUI
 class ThemeManager {
     static let shared = ThemeManager()
     
-    @AppStorage("userEnabledDynamicIcon") private var userEnabledDynamicIcon = false
+    // @AppStorage("userEnabledDynamicIcon") private var userEnabledDynamicIcon = false
     
+    /*
     func updateAppIconForTheme(_ isDarkMode: Bool) {
         // Ne rien faire si l'utilisateur n'a pas activé cette fonctionnalité
         guard userEnabledDynamicIcon else { return }
@@ -24,7 +25,9 @@ class ThemeManager {
             }
         }
     }
+    */
     
+    /*
     func enableDynamicIcon(_ enable: Bool) {
         userEnabledDynamicIcon = enable
         if enable {
@@ -36,8 +39,20 @@ class ThemeManager {
             UIApplication.shared.setAlternateIconName(nil, completionHandler: nil)
         }
     }
+    */
     
+    /*
     func isDynamicIconEnabled() -> Bool {
         return userEnabledDynamicIcon
+    }
+    */
+
+    var currentAccentColor: Color {
+        return UserSettings.shared.currentAccentColor
+    }
+
+    // Helper to get UIColor, useful for UIKit parts if any
+    var currentAccentUIColor: UIColor {
+        return UserSettings.shared.currentAccentUIColor
     }
 }
