@@ -207,6 +207,7 @@ struct StatsView: View {
                 }
                 .listStyle(.insetGrouped)
             }
+            .background(Color(.systemGroupedBackground)) // Ajout de cette ligne
             .navigationTitle("Statistiques")
             .navigationBarTitleDisplayMode(.inline)
         }
