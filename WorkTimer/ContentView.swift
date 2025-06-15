@@ -61,7 +61,7 @@ struct ContentView: View {
             .tag(4)
             .id("settings")
         }
-        .tint(.blue)
+        .tint(ThemeManager.shared.currentAccentColor) // Use dynamic accent color
     }
 }
 

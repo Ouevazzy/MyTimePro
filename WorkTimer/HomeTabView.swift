@@ -41,12 +41,38 @@ struct HomeTabView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
+                // Calculate expected hours for each section
+                let typicalWorkWeekDayCount = settings.workingDays.filter { $0 }.count
+
+                let expectedWeeklyHours = settings.weeklyHours
+
+                let actualWorkDaysInMonth = WorkTimeCalculations.workingDaysInMonth(year: selectedYear, month: selectedMonth, workingWeekDays: settings.workingDays)
+                let expectedMonthlyHours = WorkTimeCalculations.expectedWorkingHours(
+                    forActualWorkDays: actualWorkDaysInMonth,
+                    weeklyHours: settings.weeklyHours,
+                    typicalWorkWeekDayCount: typicalWorkWeekDayCount
+                )
+
+                var totalActualWorkDaysInYear = 0
+                // Ensure not to divide by zero if no working days are set, though expectedWorkingHours handles typicalWorkWeekDayCount = 0
+                if typicalWorkWeekDayCount > 0 {
+                    for m in 1...12 {
+                        totalActualWorkDaysInYear += WorkTimeCalculations.workingDaysInMonth(year: selectedYear, month: m, workingWeekDays: settings.workingDays)
+                    }
+                }
+                let expectedYearlyHours = WorkTimeCalculations.expectedWorkingHours(
+                    forActualWorkDays: totalActualWorkDaysInYear,
+                    weeklyHours: settings.weeklyHours,
+                    typicalWorkWeekDayCount: typicalWorkWeekDayCount
+                )
+
                 // Stats sections - design original avec subtiles améliorations
                 StatsSection(
                     title: "Année \(selectedYear)",
                     icon: "calendar",
-                    color: .blue,
+                    color: .blue, // Semantic color for year
                     stats: yearlyStats,
+                    expectedHours: expectedYearlyHours,
                     showMissingHours: false,
                     animateIn: animateCards,
                     animationDelay: 0.1
@@ -55,8 +81,9 @@ struct HomeTabView: View {
                 StatsSection(
                     title: "Mois en cours",
                     icon: "calendar.badge.clock",
-                    color: .orange,
+                    color: .orange, // Semantic color for month
                     stats: monthlyStats,
+                    expectedHours: expectedMonthlyHours,
                     showMissingHours: true,
                     animateIn: animateCards,
                     animationDelay: 0.2
@@ -65,8 +92,9 @@ struct HomeTabView: View {
                 StatsSection(
                     title: "Cette semaine",
                     icon: "briefcase.fill",
-                    color: .green,
+                    color: .green, // Semantic color for week
                     stats: weeklyStats,
+                    expectedHours: expectedWeeklyHours,
                     showMissingHours: true,
                     animateIn: animateCards,
                     animationDelay: 0.3
@@ -167,12 +195,13 @@ struct StatsSection: View {
     let icon: String
     let color: Color
     let stats: (totalHours: Double, overtimeSeconds: Int)
-    let showMissingHours: Bool
+    let expectedHours: Double // New property
+    let showMissingHours: Bool // This might determine if "Heures manquantes" is shown for overtime
     let animateIn: Bool
     let animationDelay: Double
     
     var body: some View {
-        CardView {
+        StandardCardView { // Replaced CardView
             VStack(spacing: 10) {
                 // Header
                 HStack {
@@ -187,13 +216,25 @@ struct StatsSection: View {
                 Divider()
                 
                 // Stats
-                HStack {
-                    // Heures travaillées
-                    StatsComponent(
-                        title: "Heures travaillées",
-                        value: WorkTimeCalculations.formattedTimeInterval(stats.totalHours * 3600),
-                        valueColor: .primary
-                    )
+                HStack(alignment: .top) { // Align to top in case one side becomes taller
+                    // Heures travaillées and ProgressView
+                    VStack(alignment: .leading, spacing: 4) {
+                        StatsComponent(
+                            title: "Heures travaillées",
+                            value: WorkTimeCalculations.formattedTimeInterval(stats.totalHours * 3600),
+                            valueColor: .primary
+                        )
+
+                        if expectedHours > 0 && stats.totalHours >= 0 {
+                            ProgressView(value: stats.totalHours, total: expectedHours)
+                                .tint(ThemeManager.shared.currentAccentColor)
+                                .animation(.easeInOut, value: stats.totalHours)
+
+                            Text(String(format: "Objectif: %@", WorkTimeCalculations.formattedTimeInterval(expectedHours * 3600)))
+                                .font(.caption) // Changed from .caption2 to .caption
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     
                     Spacer()
                     
@@ -202,6 +243,7 @@ struct StatsSection: View {
                         title: stats.overtimeSeconds >= 0 ? "Heures supp." : "Heures manquantes",
                         value: WorkTimeCalculations.formattedTimeInterval(Double(stats.overtimeSeconds)),
                         valueColor: stats.overtimeSeconds >= 0 ? .green : .red
+                        // 'showMissingHours' is implicitly handled by overtimeSeconds being negative
                     )
                 }
             }
@@ -218,7 +260,7 @@ struct VacationSection: View {
     let animationDelay: Double
     
     var body: some View {
-        CardView {
+        StandardCardView { // Replaced CardView
             VStack(spacing: 12) {
                 // Header
                 HStack {
@@ -256,21 +298,21 @@ struct VacationSection: View {
     }
 }
 
-struct CardView<Content: View>: View {
-    let content: Content
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
-    var body: some View {
-        content
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
-    }
-}
+// struct CardView<Content: View>: View { // Removed local CardView definition
+//     let content: Content
+//
+//     init(@ViewBuilder content: () -> Content) {
+//         self.content = content()
+//     }
+//
+//     var body: some View {
+//         content
+//             .padding()
+//             .background(Color(.systemBackground))
+//             .cornerRadius(12)
+//             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+//     }
+// }
 
 struct StatsComponent: View {
     let title: String

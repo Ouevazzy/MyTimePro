@@ -6,6 +6,39 @@ class UserSettings {
     
     // MARK: - Singleton
     static let shared = UserSettings()
+
+    // MARK: - Accent Color Enum
+    enum AccentColor: String, CaseIterable, Identifiable {
+        case defaultBlue, green, orange, purple
+
+        var id: String { self.rawValue }
+
+        var color: Color {
+            switch self {
+            case .defaultBlue:
+                return Color.blue // Or your specific default blue
+            case .green:
+                return Color.green
+            case .orange:
+                return Color.orange
+            case .purple:
+                return Color.purple
+            }
+        }
+
+        var localizedName: String {
+            switch self {
+            case .defaultBlue:
+                return NSLocalizedString("Default Blue", comment: "Default blue accent color")
+            case .green:
+                return NSLocalizedString("Green", comment: "Green accent color")
+            case .orange:
+                return NSLocalizedString("Orange", comment: "Orange accent color")
+            case .purple:
+                return NSLocalizedString("Purple", comment: "Purple accent color")
+            }
+        }
+    }
     
     // MARK: - iCloud Store
     private let iCloudStore = NSUbiquitousKeyValueStore.default
@@ -26,6 +59,9 @@ class UserSettings {
         
         // Nouvelle clé pour le timer
         static let showTimerInHome = "showTimerInHome"
+
+        // Clé pour la couleur d'accentuation
+        static let accentColorName = "accentColorName"
     }
     
     // MARK: - Paramètres de temps de travail
@@ -76,6 +112,28 @@ class UserSettings {
             iCloudStore.synchronize()
         }
     }
+
+    // MARK: - Accent Color Setting
+    var accentColorName: String {
+        didSet {
+            iCloudStore.set(accentColorName, forKey: Keys.accentColorName)
+            iCloudStore.synchronize()
+            // Potentially notify observers if needed in the future
+        }
+    }
+
+    var currentAccentUIColor: UIColor {
+        return UIColor(currentAccentColor)
+    }
+
+    var currentAccentColor: Color {
+        if let colorEnum = AccentColor(rawValue: accentColorName) {
+            return colorEnum.color
+        } else {
+            // Fallback to default if the name is invalid
+            return AccentColor.defaultBlue.color
+        }
+    }
     
     // MARK: - État de l'application
     var hasCompletedOnboarding: Bool {
@@ -123,6 +181,7 @@ class UserSettings {
         self.useDecimalHours     = false
         self.hasCompletedOnboarding = false
         self.showTimerInHome     = true // Afficher par défaut
+        self.accentColorName     = AccentColor.defaultBlue.rawValue // Default accent color
         
         // Charger les valeurs sauvegardées d'iCloud
         loadFromiCloud()
@@ -168,6 +227,13 @@ class UserSettings {
         if iCloudStore.object(forKey: Keys.showTimerInHome) != nil {
             self.showTimerInHome = iCloudStore.bool(forKey: Keys.showTimerInHome)
         }
+
+        if let storedAccentColorName = iCloudStore.string(forKey: Keys.accentColorName) {
+            self.accentColorName = storedAccentColorName
+        } else {
+            // If nothing is stored, set to default (already done in init, but good for safety)
+            self.accentColorName = AccentColor.defaultBlue.rawValue
+        }
     }
     
     @objc private func iCloudStoreDidChangeExternally(_ notification: Notification) {
@@ -195,6 +261,7 @@ class UserSettings {
         showTimerInHome = true
         lastStartTime = Date()
         lastEndTime = Date()
+        accentColorName = AccentColor.defaultBlue.rawValue // Reset to default
         
         iCloudStore.synchronize()
         updateDailyHours()

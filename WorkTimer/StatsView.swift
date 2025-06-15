@@ -45,7 +45,7 @@ struct StatsView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                     
                     Spacer()
@@ -62,7 +62,7 @@ struct StatsView: View {
                     }) {
                         Image(systemName: "chevron.right")
                             .font(.title2)
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 }
                 .padding()
@@ -75,25 +75,25 @@ struct StatsView: View {
                 ], spacing: 16) {
                     StatCard(
                         icon: "briefcase.fill",
-                        iconColor: .blue,
+                        iconColor: ThemeManager.shared.currentAccentColor, // Updated
                         value: "\(yearlyStats.workDays)",
                         title: "Jours travaillés"
                     )
                     StatCard(
                         icon: "umbrella.fill",
-                        iconColor: .orange,
+                        iconColor: .orange, // Semantic
                         value: String(format: "%.1f", yearlyStats.vacationDays),
                         title: "Congés"
                     )
                     StatCard(
                         icon: "cross.fill",
-                        iconColor: .red,
+                        iconColor: .red, // Semantic
                         value: "\(yearlyStats.sickDays)",
                         title: "Maladie"
                     )
                     StatCard(
                         icon: "clock.fill",
-                        iconColor: .blue,
+                        iconColor: ThemeManager.shared.currentAccentColor, // Updated
                         value: WorkTimeCalculations.formattedTimeInterval(yearlyStats.totalHours * 3600),
                         title: "Total heures"
                     )
@@ -120,7 +120,7 @@ struct StatsView: View {
                         Section(header:
                             HStack {
                                 Text(monthStat.monthName)
-                                    .font(.title2)
+                                    .font(.headline) // Changed from .title2
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Text("\(monthStat.workDays) jours")
@@ -131,12 +131,34 @@ struct StatsView: View {
                             VStack(spacing: 16) {
                                 Grid(alignment: .leading, horizontalSpacing: 50, verticalSpacing: 16) {
                                     GridRow {
-                                        VStack(alignment: .leading) {
+                                        VStack(alignment: .leading, spacing: 4) { // Added spacing: 4
                                             Text("Heures travaillées")
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
                                             Text(WorkTimeCalculations.formattedTimeInterval(monthStat.totalHours * 3600))
                                                 .font(.body)
+
+                                            // Calculate expected hours for this specific month
+                                            let typicalWorkWeekDayCount = settings.workingDays.filter { $0 }.count
+                                            let actualWorkDaysInMonth = WorkTimeCalculations.workingDaysInMonth(
+                                                year: selectedYear, // selectedYear is available in StatsView
+                                                month: monthStat.month, // monthStat has month property
+                                                workingWeekDays: settings.workingDays
+                                            )
+                                            let expectedHoursThisMonth = WorkTimeCalculations.expectedWorkingHours(
+                                                forActualWorkDays: actualWorkDaysInMonth,
+                                                weeklyHours: settings.weeklyHours,
+                                                typicalWorkWeekDayCount: typicalWorkWeekDayCount
+                                            )
+
+                                            if expectedHoursThisMonth > 0 && monthStat.totalHours >= 0 {
+                                                ProgressView(value: monthStat.totalHours, total: expectedHoursThisMonth)
+                                                    .tint(ThemeManager.shared.currentAccentColor)
+                                                    .animation(.easeInOut, value: monthStat.totalHours) // Animate progress
+                                                Text(String(format: "Objectif: %@", WorkTimeCalculations.formattedTimeInterval(expectedHoursThisMonth * 3600)))
+                                                .font(.caption) // Changed from .caption2
+                                                    .foregroundColor(.secondary)
+                                            }
                                         }
                                         
                                         VStack(alignment: .leading) {
@@ -273,25 +295,28 @@ struct StatCard: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(iconColor)
-            Text(value)
-                .font(.title2)
-            if let subtitle = subtitle {
-                Text(subtitle)
+        StandardCardView(
+            // Using default padding (16 all sides) instead of just vertical.
+            // Using default background (systemBackground) instead of systemGray6 for better adaptability.
+            // Using default cornerRadius (15) and shadow.
+        ) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(iconColor)
+                Text(value)
+                    .font(.title2)
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Text(title)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity) // Keep this to ensure VStack fills width
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical)
-        .background(Color(UIColor.systemGray6))
-        .cornerRadius(12)
     }
 }
 

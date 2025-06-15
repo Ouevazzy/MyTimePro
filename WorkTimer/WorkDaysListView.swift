@@ -20,7 +20,7 @@ struct WorkDaysListView: View {
     @State private var isSearching = false
     @State private var showingFilters = false
     @State private var selectedType: WorkDayType? = nil
-    @State private var animateList = false
+    // @State private var animateList = false // Removed as List animates by default
     @State private var isEditMode = false
     @State private var selectedWorkDays: Set<UUID> = []
     @State private var selectedDates: Set<Date> = []
@@ -91,6 +91,7 @@ struct WorkDaysListView: View {
                         }
                     }) {
                         Text("Sélectionner")
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 } else {
                     Button(action: {
@@ -101,6 +102,7 @@ struct WorkDaysListView: View {
                         }
                     }) {
                         Text("Annuler")
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 }
             }
@@ -171,7 +173,7 @@ struct WorkDaysListView: View {
             Button(action: { navigateToPreviousMonth() }) {
                 Image(systemName: "chevron.left")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .padding(.horizontal)
             }
             
@@ -185,7 +187,7 @@ struct WorkDaysListView: View {
                     Button(action: { navigateToCurrentMonth() }) {
                         Text("Aujourd'hui")
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 }
             }
@@ -195,7 +197,7 @@ struct WorkDaysListView: View {
             Button(action: { navigateToNextMonth() }) {
                 Image(systemName: "chevron.right")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .padding(.horizontal)
             }
         }
@@ -251,7 +253,7 @@ struct WorkDaysListView: View {
             }) {
                 Image(systemName: hasFilterActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                     .font(.title3)
-                    .foregroundColor(hasFilterActive ? .blue : .secondary)
+                    .foregroundColor(hasFilterActive ? ThemeManager.shared.currentAccentColor : .secondary)
             }
         }
         .padding(.horizontal)
@@ -303,7 +305,7 @@ struct WorkDaysListView: View {
                                 // Logique pour voir plus - pourrait ouvrir une nouvelle vue
                             }
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                         }
                     }
                 }
@@ -323,7 +325,7 @@ struct WorkDaysListView: View {
             
             Image(systemName: hasFilterActive ? "text.magnifyingglass" : "calendar.badge.plus")
                 .font(.system(size: 50))
-                .foregroundColor(.blue.opacity(0.6))
+                .foregroundColor(ThemeManager.shared.currentAccentColor.opacity(0.6))
             
             Text(hasFilterActive ? "Aucun résultat trouvé" : "Aucune journée pour ce mois")
                 .font(.headline)
@@ -341,7 +343,7 @@ struct WorkDaysListView: View {
                         .foregroundColor(.white)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 20)
-                        .background(Color.blue)
+                        .background(ThemeManager.shared.currentAccentColor)
                         .cornerRadius(10)
                 }
             } else {
@@ -352,7 +354,7 @@ struct WorkDaysListView: View {
                         .foregroundColor(.white)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 20)
-                        .background(Color.blue)
+                        .background(ThemeManager.shared.currentAccentColor)
                         .cornerRadius(10)
                 }
             }
@@ -369,6 +371,7 @@ struct WorkDaysListView: View {
         }) {
             Image(systemName: "plus.circle.fill")
                 .font(.title3)
+                .foregroundColor(ThemeManager.shared.currentAccentColor)
         }
     }
     
@@ -383,7 +386,7 @@ struct WorkDaysListView: View {
                   ? "line.3.horizontal.decrease.circle.fill"
                   : "line.3.horizontal.decrease.circle")
                 .font(.title3)
-                .foregroundColor(hasFilterActive ? .blue : .secondary)
+                .foregroundColor(hasFilterActive ? ThemeManager.shared.currentAccentColor : .secondary)
         }
     }
     
@@ -459,10 +462,10 @@ struct WorkDaysListView: View {
                         }
                     }) {
                         Text("Effacer le filtre")
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Color.blue.opacity(0.1))
+                            .background(ThemeManager.shared.currentAccentColor.opacity(0.1))
                             .cornerRadius(10)
                     }
                 }
@@ -508,9 +511,9 @@ struct WorkDaysListView: View {
             self.isFilteringData = false
             
             // Animer l'apparition progressive des éléments
-            withAnimation(.easeOut) {
-                self.animateList = true
-            }
+            // withAnimation(.easeOut) { // List animates changes by default
+            //     self.animateList = true
+            // }
         }
     }
     
@@ -527,9 +530,9 @@ struct WorkDaysListView: View {
             self.isFilteringData = false
             
             // Animer l'apparition progressive des éléments
-            withAnimation(.easeOut) {
-                self.animateList = true
-            }
+            // withAnimation(.easeOut) { // List animates changes by default
+            //     self.animateList = true
+            // }
         }
     }
     
@@ -677,7 +680,7 @@ struct WorkDaysListView: View {
         if let previousMonth = calendar.date(byAdding: .month, value: -1, to: selectedMonth) {
             selectedMonth = previousMonth
             selectedYear = calendar.component(.year, from: previousMonth)
-            animateList = false
+            // animateList = false // Removed
         }
     }
     
@@ -687,7 +690,7 @@ struct WorkDaysListView: View {
         if let nextMonth = calendar.date(byAdding: .month, value: 1, to: selectedMonth) {
             selectedMonth = nextMonth
             selectedYear = calendar.component(.year, from: nextMonth)
-            animateList = false
+            // animateList = false // Removed
         }
     }
     
@@ -696,7 +699,7 @@ struct WorkDaysListView: View {
         let currentDate = Date()
         selectedMonth = currentDate
         selectedYear = Calendar.current.component(.year, from: currentDate)
-        animateList = false
+        // animateList = false // Removed
     }
     
     /// Normalise la date à 00:00 (début de journée)
@@ -736,7 +739,7 @@ struct CustomSectionHeader: View {
                     onToggleSelection?()
                 }) {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(isSelected ? .blue : .gray)
+                        .foregroundColor(isSelected ? ThemeManager.shared.currentAccentColor : .gray)
                         .font(.title3)
                 }
                 .padding(.trailing, 8)
@@ -751,8 +754,8 @@ struct CustomSectionHeader: View {
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(.blue.opacity(0.2))
-                    .foregroundColor(.blue)
+                    .background(ThemeManager.shared.currentAccentColor.opacity(0.2))
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .cornerRadius(4)
             }
             
@@ -770,7 +773,7 @@ struct WorkDayRow: View {
         HStack {
             if isEditMode {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? .blue : .gray)
+                    .foregroundColor(isSelected ? ThemeManager.shared.currentAccentColor : .gray)
                     .font(.title3)
                     .padding(.trailing, 4)
             }
@@ -815,7 +818,7 @@ struct WorkDayRow: View {
             }
         }
         .padding(.vertical, 4)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+        .background(isSelected ? ThemeManager.shared.currentAccentColor.opacity(0.1) : Color.clear)
     }
 }
 
@@ -829,7 +832,7 @@ struct MonthlyStatsHeader: View {
                     title: "Heures",
                     value: WorkTimeCalculations.formattedTimeInterval(stats.totalHours * 3600),
                     icon: "clock.circle.fill",
-                    color: .blue
+                    color: ThemeManager.shared.currentAccentColor
                 )
                 
                 StatItem(
@@ -908,12 +911,12 @@ struct TypeFilterButton: View {
                 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .foregroundColor(.blue)
+                        .foregroundColor(ThemeManager.shared.currentAccentColor)
                 }
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .background(isSelected ? ThemeManager.shared.currentAccentColor.opacity(0.1) : Color.clear)
             .cornerRadius(8)
         }
         .buttonStyle(PlainButtonStyle())

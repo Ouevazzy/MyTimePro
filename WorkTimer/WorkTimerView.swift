@@ -28,36 +28,36 @@ struct WorkTimerView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: ViewMetrics.contentPadding) {
-            // Timer Display
-            HStack(spacing: 20) {
-                elapsedTimeView
-                Spacer()
-                remainingTimeView
-            }
-            .contentTransition(.numericText())
-            
-            // Controls
-            HStack(spacing: 12) {
-                mainActionButton
+        StandardCardView(
+            cornerRadiusAmount: ViewMetrics.cornerRadius, // Specific to WorkTimerView (16)
+            backgroundColor: colorScheme == .dark ? Color(.secondarySystemGroupedBackground) : Color(.systemBackground), // Match original adaptive bg
+            // Using default shadow from StandardCardView for consistency, though original was different
+            shadowColor: Color.black.opacity(colorScheme == .dark ? 0.15 : 0.08), // Slightly adjusted shadow for context
+            shadowRadius: colorScheme == .dark ? 6 : 4,
+            shadowY: colorScheme == .dark ? 3 : 2
+        ) {
+            VStack(spacing: ViewMetrics.contentPadding) {
+                // Timer Display
+                HStack(spacing: 20) {
+                    elapsedTimeView
+                    Spacer()
+                    remainingTimeView
+                }
+                .contentTransition(.numericText())
                 
-                if timerManager.state == .running || timerManager.state == .paused {
-                    endDayButton
+                // Controls
+                HStack(spacing: 12) {
+                    mainActionButton
+
+                    if timerManager.state == .running || timerManager.state == .paused {
+                        endDayButton
+                    }
                 }
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: ViewMetrics.cornerRadius)
-                .fill(colorScheme == .dark ? Color(.systemGray6) : Color(.systemBackground))
-                .shadow(
-                    color: Color.black.opacity(colorScheme == .dark ? 0.3 : 0.1),
-                    radius: ViewMetrics.shadowRadius,
-                    x: 0,
-                    y: 2
-                )
-        )
-        .padding(.horizontal)
+        // .padding() // This padding is now handled by StandardCardView's paddingAmount (default 16)
+        // Background and shadow are handled by StandardCardView
+        .padding(.horizontal) // This outer padding for the card itself remains
         .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase)
         }
@@ -139,19 +139,19 @@ struct WorkTimerView: View {
     
     private var buttonColor: Color {
         switch timerManager.state {
-        case .notStarted: return .blue
-        case .running: return .orange
-        case .paused: return .green
-        case .finished: return .blue
+        case .notStarted: return ThemeManager.shared.currentAccentColor
+        case .running: return .orange // Semantic
+        case .paused: return .green // Semantic
+        case .finished: return ThemeManager.shared.currentAccentColor
         }
     }
     
     private var timerStatusColor: Color {
         switch timerManager.state {
-        case .notStarted: return .secondary
-        case .running: return .green
-        case .paused: return .orange
-        case .finished: return .blue
+        case .notStarted: return .secondary // Neutral, keep as is
+        case .running: return .green // Semantic
+        case .paused: return .orange // Semantic
+        case .finished: return ThemeManager.shared.currentAccentColor
         }
     }
     

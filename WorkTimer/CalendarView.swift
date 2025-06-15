@@ -29,7 +29,7 @@ struct CalendarView: View {
     
     // Animation du mois
     @State private var slideDirection: SlideDirection = .none
-    @State private var animateCalendar = false
+    // @State private var animateCalendar = false // Removed, seems unused
     
     // Nouvelles optimisations
     @State private var displayedWorkDays: [WorkDay] = []
@@ -86,7 +86,7 @@ struct CalendarView: View {
                         withAnimation {
                             // Réinitialiser l'animation lors du changement de mode
                             slideDirection = .none
-                            animateCalendar = false
+                            // animateCalendar = false // Removed
                         }
                         
                         // Recalculer les dates lorsque le mode change
@@ -104,7 +104,7 @@ struct CalendarView: View {
                                 Text("Aujourd'hui")
                                     .font(.caption)
                             }
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                             .padding(.vertical, 4)
                             .padding(.horizontal, 8)
                             .background(Color(.systemBackground))
@@ -144,7 +144,8 @@ struct CalendarView: View {
                             )
                     }
                 }
-                .animation(.spring(duration: 0.4), value: displayDate)
+                .animation(.spring(duration: 0.4), value: displayDate) // Animates changes when displayDate changes (e.g. month/week shift)
+                .animation(.default, value: calendarViewMode) // Animates the switch between month/week view itself
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
@@ -194,7 +195,7 @@ struct CalendarView: View {
                         showingDatePicker = true
                     }) {
                         Image(systemName: "calendar")
-                            .foregroundColor(.blue)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 }
                 
@@ -204,6 +205,7 @@ struct CalendarView: View {
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
+                            .foregroundColor(ThemeManager.shared.currentAccentColor)
                     }
                 }
             }
@@ -271,7 +273,7 @@ struct CalendarView: View {
                 }
             }) {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(.blue)
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .font(.title3)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
@@ -315,7 +317,7 @@ struct CalendarView: View {
                 }
             }) {
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.blue)
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .font(.title3)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
@@ -396,7 +398,7 @@ struct CalendarView: View {
                                 .fontWeight(calendar.isDateInToday(date) ? .bold : .regular)
                                 .foregroundColor(
                                     calendar.isDate(date, inSameDayAs: selectedDate) ? .white :
-                                        calendar.isDateInToday(date) ? .blue : .primary
+                                        calendar.isDateInToday(date) ? ThemeManager.shared.currentAccentColor : .primary
                                 )
                         }
                         
@@ -494,10 +496,10 @@ struct CalendarView: View {
                         Image(systemName: "pencil")
                         Text("Modifier")
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(ThemeManager.shared.currentAccentColor)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 16)
-                    .background(Color.blue.opacity(0.1))
+                    .background(ThemeManager.shared.currentAccentColor.opacity(0.1))
                     .cornerRadius(8)
                 }
                 
@@ -751,9 +753,9 @@ struct CalendarView: View {
     /// Retourne la couleur de fond pour une date dans la vue semaine
     private func getDateBackgroundColor(_ date: Date) -> Color {
         if calendar.isDate(date, inSameDayAs: selectedDate) {
-            return .blue
+            return ThemeManager.shared.currentAccentColor
         } else if calendar.isDateInToday(date) {
-            return .blue.opacity(0.2)
+            return ThemeManager.shared.currentAccentColor.opacity(0.2)
         } else if findWorkDay(for: date) != nil {
             return Color(.systemGray5)
         } else {
@@ -830,7 +832,7 @@ struct OptimizedWeekEvents: View {
             VStack(spacing: 16) {
                 Image(systemName: "calendar.badge.plus")
                     .font(.largeTitle)
-                    .foregroundColor(.blue.opacity(0.7))
+                    .foregroundColor(ThemeManager.shared.currentAccentColor.opacity(0.7))
                 
                 Text("Aucun événement cette semaine")
                     .font(.headline)
@@ -868,8 +870,8 @@ struct CalendarDetailRow: View {
             // Note si présente
             if let note = workDay.note, !note.isEmpty {
                 Text(note)
-                    .font(.footnote)
-                    .foregroundColor(.blue)
+                    .font(.caption) // Changed from .footnote to .caption for consistency
+                    .foregroundColor(ThemeManager.shared.currentAccentColor) // Changed from .blue
                     .italic()
                     .lineLimit(3)
                     .padding(.horizontal, 4)
@@ -916,17 +918,17 @@ struct ImprovedCalendarCell: View {
             // Fond avec effet 3D subtil
             RoundedRectangle(cornerRadius: 10)
                 .fill(backgroundColor)
-                .shadow(color: isSelected ? Color.blue.opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
+                .shadow(color: isSelected ? ThemeManager.shared.currentAccentColor.opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(isToday ? Color.blue : Color.clear, lineWidth: 1)
+                        .stroke(isToday ? ThemeManager.shared.currentAccentColor : Color.clear, lineWidth: 1)
                 )
             
             VStack(spacing: 2) {
                 // Indicateur "aujourd'hui"
                 if isToday && !isSelected {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(ThemeManager.shared.currentAccentColor)
                         .frame(width: 6, height: 6)
                         .padding(.top, 2)
                 }
@@ -942,7 +944,7 @@ struct ImprovedCalendarCell: View {
                     // Icône de type avec effet de transition
                     Image(systemName: workDay.type.icon)
                         .foregroundStyle(workDay.type.color)
-                        .font(.caption2)
+                        .font(.caption) // Changed from .caption2 to .caption
                         .transition(.scale.combined(with: .opacity))
                     
                     // Badge pour les bonus
@@ -968,25 +970,25 @@ struct ImprovedCalendarCell: View {
     // Couleur de fond basée sur l'état et le type
     private var backgroundColor: Color {
         if isSelected {
-            return Color.blue.opacity(0.8)
+            return ThemeManager.shared.currentAccentColor.opacity(0.8)
         } else if let workDay = workDay {
             // Couleur basée sur le type avec opacité
             switch workDay.type {
             case .work:
-                return Color.blue.opacity(0.1)
+                return ThemeManager.shared.currentAccentColor.opacity(0.1)
             case .vacation, .halfDayVacation:
-                return Color.orange.opacity(0.1)
+                return Color.orange.opacity(0.1) // Semantic
             case .sickLeave:
-                return Color.red.opacity(0.1)
+                return Color.red.opacity(0.1) // Semantic
             case .compensatory:
-                return Color.green.opacity(0.1)
+                return Color.green.opacity(0.1) // Semantic
             case .training:
-                return Color.purple.opacity(0.1)
+                return Color.purple.opacity(0.1) // Potentially semantic or could be accent
             case .holiday:
-                return Color.yellow.opacity(0.1)
+                return Color.yellow.opacity(0.1) // Semantic
             }
         } else if isToday {
-            return Color.blue.opacity(0.05)
+            return ThemeManager.shared.currentAccentColor.opacity(0.05)
         }
         return Color(.systemBackground)
     }
@@ -996,7 +998,7 @@ struct ImprovedCalendarCell: View {
         if isSelected {
             return .white
         } else if isToday {
-            return .blue
+            return ThemeManager.shared.currentAccentColor
         }
         return .primary
     }
@@ -1071,14 +1073,14 @@ struct WeekDayEventRow: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(
                     isSelected
-                    ? workDay.type.color.opacity(0.1)
+                    ? ThemeManager.shared.currentAccentColor.opacity(0.15) // Use accent color for selection
                     : Color(.systemBackground)
                 )
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(
-                            isSelected ? workDay.type.color : Color.clear,
+                            isSelected ? ThemeManager.shared.currentAccentColor : Color.clear, // Use accent color for selection border
                             lineWidth: 1
                         )
                 )
@@ -1113,7 +1115,7 @@ struct DatePickerSheet: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(ThemeManager.shared.currentAccentColor)
                         .cornerRadius(10)
                 }
                 .padding()
