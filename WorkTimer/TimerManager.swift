@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import SwiftData
 import SwiftUI
 
@@ -18,20 +19,21 @@ struct TimerData: Codable {
 }
 
 @MainActor
-class WorkTimerManager: ObservableObject {
+@Observable
+class WorkTimerManager {
     // MARK: - Singleton
-    static let shared = WorkTimerManager(modelContext: ModelContext(try! ModelContainer(for: WorkDay.self)))
+    static let shared = WorkTimerManager()
     
-    // MARK: - Published Properties
-    @Published private(set) var state: TimerState = .notStarted
-    @Published private(set) var elapsedTime: TimeInterval = 0
-    @Published var showEndDayAlert = false
-    @Published var pauseTime: Date?
-    @Published private(set) var currentWorkDay: WorkDay?
+    // MARK: - Properties
+    private(set) var state: TimerState = .notStarted
+    private(set) var elapsedTime: TimeInterval = 0
+    var showEndDayAlert = false
+    var pauseTime: Date?
+    private(set) var currentWorkDay: WorkDay?
     
     // MARK: - Private Properties
     private var timer: Timer?
-    private var modelContext: ModelContext
+    private var modelContext: ModelContext!
     private var startTimestamp: Date?
     private var totalPauseDuration: TimeInterval = 0
     private var lastPauseStart: Date?
@@ -47,12 +49,21 @@ class WorkTimerManager: ObservableObject {
     }
     
     // MARK: - Initialization
+    private init() {} // For shared instance
+
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         loadSavedState()
     }
     
     // MARK: - Public Methods
+    func configure(modelContext: ModelContext) {
+        self.modelContext = modelContext
+        // Ensure modelContext is set before loading state that might use it
+        // (e.g., if loadSavedState or its side effects were to interact with WorkDay entities)
+        loadSavedState()
+    }
+
     func toggleTimer() {
         switch state {
         case .notStarted:

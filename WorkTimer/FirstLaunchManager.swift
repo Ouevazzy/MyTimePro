@@ -1,7 +1,9 @@
 import SwiftUI
+import Observation
 
-class FirstLaunchManager: ObservableObject {
-    @Published var showFirstSyncInfo = false
+@Observable
+class FirstLaunchManager {
+    var showFirstSyncInfo = false
     
     init() {
         // Vérifier si c'est une première installation ou réinstallation

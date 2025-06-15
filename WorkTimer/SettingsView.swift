@@ -6,7 +6,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     @Bindable private var settings = UserSettings.shared
-    @StateObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
     
     // MARK: - State Properties

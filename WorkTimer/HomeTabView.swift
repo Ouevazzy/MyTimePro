@@ -10,7 +10,7 @@ struct HomeTabView: View {
     @State private var selectedYear: Int
     @State private var selectedMonth: Int
     @State private var selectedWeek: Date
-    @StateObject private var timerManager: WorkTimerManager
+    // timerManager removed
     @State private var animateCards = false
     
     // MARK: - Constants
@@ -23,7 +23,7 @@ struct HomeTabView: View {
         _selectedYear = State(initialValue: calendar.component(.year, from: currentDate))
         _selectedMonth = State(initialValue: calendar.component(.month, from: currentDate))
         _selectedWeek = State(initialValue: currentDate)
-        _timerManager = StateObject(wrappedValue: WorkTimerManager(modelContext: ModelContext(try! ModelContainer(for: WorkDay.self))))
+        // timerManager initialization removed
     }
     
     // MARK: - Body
@@ -33,7 +33,7 @@ struct HomeTabView: View {
                 // Timer section (conditionally shown)
                 if settings.showTimerInHome {
                     Group {
-                        WorkTimerView(modelContext: modelContext)
+                        WorkTimerView() // modelContext removed
                             .padding(.horizontal)
                             .padding(.bottom, 4)
                     }

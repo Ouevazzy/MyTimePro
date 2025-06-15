@@ -9,7 +9,7 @@ struct WorkTimerApp: App {
     private let cloudService = ModernCloudService.shared
     @State private var initialSetupComplete = false
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var firstLaunchManager = FirstLaunchManager()
+    @State private var firstLaunchManager = FirstLaunchManager()
     
     // Variable pour stocker le container une fois qu'il est créé
     let container: ModelContainer
@@ -70,6 +70,7 @@ struct WorkTimerApp: App {
             container = try ModelContainer(for: schema, configurations: modelConfig)
             container.mainContext.autosaveEnabled = true
             print("✅ ModelContainer initialisé avec succès")
+            WorkTimerManager.shared.configure(modelContext: container.mainContext)
             
         } catch {
             print("❌ Failed to initialize ModelContainer: \(error.localizedDescription)")
@@ -86,6 +87,7 @@ struct WorkTimerApp: App {
                 )
                 container = try ModelContainer(for: Schema([WorkDay.self]), configurations: fallbackConfig)
                 print("✅ ModelContainer de secours initialisé")
+                WorkTimerManager.shared.configure(modelContext: container.mainContext)
             } catch {
                 fatalError("Could not initialize ModelContainer: \(error)")
             }
@@ -96,7 +98,7 @@ struct WorkTimerApp: App {
         WindowGroup {
             ContentView()
                 .modelContainer(container)
-                .environmentObject(cloudService)
+                .environment(cloudService)
                 .onAppear {
                     // Première mise à jour de l'icône — une fois que le ColorScheme est connu
                     updateAppIcon(for: colorScheme == .dark ? .dark : .light)

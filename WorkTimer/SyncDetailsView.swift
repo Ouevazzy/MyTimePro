@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SyncDetailsView: View {
-    @EnvironmentObject private var cloudService: ModernCloudService
+    @Environment(ModernCloudService.self) private var cloudService
     @State private var showingResetAlert = false
     
     var body: some View {
@@ -74,7 +74,7 @@ struct SyncDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             SyncDetailsView()
-                .environmentObject(ModernCloudService.shared)
+                .environment(ModernCloudService.shared)
         }
     }
 } 

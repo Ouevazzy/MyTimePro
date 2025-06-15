@@ -7,7 +7,7 @@ import Combine
 
 struct ModernCloudStatusView: View {
     // Observer le service de synchronisation
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     
     // État local de l'interface
     @State private var showDetails = false
@@ -158,7 +158,7 @@ struct SyncButton: View {
 // Vue détaillée pour la synchronisation
 struct CloudStatusDetailsView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     
     var body: some View {
         NavigationStack {
@@ -280,7 +280,7 @@ struct CloudStatusDetailsView: View {
 // Vue d'information pour la première exécution ou réinstallation
 struct FirstSyncInfoView: View {
     @Binding var isPresented: Bool
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     
     var body: some View {
         VStack(spacing: 20) {

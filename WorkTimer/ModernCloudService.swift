@@ -4,16 +4,18 @@ import SwiftUI
 import SwiftData
 import BackgroundTasks
 import Combine
+import Observation
 
 @MainActor
-final class ModernCloudService: ObservableObject {
+@Observable
+final class ModernCloudService {
     // MARK: - Singleton
     static let shared = ModernCloudService()
     
-    // MARK: - Published Properties
-    @Published private(set) var syncStatus: SyncStatus = .idle
-    @Published private(set) var lastSyncDate: Date?
-    @Published private(set) var userMessage: String?
+    // MARK: - Properties
+    private(set) var syncStatus: SyncStatus = .idle
+    private(set) var lastSyncDate: Date?
+    private(set) var userMessage: String?
     
     // Configuration
     private let containerIdentifier = "iCloud.jordan-payez.MyTimePro"

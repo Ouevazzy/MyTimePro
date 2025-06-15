@@ -19,22 +19,19 @@ struct WorkTimerView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("standardDailyHours") private var standardDailyHours: Double = 8.0
-    @StateObject private var timerManager: WorkTimerManager
+    // timerManager StateObject removed, will use WorkTimerManager.shared
+    private var timerManager = WorkTimerManager.shared // Access shared instance
     
     // MARK: - Initialization
-    init(modelContext: ModelContext) {
-        _timerManager = StateObject(wrappedValue: WorkTimerManager(modelContext: modelContext))
-    }
+    // init(modelContext: ModelContext) removed
     
     // MARK: - Body
     var body: some View {
         StandardCardView(
-            cornerRadiusAmount: ViewMetrics.cornerRadius, // Specific to WorkTimerView (16)
-            backgroundColor: colorScheme == .dark ? Color(.secondarySystemGroupedBackground) : Color(.systemBackground), // Match original adaptive bg
-            // Using default shadow from StandardCardView for consistency, though original was different
-            shadowColor: Color.black.opacity(colorScheme == .dark ? 0.15 : 0.08), // Slightly adjusted shadow for context
-            shadowRadius: colorScheme == .dark ? 6 : 4,
-            shadowY: colorScheme == .dark ? 3 : 2
+            cornerRadiusAmount: ViewMetrics.cornerRadius,
+            backgroundMaterial: .thinMaterial, // Use thin material
+            strokeColor: Color(.separator).opacity(0.6) // Add a subtle stroke
+            // backgroundColor, shadowColor, shadowRadius, shadowY removed to use new defaults
         ) {
             VStack(spacing: ViewMetrics.contentPadding) {
                 // Timer Display
@@ -54,6 +51,18 @@ struct WorkTimerView: View {
                     }
                 }
             }
+            .sensoryFeedback(.success, trigger: timerManager.state == .running) { oldValue, newValue in
+                return oldValue != .running && newValue == .running
+            }
+            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.7), trigger: timerManager.state == .paused) { oldValue, newValue in
+                return oldValue == .running && newValue == .paused
+            }
+            .sensoryFeedback(.success, trigger: timerManager.state == .finished) { oldValue, newValue in
+                return oldValue != .finished && newValue == .finished
+            }
+            .sensoryFeedback(.warning, trigger: timerManager.showEndDayAlert) { oldValue, newValue in
+                return !oldValue && newValue
+            }
         }
         // .padding() // This padding is now handled by StandardCardView's paddingAmount (default 16)
         // Background and shadow are handled by StandardCardView
@@ -61,15 +70,18 @@ struct WorkTimerView: View {
         .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase)
         }
-        .alert("Terminer la journée", isPresented: $timerManager.showEndDayAlert) {
+        .alert("Terminer la journée", isPresented: Binding(
+            get: { WorkTimerManager.shared.showEndDayAlert },
+            set: { WorkTimerManager.shared.showEndDayAlert = $0 }
+        )) {
             Group {
                 Button("Annuler", role: .cancel) { }
                 Button("Terminer", role: .destructive) {
-                    timerManager.endDay()
+                    WorkTimerManager.shared.endDay()
                 }
             }
         } message: {
-            if let pauseTime = timerManager.pauseTime {
+            if let pauseTime = WorkTimerManager.shared.pauseTime {
                 Text("La journée sera enregistrée avec comme heure de fin \(pauseTime.formatted(date: .omitted, time: .shortened))")
             }
         }
@@ -115,13 +127,13 @@ struct WorkTimerView: View {
     }
     
     private var mainActionButton: some View {
-        Button(action: { timerManager.toggleTimer() }) {
+        Button(action: { WorkTimerManager.shared.toggleTimer() }) {
             TimerButtonLabel(text: buttonText, color: buttonColor)
         }
     }
     
     private var endDayButton: some View {
-        Button(action: { timerManager.showEndDayAlert = true }) {
+        Button(action: { WorkTimerManager.shared.showEndDayAlert = true }) {
             TimerButtonLabel(text: "Terminer", color: .red)
         }
         .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -160,8 +172,8 @@ struct WorkTimerView: View {
         switch newPhase {
         case .background:
             // Sauvegarde l'état lorsque l'app passe en arrière-plan
-            if timerManager.state == .running {
-                timerManager.pauseTimer()
+            if WorkTimerManager.shared.state == .running {
+                WorkTimerManager.shared.pauseTimer()
             }
         case .active:
             // Optionnel: restaurer l'état quand l'app revient au premier plan
@@ -200,6 +212,7 @@ private struct TimerButtonLabel: View {
 
 // MARK: - Preview
 #Preview {
-    WorkTimerView(modelContext: ModelContext(try! ModelContainer(for: WorkDay.self, configurations: ModelConfiguration())))
+    WorkTimerView() // Removed modelContext
+        .modelContainer(for: WorkDay.self, inMemory: true) // Added for preview context
         .preferredColorScheme(.dark)
 }
