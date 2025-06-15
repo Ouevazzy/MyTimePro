@@ -196,13 +196,43 @@ struct SettingsView: View {
                     )
                     .padding(.trailing)
             }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-            )
+            // Icône et informations utilisateur - Wrapped in StandardCardView
+            StandardCardView(backgroundMaterial: .thinMaterial) { // Added paddingAmount to match original vertical padding
+                HStack {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Profil")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+
+                        TextField("Votre nom", text: $userName)
+                            .font(.title2)
+                            .fontWeight(.bold)
+
+                        TextField("Entreprise", text: $userCompany)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    // .padding(.horizontal) // StandardCardView handles horizontal padding
+
+                    Spacer()
+
+                    Circle()
+                        .fill(LinearGradient(
+                            colors: [ThemeManager.shared.currentAccentColor, .purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .frame(width: 60, height: 60)
+                        .overlay(
+                            Text(userName.isEmpty ? "?" : String(userName.prefix(1)))
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        )
+                        // .padding(.trailing) // StandardCardView handles padding
+                }
+                // Removed .padding(.horizontal) and .padding(.vertical, 10) as StandardCardView handles it
+            }
             
             // Statistiques simples
             HStack(spacing: 15) {
@@ -268,6 +298,7 @@ struct SettingsView: View {
                                 .fill(ThemeManager.shared.currentAccentColor.opacity(0.1)) // Updated
                         )
                     }
+                    .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                 }
                 
                 // Jours travaillés
@@ -356,6 +387,7 @@ struct SettingsView: View {
                                 .font(.title2)
                                 .foregroundColor(.red)
                         }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                         
                         Button(action: {
                             if settings.annualVacationDays < 50 {
@@ -376,6 +408,7 @@ struct SettingsView: View {
                                 .font(.title2)
                                 .foregroundColor(.green)
                         }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     }
                     .padding()
                     .background(
@@ -412,6 +445,7 @@ struct SettingsView: View {
                                         .stroke(ThemeManager.shared.currentAccentColor, lineWidth: 1) // Updated
                                 )
                         }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     }
                 }
             }
@@ -528,6 +562,7 @@ struct SettingsView: View {
                                 .fill(Color(.systemGray6))
                         )
                     }
+                    .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     
                     // Export annuel
                     Button(action: {
@@ -558,6 +593,7 @@ struct SettingsView: View {
                                 .fill(Color(.systemGray6))
                         )
                     }
+                    .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                 }
                 
                 // Personnalisation des exports
@@ -588,10 +624,12 @@ struct SettingsView: View {
     }
     
     private var aboutCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("À propos")
-                .font(.headline)
-                .padding(.bottom, 5)
+        // Refactored aboutCard to use StandardCardView as its base
+        StandardCardView(backgroundMaterial: .thinMaterial) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("À propos")
+                    .font(.headline)
+                    .padding(.bottom, 5)
             
             // Synchronisation
             VStack(alignment: .leading, spacing: 10) {
@@ -620,15 +658,11 @@ struct SettingsView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(.systemGray6)) // Keep inner styling for these sub-items
             )
+            // Removed .padding() and .background() as StandardCardView handles these
+            }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        )
     }
     
     private var resetCard: some View {
@@ -663,6 +697,7 @@ struct SettingsView: View {
                     )
                     .foregroundColor(.red)
                 }
+                .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
             }
             .padding()
         }
@@ -759,7 +794,7 @@ struct SettingsCard<Content: View>: View {
     }
     
     var body: some View {
-        StandardCardView(paddingAmount: 0) { // Outer padding handled by content or header
+        StandardCardView(paddingAmount: 0, backgroundMaterial: .thinMaterial) { // Added backgroundMaterial
             VStack(spacing: 0) {
                 // Header
                 Button(action: onToggle) {
@@ -808,7 +843,7 @@ struct StatisticCard: View {
     let animate: Bool
     
     var body: some View {
-        StandardCardView {
+        StandardCardView(backgroundMaterial: .thinMaterial) { // Added backgroundMaterial
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     Image(systemName: icon)
@@ -942,6 +977,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                                 )
                                 .foregroundColor(selectedPreset == preset.value ? .white : .primary)
                         }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     }
                 }
                 .padding(.vertical, 10)
@@ -962,6 +998,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                             .font(.title)
                             .foregroundColor(.red)
                     }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     
                     Spacer()
                     
@@ -977,6 +1014,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                             )
                             .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                     }
+                    .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                     
                     Spacer()
                     
@@ -989,6 +1027,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                             .font(.title)
                             .foregroundColor(.green)
                     }
+                        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                 }
                 .padding(.vertical, 10)
             }
@@ -1010,6 +1049,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                         )
                         .foregroundColor(ThemeManager.shared.currentAccentColor) // Updated
                 }
+                .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
                 
                 Button(action: {
                     onSave(hours)
@@ -1025,6 +1065,7 @@ struct ImprovedWeeklyHoursPickerView: View {
                         )
                         .foregroundColor(.white)
                 }
+                .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
             }
         }
         .padding(.horizontal)
@@ -1109,5 +1150,15 @@ extension Bundle {
     NavigationStack {
         SettingsView()
             .modelContainer(for: WorkDay.self, inMemory: true)
+    }
+}
+
+// MARK: - Custom ButtonStyle
+struct AppButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.75 : 1.0) // Slightly more noticeable opacity change
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0) // Slightly more noticeable scale
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }

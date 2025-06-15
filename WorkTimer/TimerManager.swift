@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import SwiftData
 import SwiftUI
+import ActivityKit
 
 enum TimerState: String, Codable {
     case notStarted
@@ -34,6 +35,7 @@ class WorkTimerManager {
     // MARK: - Private Properties
     private var timer: Timer?
     private var modelContext: ModelContext!
+    @MainActor private var currentActivity: Activity<WorkTimerActivityAttributes>? = nil
     private var startTimestamp: Date?
     private var totalPauseDuration: TimeInterval = 0
     private var lastPauseStart: Date?
@@ -93,6 +95,27 @@ class WorkTimerManager {
         
         startTimer()
         saveState()
+
+        // Start Live Activity
+        if #available(iOS 16.1, *) {
+            let attributes = WorkTimerActivityAttributes(timerName: "Work Session")
+            let initialContentState = WorkTimerActivityAttributes.ContentState(
+                elapsedTime: 0, // elapsedTime is 0 when starting a new day
+                timerState: .running,
+                currentAccentColorName: UserSettings.shared.accentColorName
+            )
+            do {
+                let activity = try Activity.request(
+                    attributes: attributes,
+                    contentState: initialContentState,
+                    pushType: nil // No push notifications for updates
+                )
+                self.currentActivity = activity
+                print("Live Activity requested with ID: \(activity.id)")
+            } catch {
+                print("Error requesting Live Activity: \(error.localizedDescription)")
+            }
+        }
     }
     
     func pauseTimer() {
@@ -104,6 +127,19 @@ class WorkTimerManager {
         timer = nil
         
         saveState()
+
+        // Update Live Activity
+        if #available(iOS 16.1, *) {
+            let contentState = WorkTimerActivityAttributes.ContentState(
+                elapsedTime: self.elapsedTime,
+                timerState: .paused,
+                currentAccentColorName: UserSettings.shared.accentColorName
+            )
+            Task {
+                await self.currentActivity?.update(using: contentState)
+                print("Live Activity updated to Paused state.")
+            }
+        }
     }
     
     func resumeTimer() {
@@ -116,6 +152,41 @@ class WorkTimerManager {
         
         startTimer()
         saveState()
+
+        // Update Live Activity
+        if #available(iOS 16.1, *) {
+            // If activity is nil (e.g. app was terminated), try to start a new one.
+            // This logic might need refinement based on how app handles existing activities on launch.
+            if self.currentActivity == nil {
+                 let attributes = WorkTimerActivityAttributes(timerName: "Work Session")
+                 let initialContentState = WorkTimerActivityAttributes.ContentState(
+                     elapsedTime: self.elapsedTime,
+                     timerState: .running,
+                     currentAccentColorName: UserSettings.shared.accentColorName
+                 )
+                 do {
+                     let activity = try Activity.request(
+                         attributes: attributes,
+                         contentState: initialContentState,
+                         pushType: nil
+                     )
+                     self.currentActivity = activity
+                     print("Live Activity (re)started on resume: \(activity.id)")
+                 } catch {
+                     print("Error (re)starting Live Activity on resume: \(error.localizedDescription)")
+                 }
+            } else {
+                let contentState = WorkTimerActivityAttributes.ContentState(
+                    elapsedTime: self.elapsedTime,
+                    timerState: .running,
+                    currentAccentColorName: UserSettings.shared.accentColorName
+                )
+                Task {
+                    await self.currentActivity?.update(using: contentState)
+                    print("Live Activity updated to Running state on resume.")
+                }
+            }
+        }
     }
     
     func endDay() {
@@ -135,6 +206,20 @@ class WorkTimerManager {
         
         saveState()
         saveWorkDay()
+
+        // End Live Activity
+        if #available(iOS 16.1, *) {
+            let finalContentState = WorkTimerActivityAttributes.ContentState(
+                elapsedTime: self.elapsedTime, // Final elapsed time
+                timerState: .finished,
+                currentAccentColorName: UserSettings.shared.accentColorName
+            )
+            Task {
+                await self.currentActivity?.end(using: finalContentState, dismissalPolicy: .default)
+                self.currentActivity = nil
+                print("Live Activity ended on endDay.")
+            }
+        }
     }
     
     func resetTimer() {
@@ -150,6 +235,20 @@ class WorkTimerManager {
         timer = nil
         
         saveState()
+
+        // End Live Activity immediately
+        if #available(iOS 16.1, *) {
+            Task {
+                let contentState = WorkTimerActivityAttributes.ContentState(
+                    elapsedTime: 0,
+                    timerState: .notStarted,
+                    currentAccentColorName: UserSettings.shared.accentColorName
+                )
+                await self.currentActivity?.end(using: contentState, dismissalPolicy: .immediate)
+                self.currentActivity = nil
+                print("Live Activity ended on resetTimer.")
+            }
+        }
     }
     
     // MARK: - Private Methods
@@ -172,6 +271,21 @@ class WorkTimerManager {
         if elapsedTime >= standardWorkDaySeconds {
             showEndDayAlert = true
         }
+
+        // Update Live Activity periodically
+        if #available(iOS 16.1, *) {
+            if self.state == .running && Int(self.elapsedTime) % 10 == 0 { // Update every 10 seconds
+                let contentState = WorkTimerActivityAttributes.ContentState(
+                    elapsedTime: self.elapsedTime,
+                    timerState: self.state, // Should be .running here
+                    currentAccentColorName: UserSettings.shared.accentColorName
+                )
+                Task {
+                    await self.currentActivity?.update(using: contentState)
+                    // print("Live Activity updated at \(Int(self.elapsedTime))s.") // Can be noisy
+                }
+            }
+        }
     }
     
     private func saveState() {
@@ -184,13 +298,20 @@ class WorkTimerManager {
         )
         
         if let encoded = try? JSONEncoder().encode(timerData) {
-            UserDefaults.standard.set(encoded, forKey: "timerState")
+            UserDefaults(suiteName: SharedConstants.appGroupID)?.set(encoded, forKey: "timerState")
         }
     }
     
     private func loadSavedState() {
-        guard let data = UserDefaults.standard.data(forKey: "timerState"),
+        guard let userDefaults = UserDefaults(suiteName: SharedConstants.appGroupID),
+              let data = userDefaults.data(forKey: "timerState"),
               let timerData = try? JSONDecoder().decode(TimerData.self, from: data) else {
+            // Fallback to standard UserDefaults if app group is nil or data not found,
+            // or handle as a fresh start. For now, just return.
+            // Consider logging an error here if userDefaults is nil.
+            if UserDefaults(suiteName: SharedConstants.appGroupID) == nil {
+                print("Error: App Group UserDefaults suite could not be initialized in TimerManager.loadSavedState().")
+            }
             return
         }
         

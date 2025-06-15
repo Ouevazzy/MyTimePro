@@ -150,7 +150,8 @@ struct SyncButton: View {
                     .fill(secondary ? Color.blue.opacity(0.1) : Color.blue)
             )
         }
-        .buttonStyle(PlainButtonStyle())
+        // .buttonStyle(PlainButtonStyle()) // Removed PlainButtonStyle
+        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
         .disabled(isLoading)
     }
 }
@@ -343,6 +344,7 @@ struct FirstSyncInfoView: View {
                     .background(Color.blue)
                     .cornerRadius(12)
             }
+            .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
             .padding(.top)
         }
         .padding()

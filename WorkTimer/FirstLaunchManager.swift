@@ -6,9 +6,23 @@ class FirstLaunchManager {
     var showFirstSyncInfo = false
     
     init() {
+        guard let userDefaults = UserDefaults(suiteName: SharedConstants.appGroupID) else {
+            print("Error: App Group UserDefaults suite could not be initialized in FirstLaunchManager.init(). Defaulting to standard UserDefaults for this session (read-only equivalent).")
+            // Fallback or error handling: For safety, perhaps prevent modification if app group is unavailable.
+            // For now, reading from standard will likely return false for these keys if not set,
+            // which might be acceptable for a first launch scenario if app group is broken.
+            let hasCompletedFirstSync = UserDefaults.standard.bool(forKey: "hasCompletedFirstSync")
+            let isReinstallation = UserDefaults.standard.bool(forKey: "isReinstallation")
+            if !hasCompletedFirstSync || isReinstallation {
+                showFirstSyncInfo = true
+                // Not setting hasInitializedCloudKit here as we don't have app group defaults.
+            }
+            return
+        }
+
         // Vérifier si c'est une première installation ou réinstallation
-        let hasCompletedFirstSync = UserDefaults.standard.bool(forKey: "hasCompletedFirstSync")
-        let isReinstallation = UserDefaults.standard.bool(forKey: "isReinstallation")
+        let hasCompletedFirstSync = userDefaults.bool(forKey: "hasCompletedFirstSync")
+        let isReinstallation = userDefaults.bool(forKey: "isReinstallation")
         
         if !hasCompletedFirstSync || isReinstallation {
             showFirstSyncInfo = true
@@ -16,14 +30,18 @@ class FirstLaunchManager {
             // Réinitialiser le statut CloudKit à la première installation
             // pour s'assurer que l'application démarre avec un état propre
             if !hasCompletedFirstSync {
-                UserDefaults.standard.set(false, forKey: "hasInitializedCloudKit")
+                userDefaults.set(false, forKey: "hasInitializedCloudKit")
             }
         }
     }
     
     func markFirstSyncCompleted() {
-        UserDefaults.standard.set(true, forKey: "hasCompletedFirstSync")
-        UserDefaults.standard.set(false, forKey: "isReinstallation")
+        guard let userDefaults = UserDefaults(suiteName: SharedConstants.appGroupID) else {
+            print("Error: App Group UserDefaults suite could not be initialized in FirstLaunchManager.markFirstSyncCompleted(). Changes will not be saved.")
+            return
+        }
+        userDefaults.set(true, forKey: "hasCompletedFirstSync")
+        userDefaults.set(false, forKey: "isReinstallation")
         showFirstSyncInfo = false
     }
 }

@@ -130,12 +130,14 @@ struct WorkTimerView: View {
         Button(action: { WorkTimerManager.shared.toggleTimer() }) {
             TimerButtonLabel(text: buttonText, color: buttonColor)
         }
+        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
     }
     
     private var endDayButton: some View {
         Button(action: { WorkTimerManager.shared.showEndDayAlert = true }) {
             TimerButtonLabel(text: "Terminer", color: .red)
         }
+        .buttonStyle(AppButtonStyle()) // Applied AppButtonStyle
         .transition(.move(edge: .trailing).combined(with: .opacity))
     }
     

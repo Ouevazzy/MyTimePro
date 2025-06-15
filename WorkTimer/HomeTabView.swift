@@ -201,7 +201,7 @@ struct StatsSection: View {
     let animationDelay: Double
     
     var body: some View {
-        StandardCardView { // Replaced CardView
+        StandardCardView(backgroundMaterial: .thinMaterial) { // Added backgroundMaterial
             VStack(spacing: 10) {
                 // Header
                 HStack {
@@ -260,7 +260,7 @@ struct VacationSection: View {
     let animationDelay: Double
     
     var body: some View {
-        StandardCardView { // Replaced CardView
+        StandardCardView(backgroundMaterial: .thinMaterial) { // Added backgroundMaterial
             VStack(spacing: 12) {
                 // Header
                 HStack {
