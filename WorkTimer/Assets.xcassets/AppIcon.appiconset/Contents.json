@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "dall 1.png",
+      "filename" : "image333.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "dall 2.png",
+      "filename" : "image333 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "dall 3.png",
+      "filename" : "image333 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
