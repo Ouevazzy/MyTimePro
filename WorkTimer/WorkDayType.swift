@@ -2,13 +2,18 @@ import Foundation
 import SwiftUI
 
 enum WorkDayType: String, Codable, CaseIterable {
-    case work = "Travail"
-    case vacation = "Congé"
-    case halfDayVacation = "Demi-journée de congé"
-    case sickLeave = "Maladie"
-    case compensatory = "Journée compensatoire"
-    case training = "Formation"
-    case holiday = "Férié"
+    case work = "workDayType.work"
+    case vacation = "workDayType.vacation"
+    case halfDayVacation = "workDayType.halfDayVacation"
+    case sickLeave = "workDayType.sickLeave"
+    case compensatory = "workDayType.compensatory"
+    case training = "workDayType.training"
+    case holiday = "workDayType.holiday"
+    
+    /// Localized display name
+    var localizedName: String {
+        return rawValue.localized
+    }
     
     var isWorkDay: Bool { self == .work }
     var isVacation: Bool { self == .vacation || self == .halfDayVacation }
@@ -19,7 +24,7 @@ enum WorkDayType: String, Codable, CaseIterable {
         switch self {
         case .work: return "briefcase.fill"
         case .vacation, .halfDayVacation: return "sun.max.fill"
-        case .sickLeave: return "cross.fill"
+        case .sickLeave: return "cross.case.fill"
         case .compensatory: return "arrow.2.squarepath"
         case .training: return "book.fill"
         case .holiday: return "star.fill"

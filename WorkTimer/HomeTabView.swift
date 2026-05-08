@@ -4,18 +4,28 @@ import SwiftData
 struct HomeTabView: View {
     // MARK: - Environment & State Properties
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
-    @StateObject private var timerManager: WorkTimerManager
-    @Environment(\.scenePhase) private var scenePhase
-    
+
+    // Seuls les jours de congé — nécessaires pour le calcul multi-année du report
+    @Query(filter: #Predicate<WorkDay> {
+        $0.typeRawValue == "workDayType.vacation" || $0.typeRawValue == "workDayType.halfDayVacation"
+    }, sort: \WorkDay.date) private var vacationWorkDays: [WorkDay]
+
     // MARK: - State Properties
     @State private var selectedYear: Int
     @State private var selectedMonth: Int
     @State private var selectedWeek: Date
-    
+    @State private var animateCards = false
+
+    // Stats en cache — calculées via FetchDescriptor, jamais itérées dans body
+    @State private var yearlyStats: (totalHours: Double, overtimeSeconds: Int) = (0, 0)
+    @State private var monthlyStats: (totalHours: Double, overtimeSeconds: Int) = (0, 0)
+    @State private var weeklyStats: (totalHours: Double, overtimeSeconds: Int) = (0, 0)
+    @State private var vacationStats: (used: Double, remaining: Double, carryIn: Double, annual: Double) = (0, 0, 0, 0)
+    @State private var isCurrentYearStartYear: Bool = false
+
     // MARK: - Constants
     let settings = UserSettings.shared
-    
+
     // MARK: - Initialization
     init() {
         let currentDate = Date()
@@ -23,422 +33,378 @@ struct HomeTabView: View {
         _selectedYear = State(initialValue: calendar.component(.year, from: currentDate))
         _selectedMonth = State(initialValue: calendar.component(.month, from: currentDate))
         _selectedWeek = State(initialValue: currentDate)
-        _timerManager = StateObject(wrappedValue: WorkTimerManager(modelContext: ModelContext(try! ModelContainer(for: WorkDay.self))))
     }
-    
-    // MARK: - Computed Properties
-    var yearlyStats: (totalHours: Double, overtimeSeconds: Int) {
-        let calendar = Calendar.current
-        let startOfYear = calendar.date(from: DateComponents(year: selectedYear))!
-        let endOfYear = calendar.date(byAdding: DateComponents(year: 1, day: -1), to: startOfYear)!
-        
-        return calculateStats(from: startOfYear, to: endOfYear)
-    }
-    
-    var monthlyStats: (totalHours: Double, overtimeSeconds: Int) {
-        let calendar = Calendar.current
-        let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: selectedMonth))!
-        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
-        
-        return calculateStats(from: startOfMonth, to: endOfMonth)
-    }
-    
-    var weeklyStats: (totalHours: Double, overtimeSeconds: Int) {
-        let calendar = Calendar.current
-        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek))!
-        let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
-        
-        return calculateStats(from: startOfWeek, to: endOfWeek)
-    }
-    
-    var vacationStats: (used: Double, remaining: Double) {
-        let currentYear = Calendar.current.component(.year, from: Date())
-        let thisYearWorkDays = workDays.filter {
-            Calendar.current.component(.year, from: $0.date) == currentYear
-        }
-        
-        let vacationDays = thisYearWorkDays.reduce(0.0) { total, day in
-            if day.type == .vacation {
-                return total + 1
-            } else if day.type == .halfDayVacation {
-                return total + 0.5
-            }
-            return total
-        }
-        
-        return (
-            used: vacationDays,
-            remaining: Double(settings.annualVacationDays) - vacationDays
-        )
-    }
-    
+
     // MARK: - Body
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                // Timer section
-                TimerSection(timerManager: timerManager)
-                
-                // Stats sections
-                StatsSection(
-                    title: "Année \(selectedYear)",
-                    icon: "calendar",
-                    color: .blue,
+        List {
+            // — Section Année —
+            Section {
+                StatsRow(
                     stats: yearlyStats,
-                    showMissingHours: false
+                    showMissing: false
                 )
-                
-                StatsSection(
-                    title: "Mois en cours",
-                    icon: "calendar.badge.clock",
-                    color: .orange,
-                    stats: monthlyStats,
-                    showMissingHours: true
+                .equatable()
+            } header: {
+                SectionHeader(
+                    title: "stats.year".localized(selectedYear),
+                    icon: "calendar",
+                    color: .blue
                 )
-                
-                StatsSection(
-                    title: "Cette semaine",
-                    icon: "briefcase.fill",
-                    color: .green,
-                    stats: weeklyStats,
-                    showMissingHours: true
-                )
-                
-                // Vacation section
-                VacationSection(stats: vacationStats)
             }
-            .padding(.horizontal)
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            // — Section Mois —
+            Section {
+                StatsRow(
+                    stats: monthlyStats,
+                    showMissing: true
+                )
+                .equatable()
+            } header: {
+                SectionHeader(
+                    title: "stats.currentMonth".localized,
+                    icon: "calendar.badge.clock",
+                    color: .orange
+                )
+            }
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            // — Section Semaine —
+            Section {
+                StatsRow(
+                    stats: weeklyStats,
+                    showMissing: true
+                )
+                .equatable()
+            } header: {
+                SectionHeader(
+                    title: "stats.currentWeek".localized,
+                    icon: "briefcase.fill",
+                    color: .green
+                )
+            }
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            // — Section Congés —
+            VacationSection(
+                stats: vacationStats,
+                isStartYear: isCurrentYearStartYear
+            )
         }
-        .navigationTitle("Accueil")
-        .onChange(of: scenePhase) { _, newPhase in
-            handleScenePhaseChange(newPhase)
-        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("navigation.home".localized)
+        .navigationBarTitleDisplayMode(.large)
         .onAppear {
+            Analytics.shared.logScreenView("home")
             updateCurrentPeriod()
+            loadStats()
+        }
+        .refreshable {
+            updateCurrentPeriod()
+            loadStats()
+        }
+        .onChange(of: StatsCache.shared.lastUpdate) { _, _ in
+            loadStats()
         }
     }
-    
-    // MARK: - Helper Methods
-    private func calculateStats(from startDate: Date, to endDate: Date) -> (totalHours: Double, overtimeSeconds: Int) {
-        let periodWorkDays = workDays.filter { workDay in
-            workDay.date >= startDate && workDay.date <= endDate
+
+    // MARK: - Stats Loading
+
+    private func loadStats() {
+        let calendar = Calendar.current
+
+        let startOfYear = calendar.date(from: DateComponents(year: selectedYear))!
+        let endOfYear = calendar.date(byAdding: DateComponents(year: 1), to: startOfYear)!
+        yearlyStats = fetchStats(from: startOfYear, to: endOfYear)
+
+        let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: selectedMonth))!
+        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1), to: startOfMonth)!
+        monthlyStats = fetchStats(from: startOfMonth, to: endOfMonth)
+
+        let weekComponents = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek)
+        let startOfWeek = calendar.date(from: weekComponents)!
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek)!
+        weeklyStats = fetchStats(from: startOfWeek, to: endOfWeek)
+
+        updateVacationStats()
+    }
+
+    private func fetchStats(from startDate: Date, to endDate: Date) -> (totalHours: Double, overtimeSeconds: Int) {
+        let predicate = #Predicate<WorkDay> {
+            $0.date >= startDate && $0.date < endDate
         }
-        
-        let totalHours = periodWorkDays.reduce(0.0) { $0 + $1.totalHours }
-        let overtimeSeconds = periodWorkDays.reduce(0) { $0 + $1.overtimeSeconds }
-        
+        let descriptor = FetchDescriptor<WorkDay>(predicate: predicate)
+        guard let days = try? modelContext.fetch(descriptor) else { return (0, 0) }
+        let totalHours = days.reduce(0.0) { $0 + $1.totalHours }
+        let overtimeSeconds = days.reduce(0) { $0 + $1.overtimeSeconds }
         return (totalHours, overtimeSeconds)
     }
-    
+
+    private func updateVacationStats() {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let startYear = calendar.component(.year, from: settings.vacationStartDate)
+        let entitlement = Double(settings.annualVacationDays)
+        let stats = VacationCalculations.remainingStats(for: currentYear, workDays: vacationWorkDays, annualEntitlement: entitlement)
+        let annualForDisplay = (currentYear == startYear) ? 0 : entitlement
+        vacationStats = (used: stats.used, remaining: stats.remaining, carryIn: stats.carryIn, annual: annualForDisplay)
+        isCurrentYearStartYear = (currentYear == startYear)
+    }
+
+    // MARK: - Helper Methods
+
     private func updateCurrentPeriod() {
         let currentDate = Date()
         let calendar = Calendar.current
-        
         selectedYear = calendar.component(.year, from: currentDate)
         selectedMonth = calendar.component(.month, from: currentDate)
         selectedWeek = currentDate
     }
-    
-    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
-        switch newPhase {
-        case .background:
-            timerManager.handleEnterBackground()
-        case .active:
-            timerManager.handleEnterForeground()
-        default:
-            break
-        }
-    }
 }
 
-// MARK: - Supporting Views
-struct TimerSection: View {
-    @ObservedObject var timerManager: WorkTimerManager
-    
-    private var buttonText: String {
-        switch timerManager.state {
-        case .notStarted: return "Démarrer"
-        case .running: return "Pause"
-        case .paused: return "Reprendre"
-        case .finished: return "Nouvelle"
-        }
-    }
-    
-    private var buttonColor: Color {
-        switch timerManager.state {
-        case .notStarted: return .blue
-        case .running: return .orange
-        case .paused: return .green
-        case .finished: return .blue
-        }
-    }
-    
-    private var timerStatusColor: Color {
-        switch timerManager.state {
-        case .notStarted: return .secondary
-        case .running: return .green
-        case .paused: return .orange
-        case .finished: return .blue
-        }
-    }
-    
-    var body: some View {
-        CardView {
-            VStack(spacing: 8) {
-                // Header
-                HStack {
-                    Text("Journée de travail")
-                        .font(.headline)
-                    Spacer()
-                    Text("Restant")
-                        .foregroundColor(.secondary)
-                }
-                
-                // Timer Display
-                HStack {
-                    TimerDisplayComponent(
-                        time: timerManager.elapsedTime,
-                        statusColor: timerStatusColor
-                    )
-                    
-                    Spacer()
-                    
-                    RemainingTimeComponent(time: timerManager.remainingTime)
-                }
-                
-                // Control Buttons
-                TimerControlButtons(
-                    timerManager: timerManager,
-                    buttonText: buttonText,
-                    buttonColor: buttonColor
-                )
-            }
-        }
-        .alert("Terminer la journée", isPresented: $timerManager.showEndDayAlert) {
-            endDayAlertButtons
-        } message: {
-            endDayAlertMessage
-        }
-    }
-    
-    private var endDayAlertButtons: some View {
-        Group {
-            Button("Annuler", role: .cancel) { }
-            Button("Terminer", role: .destructive) {
-                timerManager.endDay()
-            }
-        }
-    }
-    
-    private var endDayAlertMessage: some View {
-        Group {
-            if let pauseTime = timerManager.pauseTime {
-                Text("La journée sera enregistrée avec comme heure de fin \(pauseTime.formatted(date: .omitted, time: .shortened))")
-            }
-        }
-    }
-}
+// MARK: - Section Header (style Apple Settings)
 
-struct StatsSection: View {
+private struct SectionHeader: View {
     let title: String
     let icon: String
     let color: Color
+
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: DS.IconSize.sectionHeader, height: DS.IconSize.sectionHeader)
+                .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.sectionHeader))
+
+            Text(title)
+                .font(.callout)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .textCase(nil)
+        }
+        .padding(.bottom, DS.Spacing.xs)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+// MARK: - Stats Row
+
+private struct StatsRow: View, Equatable {
     let stats: (totalHours: Double, overtimeSeconds: Int)
-    let showMissingHours: Bool
-    
-    private var overtimeText: String {
-        showMissingHours ? "Heures manquantes" : "Heures supp."
+    let showMissing: Bool
+
+    static func == (lhs: StatsRow, rhs: StatsRow) -> Bool {
+        lhs.stats.totalHours == rhs.stats.totalHours &&
+        lhs.stats.overtimeSeconds == rhs.stats.overtimeSeconds &&
+        lhs.showMissing == rhs.showMissing
     }
-    
+
     var body: some View {
-        CardView {
-            VStack(spacing: 12) {
-                // Header
+        HStack {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("stats.workedHours".localized)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(WorkTimeCalculations.formattedHoursRounded(stats.totalHours))
+                    .font(.system(.title3, design: .rounded))
+                    .fontWeight(.semibold)
+                    .monospacedDigit()
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(stats.overtimeSeconds >= 0
+                     ? "stats.overtimeHours".localized
+                     : "stats.missingHours".localized)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(WorkTimeCalculations.formattedSecondsRounded(stats.overtimeSeconds))
+                    .font(.system(.title3, design: .rounded))
+                    .fontWeight(.semibold)
+                    .monospacedDigit()
+                    .foregroundStyle(stats.overtimeSeconds >= 0 ? Color.green : Color.red)
+            }
+        }
+        .padding(.vertical, DS.Spacing.xs)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Vacation Section
+
+private struct VacationSection: View {
+    let stats: (used: Double, remaining: Double, carryIn: Double, annual: Double)
+    let isStartYear: Bool
+
+    @State private var showVacationsView = false
+
+    private var usageProgress: Double {
+        let total = stats.annual + stats.carryIn
+        return total > 0 ? min(1.0, stats.used / total) : 0
+    }
+
+    var body: some View {
+        Section {
+            // Barre de progression
+            VStack(alignment: .leading, spacing: 8) {
+                ProgressView(value: usageProgress)
+                    .tint(.orange)
+
                 HStack {
-                    Image(systemName: icon)
-                        .foregroundColor(color)
-                    Text(title)
-                        .font(.headline)
+                    Text(String(format: "vacation.daysUsed".localized, stats.used))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     Spacer()
-                }
-                
-                // Stats
-                HStack {
-                    StatsComponent(
-                        title: "Heures travaillées",
-                        value: WorkTimeCalculations.formattedTimeInterval(stats.totalHours * 3600)
-                    )
-                    
-                    Spacer()
-                    
-                    StatsComponent(
-                        title: overtimeText,
-                        value: WorkTimeCalculations.formattedTimeInterval(Double(stats.overtimeSeconds)),
-                        valueColor: stats.overtimeSeconds >= 0 ? .green : .red
-                    )
+                    Text(String(format: "vacation.daysOfTotal".localized, stats.used, stats.annual + stats.carryIn))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            // Équivalent en heures
+            HStack {
+                Text("home.vacation.balanceHours".localized)
+                    .font(.subheadline)
+                Spacer()
+                Text(formatDaysAsHours(stats.remaining))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(stats.remaining > 0 ? .green : .red)
+            }
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            // Stats détaillées
+            if isStartYear {
+                statRow("vacation.initialBalance".localized, value: stats.carryIn, color: .purple)
+            } else {
+                statRow("vacation.annualEntitlement".localized, value: stats.annual, color: .blue)
+                statRow("vacation.carryIn".localized, value: stats.carryIn, color: .purple)
+            }
+            statRow("vacation.used".localized, value: stats.used, color: .orange)
+            statRow("vacation.remaining".localized,
+                    value: stats.remaining,
+                    color: stats.remaining > 0 ? .green : .red,
+                    bold: true)
+
+            // Bouton détails
+            Button {
+                showVacationsView = true
+            } label: {
+                HStack {
+                    Text("action.viewDetails".localized)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+        } header: {
+            SectionHeader(
+                title: "navigation.vacations".localized,
+                icon: "sun.max.fill",
+                color: .orange
+            )
+        }
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
+        .sheet(isPresented: $showVacationsView) {
+            VacationsView()
+        }
+    }
+
+    private func statRow(_ title: String, value: Double, color: Color, bold: Bool = false) -> some View {
+        HStack {
+            Text(title)
+                .font(.subheadline)
+            Spacer()
+            Text(String(format: "%.1f j", value) + "  (" + formatDaysAsHours(value) + ")")
+                .font(.subheadline)
+                .fontWeight(bold ? .semibold : .regular)
+                .foregroundStyle(color)
+        }
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
+    }
+
+    /// Convertit un nombre de jours en heures formatées
+    private func formatDaysAsHours(_ days: Double) -> String {
+        let hours = days * UserSettings.shared.standardDailyHours
+        if UserSettings.shared.useDecimalHours {
+            return String(format: "%.1fh", hours)
+        } else {
+            let totalMinutes = Int(round(hours * 60))
+            let h = abs(totalMinutes / 60)
+            let m = abs(totalMinutes % 60)
+            let sign = hours < 0 ? "-" : ""
+            return String(format: "%@%dh%02d", sign, h, m)
         }
     }
 }
 
-struct VacationSection: View {
-    let stats: (used: Double, remaining: Double)
-    
-    var body: some View {
-        CardView {
-            VStack(spacing: 12) {
-                // Header
-                HStack {
-                    Image(systemName: "sun.max.fill")
-                        .foregroundColor(.yellow)
-                    Text("Vacances restantes")
-                        .font(.headline)
-                    Spacer()
-                }
-                
-                // Stats
-                HStack {
-                    VacationStatsComponent(
-                        title: "Jours restants",
-                        value: stats.remaining
-                    )
-                    
-                    Spacer()
-                    
-                    VacationStatsComponent(
-                        title: "Jours utilisés",
-                        value: stats.used,
-                        valueColor: .green
-                    )
-                }
-            }
-        }
-    }
-}
+// MARK: - CardView (content layer)
 
-// MARK: - Supporting Components
 struct CardView<Content: View>: View {
     let content: Content
-    
+    @Environment(\.colorScheme) var colorScheme
+
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     var body: some View {
         content
             .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
-    }
-}
-
-struct TimerDisplayComponent: View {
-    let time: TimeInterval
-    let statusColor: Color
-    
-    var body: some View {
-        HStack {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
-            Text(formatTime(time))
-                .font(.system(.title2, design: .rounded))
-        }
-    }
-    
-    private func formatTime(_ timeInterval: TimeInterval) -> String {
-        let roundedInterval = round(timeInterval)
-        let hours = Int(roundedInterval) / 3600
-        let minutes = Int(roundedInterval) / 60 % 60
-        let seconds = Int(roundedInterval) % 60
-        return String(format: "%dh%02dmin %02d", hours, minutes, seconds)
-    }
-}
-
-struct RemainingTimeComponent: View {
-    let time: TimeInterval
-    
-    var body: some View {
-        Text(formatTime(time))
-            .foregroundColor(.secondary)
-            .font(.system(.title2, design: .rounded))
-    }
-    
-    private func formatTime(_ timeInterval: TimeInterval) -> String {
-        let roundedInterval = round(timeInterval)
-        let hours = Int(roundedInterval) / 3600
-        let minutes = Int(roundedInterval) / 60 % 60
-        let seconds = Int(roundedInterval) % 60
-        return String(format: "%dh%02dmin %02d", hours, minutes, seconds)
-    }
-}
-
-struct TimerControlButtons: View {
-    let timerManager: WorkTimerManager
-    let buttonText: String
-    let buttonColor: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: {
-                timerManager.toggleTimer()
-            }) {
-                Text(buttonText)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(buttonColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+            .background {
+                RoundedRectangle(cornerRadius: DS.Radius.card)
+                    .fill(Color(.secondarySystemGroupedBackground))
             }
-            
-            if timerManager.state == .running || timerManager.state == .paused {
-                Button(action: {
-                    timerManager.attemptEndDay()
-                }) {
-                    Text("Terminer")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-        }
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
     }
 }
+
+// MARK: - Shared Components
 
 struct StatsComponent: View {
     let title: String
     let value: String
-    var valueColor: Color = .primary
-    
+    let valueColor: Color
+
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.title)
+                .font(.system(.title3, design: .rounded))
                 .foregroundColor(valueColor)
+                .fontWeight(.medium)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 
 struct VacationStatsComponent: View {
     let title: String
     let value: Double
-    var valueColor: Color = .primary
-    
+    let valueColor: Color
+
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text(String(format: "%.1fj", value))
-                .font(.title)
+            Text(String(format: "%.1f j", value))
+                .font(.system(.title3, design: .rounded))
                 .foregroundColor(valueColor)
+                .fontWeight(.medium)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(format: "accessibility.days".localized, title, String(format: "%.1f", value)))
     }
 }
 
@@ -447,6 +413,5 @@ struct VacationStatsComponent: View {
     NavigationStack {
         HomeTabView()
             .modelContainer(for: WorkDay.self, inMemory: true)
-            .preferredColorScheme(.dark)
     }
 }

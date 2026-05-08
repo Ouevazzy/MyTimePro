@@ -1,8 +1,7 @@
 import SwiftUI
-import Combine
 
 @Observable
-class UserSettings {
+final class UserSettings {
     
     // MARK: - Singleton
     static let shared = UserSettings()
@@ -23,39 +22,56 @@ class UserSettings {
         
         static let lastStartTimeInterval = "lastStartTimeInterval"
         static let lastEndTimeInterval   = "lastEndTimeInterval"
+        static let lastBreakDuration     = "lastBreakDuration"
+        
+        // Nouvelles clés pour la gestion des vacances
+        static let vacationStartDate = "vacationStartDate"
+        static let initialVacationDays = "initialVacationDays"
     }
     
     // MARK: - Paramètres de temps de travail
     var weeklyHours: Double {
         didSet {
             iCloudStore.set(weeklyHours, forKey: Keys.weeklyHours)
-            iCloudStore.synchronize()
             updateDailyHours()
         }
     }
     
     var workingDays: [Bool] {
         didSet {
-            if let encoded = try? JSONEncoder().encode(workingDays) {
+            guard workingDays != oldValue else { return }
+            do {
+                let encoded = try JSONEncoder().encode(workingDays)
                 iCloudStore.set(encoded, forKey: Keys.workingDays)
-                iCloudStore.synchronize()
+            } catch {
+                AppLogger.error("Failed to encode workingDays", category: AppLogger.general, error: error)
             }
             updateDailyHours()
         }
     }
     
-    /// Calculé en fonction de weeklyHours et workingDays, mais on le stocke
     var standardDailyHours: Double {
         didSet {
             iCloudStore.set(standardDailyHours, forKey: Keys.standardDailyHours)
-            iCloudStore.synchronize()
         }
     }
     
     var annualVacationDays: Int {
         didSet {
             iCloudStore.set(annualVacationDays, forKey: Keys.annualVacationDays)
-            iCloudStore.synchronize()
+        }
+    }
+    
+    // MARK: - Paramètres de gestion des vacances
+    var vacationStartDate: Date {
+        didSet {
+            iCloudStore.set(vacationStartDate.timeIntervalSince1970, forKey: Keys.vacationStartDate)
+        }
+    }
+    
+    var initialVacationDays: Double {
+        didSet {
+            iCloudStore.set(initialVacationDays, forKey: Keys.initialVacationDays)
         }
     }
     
@@ -63,23 +79,13 @@ class UserSettings {
     var useDecimalHours: Bool {
         didSet {
             iCloudStore.set(useDecimalHours, forKey: Keys.useDecimalHours)
-            iCloudStore.synchronize()
         }
     }
     
     // MARK: - État de l'application
-    private(set) var isFirstLaunch: Bool {
-        didSet {
-            // On inverse la valeur pour marquer qu’on a lancé au moins une fois
-            iCloudStore.set(!isFirstLaunch, forKey: Keys.hasLaunchedBefore)
-            iCloudStore.synchronize()
-        }
-    }
-    
     var hasCompletedOnboarding: Bool {
         didSet {
             iCloudStore.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding)
-            iCloudStore.synchronize()
         }
     }
     
@@ -91,7 +97,6 @@ class UserSettings {
         }
         set {
             iCloudStore.set(newValue.timeIntervalSince1970, forKey: Keys.lastStartTimeInterval)
-            iCloudStore.synchronize()
         }
     }
     
@@ -102,7 +107,17 @@ class UserSettings {
         }
         set {
             iCloudStore.set(newValue.timeIntervalSince1970, forKey: Keys.lastEndTimeInterval)
-            iCloudStore.synchronize()
+        }
+    }
+
+    /// Dernière durée de pause utilisée (en secondes). Par défaut 3600 (1h).
+    var lastBreakDuration: TimeInterval {
+        get {
+            let value = iCloudStore.double(forKey: Keys.lastBreakDuration)
+            return value > 0 ? value : 3600
+        }
+        set {
+            iCloudStore.set(newValue, forKey: Keys.lastBreakDuration)
         }
     }
     
@@ -111,122 +126,118 @@ class UserSettings {
     private let defaultWorkingDays: [Bool] = [true, true, true, true, true, false, false]
     private let defaultDailyHours: Double = 8.0
     private let defaultVacationDays: Int = 25
+    private let defaultVacationStartDate: Date = Calendar.current.date(from: DateComponents(year: Calendar.current.component(.year, from: Date()), month: 1, day: 1)) ?? Date()
+    private let defaultInitialVacationDays: Double = 0.0
     
     // MARK: - Initialisation privée (Singleton)
     private init() {
-        // Initialisation en mémoire
         self.weeklyHours         = defaultWeeklyHours
         self.workingDays         = defaultWorkingDays
         self.standardDailyHours  = defaultDailyHours
         self.annualVacationDays  = defaultVacationDays
+        self.vacationStartDate   = defaultVacationStartDate
+        self.initialVacationDays = defaultInitialVacationDays
         self.useDecimalHours     = false
-        self.isFirstLaunch       = true
         self.hasCompletedOnboarding = false
         
-        // Charger les valeurs sauvegardées d’iCloud
+        // Charger les valeurs sauvegardées d'iCloud
         loadFromiCloud()
         
         // Mettre à jour standardDailyHours en conséquence
         updateDailyHours()
         
-        // Observer les changements iCloud depuis d’autres appareils
+        // Observer les changements iCloud depuis d'autres appareils
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(iCloudStoreDidChangeExternally(_:)),
             name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
             object: iCloudStore
         )
-        
-        // Forcer une synchronisation initiale
-        iCloudStore.synchronize()
+
+        // iOS 26: synchronize() supprimé — le système gère la sync automatiquement
     }
     
     // MARK: - Méthodes privées
-    
-    /// Charge les valeurs depuis iCloud store (si présentes).
     private func loadFromiCloud() {
-        // weeklyHours
         if iCloudStore.object(forKey: Keys.weeklyHours) != nil {
             self.weeklyHours = iCloudStore.double(forKey: Keys.weeklyHours)
         }
         
-        // workingDays (JSON)
         if let data = iCloudStore.data(forKey: Keys.workingDays),
            let decoded = try? JSONDecoder().decode([Bool].self, from: data) {
             self.workingDays = decoded
         }
         
-        // standardDailyHours
         if iCloudStore.object(forKey: Keys.standardDailyHours) != nil {
             self.standardDailyHours = iCloudStore.double(forKey: Keys.standardDailyHours)
         }
         
-        // annualVacationDays
         if iCloudStore.object(forKey: Keys.annualVacationDays) != nil {
-            self.annualVacationDays = Int(iCloudStore.longLong(forKey: Keys.annualVacationDays))
+            let raw = Int(iCloudStore.longLong(forKey: Keys.annualVacationDays))
+            self.annualVacationDays = max(0, min(365, raw))
         }
         
-        // useDecimalHours
+        // Charger la date de début des vacances
+        if iCloudStore.object(forKey: Keys.vacationStartDate) != nil {
+            let timeInterval = iCloudStore.double(forKey: Keys.vacationStartDate)
+            self.vacationStartDate = Date(timeIntervalSince1970: timeInterval)
+        }
+        
+        // Charger les jours de vacances initiaux
+        if iCloudStore.object(forKey: Keys.initialVacationDays) != nil {
+            self.initialVacationDays = iCloudStore.double(forKey: Keys.initialVacationDays)
+        }
+        
         self.useDecimalHours = iCloudStore.bool(forKey: Keys.useDecimalHours)
-        
-        // isFirstLaunch
-        // On inverse la logique "hasLaunchedBefore"
-        let hasLaunchedBefore = iCloudStore.bool(forKey: Keys.hasLaunchedBefore)
-        self.isFirstLaunch = !hasLaunchedBefore
-        
-        // hasCompletedOnboarding
         self.hasCompletedOnboarding = iCloudStore.bool(forKey: Keys.hasCompletedOnboarding)
-        
-        // lastStartTime / lastEndTime => gérés par les getters
     }
     
-    /// Méthode appelée automatiquement quand l’iCloud Store change (depuis un autre appareil).
     @objc private func iCloudStoreDidChangeExternally(_ notification: Notification) {
-        // Recharger toutes les valeurs
-        loadFromiCloud()
-        // Mettre à jour dailyHours
-        updateDailyHours()
+        DispatchQueue.main.async { [weak self] in
+            self?.loadFromiCloud()
+            self?.updateDailyHours()
+        }
     }
     
-    /// Met à jour standardDailyHours en fonction de weeklyHours et des jours travaillés
     private func updateDailyHours() {
         let workingDaysCount = workingDays.filter { $0 }.count
         if workingDaysCount > 0 {
             standardDailyHours = weeklyHours / Double(workingDaysCount)
         } else {
-            // si 0 jours travaillés => on peut fixer 0 ou laisser un default
             standardDailyHours = 0
         }
     }
     
     // MARK: - Méthodes publiques
-    
-    /// Remet toutes les valeurs par défaut
     func resetToDefaults() {
-        weeklyHours         = defaultWeeklyHours
-        workingDays         = defaultWorkingDays
-        standardDailyHours  = defaultDailyHours
-        annualVacationDays  = defaultVacationDays
-        useDecimalHours     = false
+        weeklyHours = defaultWeeklyHours
+        workingDays = defaultWorkingDays
+        standardDailyHours = defaultDailyHours
+        annualVacationDays = defaultVacationDays
+        vacationStartDate = defaultVacationStartDate
+        initialVacationDays = defaultInitialVacationDays
+        useDecimalHours = false
         hasCompletedOnboarding = false
-        lastStartTime       = Date()
-        lastEndTime         = Date()
-        
-        // On force la synchro iCloud
-        iCloudStore.synchronize()
+        lastStartTime = Date()
+        lastEndTime = Date()
+        lastBreakDuration = 3600
+
+        // iOS 26: synchronize() supprimé — le système gère la sync automatiquement
         updateDailyHours()
     }
     
-    func updateLastUsedTimes(start: Date?, end: Date?) {
+    func updateLastUsedTimes(start: Date?, end: Date?, breakDuration: TimeInterval? = nil) {
         if let start {
             lastStartTime = start
         }
         if let end {
             lastEndTime = end
         }
+        if let breakDuration {
+            lastBreakDuration = breakDuration
+        }
     }
     
-    /// Formatte un nombre d'heures en texte, selon useDecimalHours
     func formatHours(_ hours: Double) -> String {
         if useDecimalHours {
             return String(format: "%.2f", hours)

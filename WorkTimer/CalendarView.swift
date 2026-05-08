@@ -10,9 +10,6 @@ struct CalendarView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     
-    // Optimisation de la requête avec prédicat pour limiter les résultats
-    @Query(sort: \WorkDay.date) private var allWorkDays: [WorkDay]
-    
     // État principal
     @State private var selectedDate = Date()
     @State private var displayDate = Date() // Date affichée (peut être différente de selectedDate)
@@ -33,6 +30,7 @@ struct CalendarView: View {
     
     // Nouvelles optimisations
     @State private var displayedWorkDays: [WorkDay] = []
+    @State private var workDaysByDate: [Date: WorkDay] = [:]  // Lookup O(1) au lieu de O(n)
     @State private var isFiltering = false
     @State private var cachedMonthDates: [Date?] = []
     @State private var cachedWeekDates: [Date] = []
@@ -40,7 +38,6 @@ struct CalendarView: View {
     // Valeurs calculées
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    private var screenWidth = UIScreen.main.bounds.width
     
     // Constantes d'animation
     private enum SlideDirection {
@@ -69,21 +66,20 @@ struct CalendarView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // En-tête du calendrier
                 calendarHeader
                 
                 // Mode de vue (mois/semaine)
                 HStack {
                     Picker("Mode", selection: $calendarViewMode) {
-                        Text("Mois").tag(CalendarViewMode.month)
-                        Text("Semaine").tag(CalendarViewMode.week)
+                        Text("calendar.mode.month".localized).tag(CalendarViewMode.month)
+                        Text("calendar.mode.week".localized).tag(CalendarViewMode.week)
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal)
                     .onChange(of: calendarViewMode) { _, newValue in
-                        withAnimation {
+                        withAnimation(DS.Animation.navigation) {
                             // Réinitialiser l'animation lors du changement de mode
                             slideDirection = .none
                             animateCalendar = false
@@ -101,7 +97,7 @@ struct CalendarView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "calendar.badge.clock")
                                     .font(.caption)
-                                Text("Aujourd'hui")
+                                Text("calendar.today".localized)
                                     .font(.caption)
                             }
                             .foregroundColor(.blue)
@@ -111,6 +107,7 @@ struct CalendarView: View {
                             .cornerRadius(8)
                             .shadow(color: Color.black.opacity(0.1), radius: 1)
                         }
+                        .accessibilityLabel("accessibility.today".localized)
                     }
                 }
                 .padding(.top, 8)
@@ -122,7 +119,7 @@ struct CalendarView: View {
                 // Affichage du calendrier selon le mode
                 ZStack {
                     if isFiltering {
-                        ProgressView("Chargement...")
+                        ProgressView("loading".localized)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else if calendarViewMode == .month {
                         // Vue mensuelle avec animation
@@ -144,28 +141,34 @@ struct CalendarView: View {
                             )
                     }
                 }
-                .animation(.spring(duration: 0.4), value: displayDate)
+                .animation(DS.Animation.navigation, value: displayDate)
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 20)
                         .onChanged { gesture in
+                            withAnimation(DS.Animation.interactive) {
                             isDragging = true
                             dragOffset = gesture.translation.width
+                            }
                         }
                         .onEnded { gesture in
                             isDragging = false
                             let threshold: CGFloat = 50
-                            withAnimation {
-                                if gesture.translation.width > threshold {
+                            let velocity = gesture.predictedEndTranslation.width
+                            
+                            withAnimation(DS.Animation.navigation) {
+                                if gesture.translation.width > threshold || velocity > 500 {
                                     // Glissement vers la droite -> mois/semaine précédent
                                     slideDirection = .right
+                                    Haptic.impact(.light)
                                     if calendarViewMode == .month {
                                         shiftMonth(by: -1)
                                     } else {
                                         shiftWeek(by: -1)
                                     }
-                                } else if gesture.translation.width < -threshold {
+                                } else if gesture.translation.width < -threshold || velocity < -500 {
                                     // Glissement vers la gauche -> mois/semaine suivant
                                     slideDirection = .left
+                                    Haptic.impact(.light)
                                     if calendarViewMode == .month {
                                         shiftMonth(by: 1)
                                     } else {
@@ -186,8 +189,11 @@ struct CalendarView: View {
                         .zIndex(1)
                 }
             }
-            .navigationTitle("Calendrier")
+            .navigationTitle("calendar.title".localized)
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                Analytics.shared.logScreenView("calendar")
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
@@ -233,7 +239,7 @@ struct CalendarView: View {
             .onChange(of: selectedDate) { oldValue, newValue in
                 // Assurez-vous que la date affichée correspond au mois de la date sélectionnée
                 if !calendar.isDate(oldValue, equalTo: newValue, toGranularity: .month) {
-                    withAnimation {
+                    withAnimation(DS.Animation.navigation) {
                         displayDate = newValue
                         slideDirection = .none
                     }
@@ -250,18 +256,22 @@ struct CalendarView: View {
             }
             .task {
                 // Charger les données initiales
-                try? await updateDisplayedWorkDays()
+                do {
+                    try await updateDisplayedWorkDays()
+                } catch {
+                    ErrorManager.shared.handle(error, context: "CalendarInitialLoad")
+                }
             }
-        }
+            .withErrorHandling()
     }
-    
+
     // MARK: - Composants d'interface
     
     // En-tête avec navigation du calendrier
     private var calendarHeader: some View {
         HStack {
             Button(action: {
-                withAnimation {
+                withAnimation(DS.Animation.navigation) {
                     slideDirection = .right
                     if calendarViewMode == .month {
                         shiftMonth(by: -1)
@@ -276,23 +286,24 @@ struct CalendarView: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
-            
+            .buttonStyle(.pressable)
+
             Spacer()
-            
+
             // Titre du mois ou de la semaine avec effet de transition
             VStack(spacing: 4) {
                 if calendarViewMode == .month {
                     Text(monthAndYear)
                         .font(.title2)
-                        .fontWeight(.medium)
+                        .fontWeight(.semibold)
                         .matchedGeometryEffect(id: "monthTitle", in: monthTransition)
                 } else {
                     Text(weekRange)
                         .font(.title3)
-                        .fontWeight(.medium)
+                        .fontWeight(.semibold)
                         .matchedGeometryEffect(id: "weekTitle", in: monthTransition)
                 }
-                
+
                 // Petit indicateur d'année si en mode semaine
                 if calendarViewMode == .week {
                     Text(displayDate.formatted(.dateTime.year()))
@@ -301,11 +312,11 @@ struct CalendarView: View {
                 }
             }
             .frame(height: 50)
-            
+
             Spacer()
-            
+
             Button(action: {
-                withAnimation {
+                withAnimation(DS.Animation.navigation) {
                     slideDirection = .left
                     if calendarViewMode == .month {
                         shiftMonth(by: 1)
@@ -320,12 +331,13 @@ struct CalendarView: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
+            .buttonStyle(.pressable)
         }
         .padding(.horizontal)
         .padding(.top, 8)
-        .background(Color(colorScheme == .dark ? .systemBackground : .systemGroupedBackground))
+        .background(Color(.systemGroupedBackground))
     }
-    
+
     // En-tête des jours de la semaine
     private var weekdayHeader: some View {
         HStack(spacing: 0) {
@@ -343,8 +355,8 @@ struct CalendarView: View {
     
     // Vue du calendrier mensuel - version optimisée
     private var monthCalendarView: some View {
-        LazyVGrid(columns: columns, spacing: 1) {
-            ForEach(Array(cachedMonthDates.enumerated()), id: \.offset) { _, date in
+        LazyVGrid(columns: columns, spacing: 2) {
+            ForEach(Array(cachedMonthDates.enumerated()), id: \.offset) { index, date in
                 if let date = date {
                     let workDay = findWorkDay(for: date)
                     // Cellule avec jour
@@ -355,7 +367,7 @@ struct CalendarView: View {
                         isToday: calendar.isDateInToday(date)
                     )
                     .onTapGesture {
-                        withAnimation(.spring(duration: 0.3)) {
+                        withAnimation(DS.Animation.micro) {
                             selectedDate = date
                             selectedWorkDay = workDay
                         }
@@ -413,7 +425,7 @@ struct CalendarView: View {
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        withAnimation(.spring(duration: 0.3)) {
+                        withAnimation(DS.Animation.micro) {
                             selectedDate = date
                             selectedWorkDay = findWorkDay(for: date)
                         }
@@ -421,7 +433,7 @@ struct CalendarView: View {
                 }
             }
             .padding(.horizontal)
-            
+
             // Conteneur d'événements pour la semaine
             weekEventsContainer
         }
@@ -435,7 +447,7 @@ struct CalendarView: View {
             // Utilisation d'un composant de vue optimisé pour les événements de la semaine
             OptimizedWeekEvents(
                 weekDates: cachedWeekDates,
-                displayedWorkDays: displayedWorkDays,
+                workDaysByDate: workDaysByDate,
                 selectedDate: $selectedDate,
                 selectedWorkDay: $selectedWorkDay
             )
@@ -445,103 +457,85 @@ struct CalendarView: View {
     
     // Carte de détail de la journée sélectionnée
     private func workDayDetailCard(_ workDay: WorkDay) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             HStack {
                 Text(formatDate(workDay.date))
                     .font(.headline)
-                
                 Spacer()
-                
-                // Bouton de fermeture
-                Button(action: {
-                    withAnimation {
-                        selectedWorkDay = nil
-                    }
-                }) {
+                Button {
+                    withAnimation(DS.Animation.interactive) { selectedWorkDay = nil }
+                } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(.title3)
                 }
             }
             .padding(.horizontal)
-            
+
             Divider()
-            
-            VStack {
-                CalendarDetailRow(workDay: workDay)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        showingEditSheet = true
+
+            CalendarDetailRow(workDay: workDay)
+                .contentShape(Rectangle())
+                .onTapGesture { showingEditSheet = true }
+                .contextMenu {
+                    Button(role: .destructive) {
+                        withAnimation(DS.Animation.interactive) { deleteWorkDay(workDay) }
+                    } label: {
+                        Label("action.delete".localized, systemImage: "trash")
                     }
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            withAnimation {
-                                deleteWorkDay(workDay)
-                            }
-                        } label: {
-                            Label("Supprimer", systemImage: "trash")
-                        }
-                    }
-            }
-            .padding(.vertical, 4)
-            
-            // Boutons d'action
-            HStack(spacing: 16) {
-                Button(action: {
+                }
+                .padding(.vertical, DS.Spacing.xs)
+
+            HStack(spacing: DS.Spacing.sm) {
+                Button {
                     showingEditSheet = true
-                }) {
-                    HStack {
-                        Image(systemName: "pencil")
-                        Text("Modifier")
-                    }
-                    .foregroundColor(.blue)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(8)
+                } label: {
+                    Label("action.edit".localized, systemImage: "pencil")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.blue)
+                        .padding(.vertical, DS.Spacing.sm)
+                        .padding(.horizontal, DS.Spacing.md)
+                        .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: DS.Radius.small))
                 }
-                
-                Button(action: {
-                    withAnimation {
-                        deleteWorkDay(workDay)
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "trash")
-                        Text("Supprimer")
-                    }
-                    .foregroundColor(.red)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(8)
+                .buttonStyle(.pressable)
+
+                Button {
+                    withAnimation(DS.Animation.interactive) { deleteWorkDay(workDay) }
+                } label: {
+                    Label("action.delete".localized, systemImage: "trash")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.red)
+                        .padding(.vertical, DS.Spacing.sm)
+                        .padding(.horizontal, DS.Spacing.md)
+                        .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: DS.Radius.small))
                 }
-                
+                .buttonStyle(.pressable)
+
                 Spacer()
             }
             .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.bottom, DS.Spacing.sm)
         }
-        .padding(.vertical, 8)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .padding(.vertical, DS.Spacing.sm)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
         .padding(.horizontal)
-        .padding(.bottom, 8)
+        .padding(.bottom, DS.Spacing.sm)
     }
     
     // MARK: - Méthodes d'optimisation
     
-    // Mise à jour efficace des WorkDays à afficher
+    // ✅ FetchDescriptor ciblé sur la période visible.
     @MainActor
     private func updateDisplayedWorkDays() async throws {
         isFiltering = true
-        
-        // Capturer les données nécessaires dans le contexte MainActor
+
         let currentMode = calendarViewMode
         let currentDisplayDate = displayDate
-        
-        // Calculer les dates dans une tâche détachée - cette partie est Sendable et sûre
+
+        // Calcul des dates de la grille (pur calcul, pas de données SwiftData)
         let datesTask = Task.detached(priority: .userInitiated) { [calendar] in
             if currentMode == .month {
                 return await (Self.computeMonthDates(for: currentDisplayDate, calendar: calendar), [Date]())
@@ -549,33 +543,48 @@ struct CalendarView: View {
                 return await ([], Self.computeWeekDates(for: currentDisplayDate, calendar: calendar))
             }
         }
-        
-        // Attendre le résultat des dates
         let (monthDates, weekDates) = await datesTask.value
-        
-        // Filtrer les WorkDays directement sur l'acteur principal
-        // car WorkDay n'est pas Sendable et ne peut pas être transmis entre acteurs
+
+        // ✅ Fetch ciblé avec prédicat SQL — ne charge QUE les jours de la période visible
         var relevantWorkDays: [WorkDay] = []
-        
-        if currentMode == .month {
-            // Pour le mode mois, on filtre sur le mois
-            if let interval = calendar.dateInterval(of: .month, for: currentDisplayDate) {
-                relevantWorkDays = allWorkDays.filter { !$0.isDeleted && $0.date >= interval.start && $0.date < interval.end }
+        do {
+            if currentMode == .month,
+               let interval = calendar.dateInterval(of: .month, for: currentDisplayDate) {
+                let start = interval.start
+                let end   = interval.end
+                var descriptor = FetchDescriptor<WorkDay>(
+                    predicate: #Predicate<WorkDay> { $0.date >= start && $0.date < end },
+                    sortBy: [SortDescriptor(\.date)]
+                )
+                descriptor.propertiesToFetch = [\.date, \.typeRawValue, \.totalHours, \.overtimeSeconds, \.startTime, \.endTime]
+                relevantWorkDays = try modelContext.fetch(descriptor)
+
+            } else if currentMode == .week,
+                      let firstDay = weekDates.first, let lastDay = weekDates.last {
+                var descriptor = FetchDescriptor<WorkDay>(
+                    predicate: #Predicate<WorkDay> { $0.date >= firstDay && $0.date <= lastDay },
+                    sortBy: [SortDescriptor(\.date)]
+                )
+                descriptor.propertiesToFetch = [\.date, \.typeRawValue, \.totalHours, \.overtimeSeconds, \.startTime, \.endTime]
+                relevantWorkDays = try modelContext.fetch(descriptor)
             }
-        } else {
-            // Pour le mode semaine, on filtre sur la semaine
-            if !weekDates.isEmpty, let firstDay = weekDates.first, let lastDay = weekDates.last {
-                relevantWorkDays = allWorkDays.filter { !$0.isDeleted && $0.date >= firstDay && $0.date <= lastDay }
-            }
+        } catch {
+            AppLogger.error("Calendar fetch failed", category: AppLogger.general, error: error)
         }
-        
-        // Mettre à jour l'interface
+
         self.cachedMonthDates = monthDates
         self.cachedWeekDates = weekDates
         self.displayedWorkDays = relevantWorkDays
+
+        // Pré-construire le dictionnaire pour lookup O(1) au lieu de O(n) par cellule
+        var lookup: [Date: WorkDay] = [:]
+        for wd in relevantWorkDays {
+            let key = calendar.startOfDay(for: wd.date)
+            lookup[key] = wd
+        }
+        self.workDaysByDate = lookup
+
         self.isFiltering = false
-        
-        // Vérifier si la date sélectionnée a un workDay
         self.selectedWorkDay = findWorkDay(for: selectedDate)
     }
     
@@ -693,59 +702,37 @@ struct CalendarView: View {
     
     /// Met la date sélectionnée à aujourd'hui
     private func goToToday() {
-        withAnimation(.spring(duration: 0.5)) {
+        withAnimation(DS.Animation.appear) {
             let today = Date()
             selectedDate = today
             displayDate = today
             slideDirection = .none
         }
         
-        // Effet de feedback haptique
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
     
     /// Supprime un WorkDay
     private func deleteWorkDay(_ workDay: WorkDay) {
-        // Supprimer localement
+        StatsCache.shared.onWorkDayDeleted(workDay)
         modelContext.delete(workDay)
-        
-        // Supprimer de CloudKit si nécessaire (en tâche de fond)
-        if let recordID = workDay.cloudKitRecordID {
-            Task.detached {
-                await CloudService.shared.deleteRecord(withID: recordID)
-            }
-        }
-        
-        // Sauvegarde
+
         do {
             try modelContext.save()
-            
-            // Mettre à jour l'affichage
-            if selectedWorkDay?.id == workDay.id {
-                selectedWorkDay = nil
-            }
-            
-            // Mettre à jour la liste filtrée
+            if selectedWorkDay?.id == workDay.id { selectedWorkDay = nil }
             displayedWorkDays.removeAll { $0.id == workDay.id }
-            
         } catch {
-            print("Erreur lors de la suppression : \(error)")
+            ErrorManager.shared.handle(error, context: "CalendarDeleteWorkDay")
         }
     }
     
-    /// Trouve le WorkDay correspondant à une date dans la liste filtrée
+    /// Trouve le WorkDay correspondant à une date via le dictionnaire pré-calculé (O(1))
     private func findWorkDay(for date: Date) -> WorkDay? {
-        displayedWorkDays.first { workDay in
-            calendar.isDate(workDay.date, inSameDayAs: date)
-        }
+        workDaysByDate[calendar.startOfDay(for: date)]
     }
     
     /// Formatte une date en chaîne localisée
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.dateStyle = .full
-        return formatter.string(from: date).capitalized
+        Self.fullDateFormatter.string(from: date).capitalized
     }
     
     /// Retourne la couleur de fond pour une date dans la vue semaine
@@ -761,47 +748,60 @@ struct CalendarView: View {
         }
     }
     
+    // MARK: - DateFormatters statiques (créés une seule fois)
+    private static let monthYearFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "fr_FR")
+        f.setLocalizedDateFormatFromTemplate("MMMM yyyy")
+        return f
+    }()
+
+    private static let fullDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "fr_FR")
+        f.dateStyle = .full
+        return f
+    }()
+
+    private static let dayMonthFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "fr_FR")
+        f.dateFormat = "d MMM"
+        return f
+    }()
+
+    private static let dayOnlyFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "fr_FR")
+        f.dateFormat = "d"
+        return f
+    }()
+
     // Formats et textes
     private var monthAndYear: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.setLocalizedDateFormatFromTemplate("MMMM yyyy")
-        return formatter.string(from: displayDate).lowercased()
+        Self.monthYearFormatter.string(from: displayDate).lowercased()
     }
-    
+
     private var weekRange: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.dateFormat = "d MMM"
-        
         guard let firstDay = cachedWeekDates.first, let lastDay = cachedWeekDates.last else {
             return ""
         }
-        
-        // Si même mois, n'afficher le mois qu'une fois
+
         if calendar.isDate(firstDay, equalTo: lastDay, toGranularity: .month) {
-            formatter.dateFormat = "d"
-            return "\(formatter.string(from: firstDay)) - \(lastDay.formatted(.dateTime.day().month(.abbreviated)))"
+            return "\(Self.dayOnlyFormatter.string(from: firstDay)) - \(lastDay.formatted(.dateTime.day().month(.abbreviated)))"
         }
-        
-        return "\(formatter.string(from: firstDay)) - \(formatter.string(from: lastDay))"
+
+        return "\(Self.dayMonthFormatter.string(from: firstDay)) - \(Self.dayMonthFormatter.string(from: lastDay))"
     }
 }
 
 // Vue optimisée pour afficher les événements d'une semaine
 struct OptimizedWeekEvents: View {
     let weekDates: [Date]
-    let displayedWorkDays: [WorkDay]
+    let workDaysByDate: [Date: WorkDay]
     @Binding var selectedDate: Date
     @Binding var selectedWorkDay: WorkDay?
-    
-    // Filtrer et organiser les données à l'avance
-    private var workDaysByDate: [Date: WorkDay] {
-        Dictionary(uniqueKeysWithValues: displayedWorkDays.map {
-            (Calendar.current.startOfDay(for: $0.date), $0)
-        })
-    }
-    
+
     private var hasEvents: Bool {
         !workDaysByDate.isEmpty
     }
@@ -816,7 +816,7 @@ struct OptimizedWeekEvents: View {
                     )
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        withAnimation(.spring(duration: 0.3)) {
+                        withAnimation(DS.Animation.micro) {
                             selectedDate = date
                             selectedWorkDay = workDay
                         }
@@ -832,7 +832,7 @@ struct OptimizedWeekEvents: View {
                     .font(.largeTitle)
                     .foregroundColor(.blue.opacity(0.7))
                 
-                Text("Aucun événement cette semaine")
+                Text("calendar.noEvents".localized)
                     .font(.headline)
                     .foregroundColor(.secondary)
             }
@@ -854,7 +854,7 @@ struct CalendarDetailRow: View {
                 HStack(spacing: 8) {
                     Image(systemName: workDay.type.icon)
                         .foregroundColor(workDay.type.color)
-                    Text(workDay.type.rawValue)
+                    Text(workDay.type.localizedName)
                         .font(.headline)
                 }
                 
@@ -902,31 +902,57 @@ struct CalendarDetailRow: View {
 
 // MARK: - Sous-vues améliorées
 
-/// Cellule de calendrier améliorée
+/// Cellule de calendrier améliorée avec design Liquid Glass
 struct ImprovedCalendarCell: View {
     let date: Date
     let workDay: WorkDay?
     let isSelected: Bool
     let isToday: Bool
     
+    @Environment(\.colorScheme) var colorScheme
     private let calendar = Calendar.current
     
     var body: some View {
         ZStack {
-            // Fond avec effet 3D subtil
-            RoundedRectangle(cornerRadius: 10)
+            // Fond avec effet Liquid Glass
+            RoundedRectangle(cornerRadius: 12)
                 .fill(backgroundColor)
-                .shadow(color: isSelected ? Color.blue.opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isToday ? Color.blue : Color.clear, lineWidth: 1)
+                .overlay {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.blue, .blue.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                }
+                .overlay {
+                    if isToday && !isSelected {
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.blue, lineWidth: 2)
+                    }
+                }
+                .shadow(
+                    color: isSelected ? Color.blue.opacity(0.2) : .clear,
+                    radius: isSelected ? 4 : 0,
+                    x: 0,
+                    y: isSelected ? 2 : 0
                 )
             
             VStack(spacing: 2) {
                 // Indicateur "aujourd'hui"
                 if isToday && !isSelected {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(
+                            LinearGradient(
+                                colors: [.blue, .blue.opacity(0.7)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                         .frame(width: 6, height: 6)
                         .padding(.top, 2)
                 }
@@ -934,27 +960,33 @@ struct ImprovedCalendarCell: View {
                 // Numéro du jour
                 Text(String(calendar.component(.day, from: date)))
                     .font(.system(.body, design: .rounded))
-                    .fontWeight(isToday || isSelected ? .bold : .regular)
+                    .fontWeight(isToday || isSelected ? .bold : .medium)
                     .foregroundStyle(textColor)
                 
                 // Indicateurs d'événements
                 if let workDay = workDay {
                     // Icône de type avec effet de transition
                     Image(systemName: workDay.type.icon)
-                        .foregroundStyle(workDay.type.color)
+                        .foregroundColor(isSelected ? .white.opacity(0.9) : workDay.type.color)
                         .font(.caption2)
                         .transition(.scale.combined(with: .opacity))
                     
                     // Badge pour les bonus
                     if workDay.bonusAmount > 0 {
                         Text("+" + String(format: "%.0f", workDay.bonusAmount))
-                            .font(.system(size: 9))
+                            .font(.system(size: 8, weight: .semibold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 1)
                             .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.orange)
+                                Capsule()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [.orange, .orange.opacity(0.8)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
                             )
                     }
                 }
@@ -968,27 +1000,28 @@ struct ImprovedCalendarCell: View {
     // Couleur de fond basée sur l'état et le type
     private var backgroundColor: Color {
         if isSelected {
-            return Color.blue.opacity(0.8)
+            return .clear // Le gradient est appliqué via overlay
         } else if let workDay = workDay {
-            // Couleur basée sur le type avec opacité
+            // Couleur basée sur le type avec opacité adaptée au mode sombre/clair
+            let opacity = colorScheme == .dark ? 0.15 : 0.12
             switch workDay.type {
             case .work:
-                return Color.blue.opacity(0.1)
+                return Color.blue.opacity(opacity)
             case .vacation, .halfDayVacation:
-                return Color.orange.opacity(0.1)
+                return Color.orange.opacity(opacity)
             case .sickLeave:
-                return Color.red.opacity(0.1)
+                return Color.red.opacity(opacity)
             case .compensatory:
-                return Color.green.opacity(0.1)
+                return Color.green.opacity(opacity)
             case .training:
-                return Color.purple.opacity(0.1)
+                return Color.purple.opacity(opacity)
             case .holiday:
-                return Color.yellow.opacity(0.1)
+                return Color.yellow.opacity(opacity)
             }
         } else if isToday {
-            return Color.blue.opacity(0.05)
+            return Color.blue.opacity(colorScheme == .dark ? 0.08 : 0.05)
         }
-        return Color(.systemBackground)
+        return colorScheme == .dark ? Color(.systemGray6).opacity(0.5) : Color(.systemBackground)
     }
     
     // Couleur du texte basée sur l'état
@@ -1083,7 +1116,7 @@ struct WeekDayEventRow: View {
                         )
                 )
         )
-        .animation(.spring(duration: 0.3), value: isSelected)
+        .animation(DS.Animation.micro, value: isSelected)
     }
 }
 
@@ -1097,7 +1130,7 @@ struct DatePickerSheet: View {
         NavigationStack {
             VStack {
                 DatePicker(
-                    "Sélectionner une date",
+                    "calendar.selectDate".localized,
                     selection: $selectedDate,
                     displayedComponents: [.date]
                 )
@@ -1108,7 +1141,7 @@ struct DatePickerSheet: View {
                     displayDate = selectedDate
                     isPresented = false
                 }) {
-                    Text("Confirmer")
+                    Text("action.confirm".localized)
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -1118,11 +1151,11 @@ struct DatePickerSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Choisir une date")
+            .navigationTitle("calendar.selectDate".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Fermer") {
+                    Button("action.close".localized) {
                         isPresented = false
                     }
                 }

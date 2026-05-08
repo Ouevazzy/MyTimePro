@@ -2,19 +2,51 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
-    <true/>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>remote-notification</string>
-        <string>fetch</string>
-        <string>processing</string>
-    </array>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
-        <string>com.mytimepro.backgroundtask</string>
-    </array>
-    <key>CFBundleDisplayName</key>
-    <string>WorkTimer</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>AppIcon</string>
+			</array>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>processing</string>
+		<string>fetch</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.mytiempo.sync</string>
+		<string>com.mytiempo.cleanup</string>
+	</array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>fr</string>
+		<string>en</string>
+		<string>de</string>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>fr</string>
+	<key>INIntentsSupported</key>
+	<array>
+		<string>LogArrivalIntent</string>
+		<string>LogDepartureIntent</string>
+		<string>GetOvertimeIntent</string>
+		<string>GetVacationBalanceIntent</string>
+	</array>
+	<key>NSSiriUsageDescription</key>
+	<string>WorkTimer utilise Siri pour vous permettre de pointer vos heures et consulter vos statistiques par la voix.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>WorkTimer vous envoie des rappels pour pointer vos heures de travail.</string>
 </dict>
 </plist>

@@ -1,71 +1,91 @@
 import SwiftUI
 
 struct SyncDetailsView: View {
-    @EnvironmentObject private var cloudService: ModernCloudService
+    @Environment(ModernCloudService.self) private var cloudService
     @State private var showingResetAlert = false
-    
+
+    private func friendlyErrorMessage(from error: Error) -> String {
+        let description = error.localizedDescription.lowercased()
+
+        if description.contains("network") || description.contains("connection") {
+            return "sync.error.network".localized
+        } else if description.contains("account") || description.contains("icloud") {
+            return "sync.error.account".localized
+        } else if description.contains("quota") || description.contains("space") {
+            return "sync.error.quota".localized
+        } else {
+            return "sync.error.generic".localized
+        }
+    }
+
     var body: some View {
         List {
             Section {
                 ModernCloudStatusView()
             }
             
-            Section("Statut détaillé") {
+            Section("sync.section.detailed".localized) {
                 HStack {
-                    Text("Dernière synchronisation")
+                    Text("sync.lastSync.label".localized)
                     Spacer()
                     if let lastSync = cloudService.lastSyncDate {
                         Text(lastSync.formatted(.relative(presentation: .named)))
                             .foregroundColor(.secondary)
                     } else {
-                        Text("Jamais")
+                        Text("sync.lastSync.never".localized)
                             .foregroundColor(.secondary)
                     }
                 }
                 
                 if case .failed(let error) = cloudService.syncStatus {
                     HStack {
-                        Text("Erreur")
+                        Text("sync.error.label".localized)
                         Spacer()
-                        Text(error.localizedDescription)
-                            .foregroundColor(.red)
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text(friendlyErrorMessage(from: error))
+                                .foregroundColor(.red)
+                                .font(.caption)
+                            Text(error.localizedDescription)
+                                .foregroundColor(.secondary)
+                                .font(.caption2)
+                        }
                     }
                 }
             }
             
-            Section("Actions") {
+            Section("sync.section.actions".localized) {
                 Button(action: {
                     Task {
                         try? await cloudService.sendChanges()
                     }
                 }) {
-                    Label("Synchroniser maintenant", systemImage: "arrow.triangle.2.circlepath")
+                    Label("sync.syncNow".localized, systemImage: "arrow.triangle.2.circlepath")
                 }
-                
+
                 Button(action: {
                     showingResetAlert = true
                 }) {
-                    Label("Réinitialiser la synchronisation", systemImage: "arrow.counterclockwise")
+                    Label("sync.reset".localized, systemImage: "arrow.counterclockwise")
                         .foregroundColor(.red)
                 }
             }
             
-            Section("À propos") {
-                Text("La synchronisation utilise iCloud pour garder vos données à jour sur tous vos appareils. Les données sont chiffrées et sécurisées.")
+            Section("sync.section.about".localized) {
+                Text("sync.about.description".localized)
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
         }
-        .navigationTitle("Synchronisation")
-        .alert("Réinitialiser la synchronisation", isPresented: $showingResetAlert) {
-            Button("Annuler", role: .cancel) { }
-            Button("Réinitialiser", role: .destructive) {
+        .navigationTitle("sync.title".localized)
+        .alert("sync.reset.title".localized, isPresented: $showingResetAlert) {
+            Button("action.cancel".localized, role: .cancel) { }
+            Button("sync.reset.confirm".localized, role: .destructive) {
                 Task {
                     cloudService.initialize()
                 }
             }
         } message: {
-            Text("Cette action supprimera toutes les données de synchronisation et redémarrera le processus depuis le début. Vos données locales ne seront pas affectées.")
+            Text("sync.reset.message".localized)
         }
     }
 }
@@ -74,7 +94,7 @@ struct SyncDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             SyncDetailsView()
-                .environmentObject(ModernCloudService.shared)
+                .environment(ModernCloudService.shared)
         }
     }
 } 

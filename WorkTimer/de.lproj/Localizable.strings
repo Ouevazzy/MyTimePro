@@ -1,0 +1,289 @@
+/* 
+  Localizable.strings (German)
+  WorkTimer
+*/
+
+// MARK: - Tab Bar
+"tab.home" = "Übersicht";
+"tab.workdays" = "Tage";
+"tab.calendar" = "Kalender";
+"tab.stats" = "Statistik";
+"tab.settings" = "Einstellungen";
+
+// MARK: - Home View
+"home.title" = "Übersicht";
+"home.yearly.title" = "Dieses Jahr";
+"home.monthly.title" = "Dieser Monat";
+"home.weekly.title" = "Diese Woche";
+"home.vacation.title" = "Urlaub";
+"home.hours.worked" = "Arbeitsstunden";
+"home.overtime" = "Überstunden";
+"home.days.worked" = "Arbeitstage";
+"home.remaining" = "Verbleibend";
+"home.used" = "Verwendet";
+
+// MARK: - Work Days List
+"workdays.title" = "Arbeitstage";
+"workdays.add" = "Eintrag hinzufügen";
+"workdays.empty.title" = "Keine Einträge";
+"workdays.empty.subtitle" = "Tippen Sie auf +, um Ihren ersten Arbeitstag hinzuzufügen";
+"workdays.filter.all" = "Alle";
+"workdays.search.placeholder" = "Suchen...";
+
+// MARK: - Add/Edit Work Day
+"addworkday.title.new" = "Neuer Eintrag";
+"addworkday.title.edit" = "Eintrag bearbeiten";
+"addworkday.date" = "Datum";
+"addworkday.type" = "Typ";
+"addworkday.start" = "Beginn";
+"addworkday.end" = "Ende";
+"addworkday.break" = "Pause";
+"addworkday.bonus" = "Bonus";
+"addworkday.note" = "Notiz";
+"addworkday.save" = "Speichern";
+"addworkday.delete" = "Löschen";
+
+// MARK: - Work Day Types
+"workday.type.work" = "Arbeit";
+"workday.type.vacation" = "Urlaub";
+"workday.type.halfDayVacation" = "Halbtag";
+"workday.type.sickLeave" = "Krankheit";
+"workday.type.holiday" = "Feiertag";
+"workday.type.compensatory" = "Zeitausgleich";
+"workday.type.training" = "Schulung";
+
+// MARK: - Calendar
+"calendar.title" = "Kalender";
+"calendar.today" = "Heute";
+"calendar.view.month" = "Monat";
+"calendar.view.week" = "Woche";
+
+// MARK: - Stats
+"stats.title" = "Statistik";
+"stats.year" = "Jahr";
+"stats.month" = "Monat";
+"stats.total.hours" = "Gesamtstunden";
+"stats.total.overtime" = "Gesamte Überstunden";
+"stats.average.hours" = "Durchschnitt";
+"stats.days.count" = "Anzahl Tage";
+
+// MARK: - Settings
+"settings.title" = "Einstellungen";
+"settings.work.hours" = "Arbeitszeit";
+"settings.weekly.hours" = "Wochenstunden";
+"settings.working.days" = "Arbeitstage";
+"settings.vacation" = "Urlaub";
+"settings.annual.days" = "Jahresurlaub";
+"settings.start.date" = "Startdatum";
+"settings.initial.balance" = "Anfangssaldo";
+"settings.display" = "Anzeige";
+"settings.decimal.hours" = "Dezimalstunden";
+"settings.notifications" = "Benachrichtigungen";
+"settings.export" = "Export";
+"settings.export.pdf" = "PDF exportieren";
+"settings.export.csv" = "CSV exportieren";
+"settings.about" = "Über";
+"settings.version" = "Version";
+"settings.support" = "Support";
+"settings.diagnostics" = "Diagnose";
+"settings.siri" = "Siri-Kurzbefehle";
+
+// MARK: - Notifications
+"notifications.title" = "Benachrichtigungen";
+"notifications.morning" = "Morgenerinnerung";
+"notifications.evening" = "Abenderinnerung";
+"notifications.weekend" = "Wochenenden einschließen";
+"notifications.test" = "Test senden";
+"notifications.authorized" = "Erlaubt";
+"notifications.not.authorized" = "Nicht erlaubt";
+"notifications.authorize" = "Erlauben";
+
+// MARK: - Charts
+"charts.title" = "Diagramme";
+"charts.weekly" = "Wöchentlich";
+"charts.monthly" = "Monatlich";
+"charts.daily" = "Täglich";
+"charts.distribution" = "Verteilung";
+"charts.summary" = "Zusammenfassung %d";
+"charts.no.data" = "Keine Daten";
+
+// MARK: - CSV Export
+"csv.title" = "CSV-Export";
+"csv.type.all" = "Alle Daten";
+"csv.type.yearly" = "Jahresbericht";
+"csv.type.monthly" = "Monatsbericht";
+"csv.type.vacation" = "Urlaubsbericht";
+"csv.type.overtime" = "Überstundenbericht";
+"csv.export" = "Als CSV exportieren";
+"csv.close" = "Schließen";
+
+// MARK: - PDF Export
+"pdf.title" = "PDF-Bericht";
+"pdf.generate" = "PDF erstellen";
+"pdf.share" = "Teilen";
+
+// MARK: - Vacation
+"vacation.title" = "Urlaub";
+"vacation.balance" = "Saldo";
+"vacation.carryover" = "Übertrag";
+"vacation.entitlement" = "Anspruch";
+"vacation.used" = "Verwendet";
+"vacation.remaining" = "Verbleibend";
+
+// MARK: - Siri
+"siri.title" = "Siri-Kurzbefehle";
+"siri.arrival" = "Ankunft erfassen";
+"siri.departure" = "Abfahrt erfassen";
+"siri.overtime" = "Überstunden prüfen";
+"siri.vacation" = "Urlaub prüfen";
+
+// MARK: - Days of Week
+"day.monday" = "Montag";
+"day.tuesday" = "Dienstag";
+"day.wednesday" = "Mittwoch";
+"day.thursday" = "Donnerstag";
+"day.friday" = "Freitag";
+"day.saturday" = "Samstag";
+"day.sunday" = "Sonntag";
+"day.mon" = "Mo";
+"day.tue" = "Di";
+"day.wed" = "Mi";
+"day.thu" = "Do";
+"day.fri" = "Fr";
+"day.sat" = "Sa";
+"day.sun" = "So";
+
+// MARK: - Months
+"month.january" = "Januar";
+"month.february" = "Februar";
+"month.march" = "März";
+"month.april" = "April";
+"month.may" = "Mai";
+"month.june" = "Juni";
+"month.july" = "Juli";
+"month.august" = "August";
+"month.september" = "September";
+"month.october" = "Oktober";
+"month.november" = "November";
+"month.december" = "Dezember";
+
+// MARK: - Common
+"common.cancel" = "Abbrechen";
+"common.save" = "Speichern";
+"common.delete" = "Löschen";
+"common.edit" = "Bearbeiten";
+"common.done" = "Fertig";
+"common.close" = "Schließen";
+"common.error" = "Fehler";
+"common.success" = "Erfolg";
+"common.loading" = "Laden...";
+"common.year" = "Jahr";
+"common.month" = "Monat";
+"common.week" = "Woche";
+"common.day" = "Tag";
+"common.hours" = "Stunden";
+"common.minutes" = "Minuten";
+"common.days" = "Tage";
+
+// MARK: - Accessibility
+"accessibility.home.tab" = "Übersicht, zeigt Arbeits- und Urlaubsstatistiken";
+"accessibility.workdays.tab" = "Arbeitstage, listet alle Ihre Arbeitstage auf";
+"accessibility.calendar.tab" = "Kalender, Kalenderansicht Ihrer Tage";
+"accessibility.stats.tab" = "Statistik, zeigt Jahres- und Monatsstatistiken";
+"accessibility.settings.tab" = "Einstellungen, Präferenzen konfigurieren";
+"accessibility.add.entry" = "Neuen Arbeitstag hinzufügen";
+"accessibility.previous.month" = "Zum vorherigen Monat";
+"accessibility.next.month" = "Zum nächsten Monat";
+"accessibility.previous.year" = "Zum vorherigen Jahr";
+"accessibility.next.year" = "Zum nächsten Jahr";
+
+// MARK: - Keys matching fr/en localization
+"navigation.home" = "Übersicht";
+"navigation.workDays" = "Tage";
+"navigation.calendar" = "Kalender";
+"navigation.stats" = "Statistik";
+"navigation.settings" = "Einstellungen";
+"navigation.vacations" = "Urlaub";
+"action.close" = "Schließen";
+"action.cancel" = "Abbrechen";
+"action.save" = "Speichern";
+"action.delete" = "Löschen";
+"action.edit" = "Bearbeiten";
+"action.add" = "Hinzufügen";
+"action.confirm" = "Bestätigen";
+"action.retry" = "Erneut versuchen";
+"action.done" = "Fertig";
+"workDay.title" = "Arbeitstage";
+"workDay.new" = "Neuer Eintrag";
+"workDay.edit" = "Eintrag bearbeiten";
+"workDay.type" = "Typ";
+"workDay.date" = "Datum";
+"workDay.startTime" = "Beginn";
+"workDay.endTime" = "Ende";
+"workDay.breakDuration" = "Pause";
+"workDay.bonus" = "BONUS";
+"workDay.note" = "NOTIZ";
+"workDay.summary" = "ZUSAMMENFASSUNG";
+"workDay.totalDuration" = "Gesamtdauer";
+"workDay.details" = "TAGESDETAILS";
+"stats.workDays" = "Arbeitstage";
+"stats.vacationDays" = "Urlaub";
+"stats.sickDays" = "Krankheit";
+"stats.totalHours" = "Gesamtstunden";
+"stats.overtimeHours" = "Überstunden";
+"stats.bonus" = "Bonus";
+"stats.year" = "Jahr %d";
+"stats.currentMonth" = "Aktueller Monat";
+"stats.currentWeek" = "Diese Woche";
+"stats.workedHours" = "Arbeitsstunden";
+"stats.missingHours" = "Fehlende Stunden";
+"calendar.today" = "Heute";
+"calendar.noEvents" = "Keine Ereignisse diese Woche";
+"loading" = "Laden...";
+"empty.noWorkDays.title" = "Keine Einträge für diesen Monat";
+"empty.noWorkDays.message" = "Fügen Sie Ihren ersten Arbeitstag hinzu";
+"empty.noWorkDays.action" = "Tag hinzufügen";
+"empty.noResults.title" = "Keine Ergebnisse gefunden";
+"empty.noResults.message" = "Versuchen Sie, Ihre Suchkriterien zu ändern";
+"empty.noResults.action" = "Filter löschen";
+"filter.title" = "Nach Typ filtern";
+"error.title" = "Fehler";
+"error.generic" = "Ein Fehler ist aufgetreten";
+"time.days" = "Tage";
+"time.day" = "Tag";
+"settings.weeklyHours" = "Wochenstunden";
+"settings.annualVacationDays" = "Jahresurlaub";
+"settings.support" = "Problem melden";
+"settings.diagnostics" = "Berechnungsdiagnose";
+"settings.privacy.message" = "Ihre Daten werden lokal gespeichert und über iCloud mit Ende-zu-Ende-Verschlüsselung synchronisiert.";
+"settings.privacy.icloud" = "iCloud-Synchronisierung";
+"settings.privacy.icloud.message" = "Die iCloud-Synchronisierung ist optional. Ihre Daten sind auch offline zugänglich.";
+"settings.privacy.dataControl" = "Datenkontrolle";
+"settings.privacy.dataControl.message" = "Sie können Ihre Daten jederzeit über die Exportoptionen exportieren, sichern oder löschen.";
+"settings.reset.confirm.title" = "Daten zurücksetzen";
+"settings.reset.confirm.message" = "Diese Aktion löscht alle Ihre Daten und setzt alle Einstellungen zurück. Dies kann nicht rückgängig gemacht werden.";
+"settings.reset.button" = "Einstellungen zurücksetzen";
+"privacy.encryption" = "Ende-zu-Ende-Verschlüsselung über iCloud";
+"privacy.noThirdParty" = "Keine Daten an Dritte weitergegeben";
+"privacy.localFirst" = "Lokale Speicherung prioritär";
+"privacy.noTracking" = "Kein Tracking oder Analytics";
+"privacy.dataOwnership" = "Ihre Daten gehören Ihnen";
+"sync.restore.title" = "Aus iCloud wiederherstellen?";
+"sync.restore.action" = "Wiederherstellen";
+"sync.restore.message" = "Alle verfügbaren iCloud-Daten werden mit den bestehenden Daten zusammengeführt.";
+"accessibility.home.hint" = "Zeigt Arbeits- und Urlaubsstatistiken";
+"accessibility.workDays.hint" = "Listet alle Ihre Arbeitstage auf";
+"accessibility.calendar.hint" = "Kalenderansicht Ihrer Tage";
+"accessibility.stats.hint" = "Zeigt Jahres- und Monatsstatistiken";
+"accessibility.settings.hint" = "Einstellungen und Präferenzen konfigurieren";
+
+
+
+
+
+
+
+
+
+
+

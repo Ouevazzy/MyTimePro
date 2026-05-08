@@ -3,117 +3,107 @@ import CloudKit
 import BackgroundTasks
 
 class ModernAppDelegate: NSObject, UIApplicationDelegate {
-    // Clés UserDefaults pour le verrouillage global
-    private static let taskRegistrationLockKey = "com.mytiempo.taskRegistrationComplete"
-    
+
+    private static let syncTaskID = "com.mytiempo.sync"
+    private static let cleanupTaskID = "com.mytiempo.cleanup"
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        // Désactivé temporairement pour diagnostic
-        // registerTaskHandlersIfNeeded()
-        
-        // Configurer les notifications push et vérifier la première installation
+        registerBackgroundTasks()
         setupPushNotifications()
         checkFirstInstall()
         return true
     }
-    
-    // Cette méthode ne fait qu'enregistrer les gestionnaires, mais ne planifie pas les tâches
-    private func registerTaskHandlersIfNeeded() {
-        // Désactivé temporairement pour diagnostiquer le problème
-        print("⚠️ Enregistrement des tâches d'arrière-plan désactivé pour diagnostic")
-        return
-        
-        // Le code ci-dessous est désactivé
-        /* 
-        // Vérifier si les tâches sont déjà enregistrées via UserDefaults
-        let defaults = UserDefaults.standard
-        
-        // Si nous sommes dans un environnement de développement/débogage, forcer la réinitialisation
-        #if DEBUG
-        if ProcessInfo.processInfo.environment["RESET_TASK_REGISTRATION"] == "1" {
-            defaults.removeObject(forKey: ModernAppDelegate.taskRegistrationLockKey)
-            print("Réinitialisation forcée de l'enregistrement des tâches")
-        }
-        #endif
-        
-        // Vérifier si l'enregistrement a déjà été effectué
-        if defaults.bool(forKey: ModernAppDelegate.taskRegistrationLockKey) {
-            print("Tâches d'arrière-plan déjà enregistrées précédemment")
-            return
-        }
-        
-        // Tenter d'enregistrer la tâche de synchronisation
-        print("Tentative d'enregistrement des tâches d'arrière-plan...")
-        
-        // Utiliser DispatchQueue.main pour s'assurer que nous sommes sur le thread principal
-        DispatchQueue.main.async {
-            let syncResult = BGTaskScheduler.shared.register(
-                forTaskWithIdentifier: "com.mytiempo.sync",
-                using: nil
-            ) { [weak self] task in
-                guard let self = self else { return }
-                self.handleSyncTask(task: task as! BGProcessingTask)
+
+    // MARK: - Background Tasks
+
+    private func registerBackgroundTasks() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.syncTaskID,
+            using: nil
+        ) { [weak self] task in
+            guard let processingTask = task as? BGProcessingTask else {
+                task.setTaskCompleted(success: false)
+                return
             }
-            
-            let cleanupResult = BGTaskScheduler.shared.register(
-                forTaskWithIdentifier: "com.mytiempo.cleanup",
-                using: nil
-            ) { [weak self] task in
-                guard let self = self else { return }
-                self.handleCleanupTask(task: task as! BGProcessingTask)
-            }
-            
-            // Si l'enregistrement a réussi, marquer comme complet dans UserDefaults
-            if syncResult && cleanupResult {
-                defaults.set(true, forKey: ModernAppDelegate.taskRegistrationLockKey)
-                print("✅ Enregistrement des tâches d'arrière-plan réussi")
-            } else {
-                print("❌ Échec de l'enregistrement des tâches d'arrière-plan - Sync: \(syncResult), Cleanup: \(cleanupResult)")
-            }
+            self?.handleSyncTask(task: processingTask)
         }
-        */
+
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.cleanupTaskID,
+            using: nil
+        ) { [weak self] task in
+            guard let processingTask = task as? BGProcessingTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self?.handleCleanupTask(task: processingTask)
+        }
+
+        AppLogger.info("Background tasks registered", category: AppLogger.general)
     }
-    
-    // Cette méthode peut être appelée pour planifier les tâches réelles
+
     func scheduleBackgroundTasks() {
-        // Désactivé temporairement pour diagnostiquer le problème
-        print("⚠️ Planification des tâches d'arrière-plan désactivée pour diagnostic")
-        return
-        
-        /*
-        // Vérifier d'abord si l'enregistrement des tâches a été effectué
-        let defaults = UserDefaults.standard
-        guard defaults.bool(forKey: ModernAppDelegate.taskRegistrationLockKey) else {
-            print("⚠️ Impossible de planifier les tâches : les gestionnaires ne sont pas enregistrés")
-            registerTaskHandlersIfNeeded()
-            return
-        }
-        
-        // Planifier la tâche de synchronisation
-        let syncRequest = BGProcessingTaskRequest(identifier: "com.mytiempo.sync")
-        syncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 3600) // 1 heure
+        let syncRequest = BGProcessingTaskRequest(identifier: Self.syncTaskID)
+        syncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 3600)
         syncRequest.requiresNetworkConnectivity = true
-        
-        // Planifier la tâche de nettoyage
-        let cleanupRequest = BGProcessingTaskRequest(identifier: "com.mytiempo.cleanup")
-        cleanupRequest.earliestBeginDate = Date(timeIntervalSinceNow: 86400) // 24 heures
+
+        let cleanupRequest = BGProcessingTaskRequest(identifier: Self.cleanupTaskID)
+        cleanupRequest.earliestBeginDate = Date(timeIntervalSinceNow: 86400)
         cleanupRequest.requiresNetworkConnectivity = true
-        
+
         do {
             try BGTaskScheduler.shared.submit(syncRequest)
             try BGTaskScheduler.shared.submit(cleanupRequest)
-            print("✅ Tâches d'arrière-plan planifiées avec succès")
+            AppLogger.info("Background tasks scheduled", category: AppLogger.general)
         } catch {
-            print("❌ Échec de la planification des tâches d'arrière-plan: \(error)")
+            AppLogger.error("Failed to schedule background tasks", category: AppLogger.general, error: error)
         }
-        */
     }
-    
-    // Méthode utilitaire pour réinitialiser l'état d'enregistrement (utile pour le débogage)
-    func resetTaskRegistration() {
-        UserDefaults.standard.removeObject(forKey: ModernAppDelegate.taskRegistrationLockKey)
-        print("🔄 État d'enregistrement des tâches réinitialisé")
+
+    private func handleSyncTask(task: BGProcessingTask) {
+        let syncTask = Task {
+            do {
+                try await ModernCloudService.shared.sendChanges()
+                task.setTaskCompleted(success: true)
+                AppLogger.info("Background sync completed", category: AppLogger.cloudKit)
+                scheduleBackgroundTasks()
+            } catch {
+                AppLogger.error("Background sync failed", category: AppLogger.cloudKit, error: error)
+                task.setTaskCompleted(success: false)
+                scheduleBackgroundTasks()
+            }
+        }
+
+        task.expirationHandler = { [weak self] in
+            syncTask.cancel()
+            task.setTaskCompleted(success: false)
+            self?.scheduleBackgroundTasks()
+        }
     }
-    
+
+    private func handleCleanupTask(task: BGProcessingTask) {
+        let cleanupTask = Task {
+            do {
+                try await ModernCloudService.shared.sendChanges()
+                task.setTaskCompleted(success: true)
+                AppLogger.info("Background cleanup completed", category: AppLogger.cloudKit)
+                scheduleBackgroundTasks()
+            } catch {
+                AppLogger.error("Background cleanup failed", category: AppLogger.cloudKit, error: error)
+                task.setTaskCompleted(success: false)
+                scheduleBackgroundTasks()
+            }
+        }
+
+        task.expirationHandler = { [weak self] in
+            cleanupTask.cancel()
+            task.setTaskCompleted(success: false)
+            self?.scheduleBackgroundTasks()
+        }
+    }
+
+    // MARK: - Setup
+
     private func setupPushNotifications() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
@@ -123,77 +113,36 @@ class ModernAppDelegate: NSObject, UIApplicationDelegate {
             }
         }
     }
-    
+
     private func checkFirstInstall() {
         let keychain = KeychainHelper.shared
         let isFirstInstall = keychain.retrieve(for: "isFirstInstall") == nil
-        
+
         if isFirstInstall {
             keychain.save("true", for: "isFirstInstall")
             UserDefaults.standard.set(false, forKey: "hasCompletedFirstSync")
         }
     }
-    
-    private func handleSyncTask(task: BGProcessingTask) {
-        // Désactivé temporairement
-        task.setTaskCompleted(success: false)
-        
-        /*
-        task.expirationHandler = {
-            task.setTaskCompleted(success: false)
-        }
-        
-        Task {
-            do {
-                try await ModernCloudService.shared.sendChanges()
-                task.setTaskCompleted(success: true)
-            } catch {
-                task.setTaskCompleted(success: false)
-            }
-        }
-        */
-    }
-    
-    private func handleCleanupTask(task: BGProcessingTask) {
-        // Désactivé temporairement
-        task.setTaskCompleted(success: false)
-        
-        /*
-        task.expirationHandler = {
-            task.setTaskCompleted(success: false)
-        }
-        
-        Task {
-            do {
-                // Au lieu d'un cleanup explicite, on force une nouvelle synchronisation
-                try await ModernCloudService.shared.sendChanges()
-                task.setTaskCompleted(success: true)
-            } catch {
-                task.setTaskCompleted(success: false)
-            }
-        }
-        */
-    }
-    
+
     // MARK: - Push Notifications
-    
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // Enregistrer le token pour les notifications push
     }
-    
+
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to register for remote notifications: \(error.localizedDescription)")
+        AppLogger.error("Failed to register for remote notifications", category: AppLogger.general, error: error)
     }
-    
+
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let notification = CKNotification(fromRemoteNotificationDictionary: userInfo)
-        
+
         if notification?.subscriptionID == "sync-changes" {
             Task {
                 do {
                     try await ModernCloudService.shared.sendChanges()
                     completionHandler(.newData)
                 } catch {
+                    AppLogger.error("Remote notification sync failed", category: AppLogger.cloudKit, error: error)
                     completionHandler(.failed)
                 }
             }
@@ -201,4 +150,4 @@ class ModernAppDelegate: NSObject, UIApplicationDelegate {
             completionHandler(.noData)
         }
     }
-} 
+}

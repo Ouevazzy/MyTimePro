@@ -7,7 +7,7 @@ import Combine
 
 struct ModernCloudStatusView: View {
     // Observer le service de synchronisation
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     
     // État local de l'interface
     @State private var showDetails = false
@@ -19,11 +19,11 @@ struct ModernCloudStatusView: View {
                 Image(systemName: cloudService.syncStatus.iconName)
                     .font(.title3)
                     .foregroundColor(cloudService.syncStatus.color)
-                    .symbolEffect(.pulse, 
-                                 options: .repeating, 
-                                 isActive: cloudService.syncStatus == .syncing(progress: 0.0))
+                    .symbolEffect(.pulse,
+                                 options: .repeating,
+                                 isActive: isSyncing)
                 
-                Text("iCloud")
+                Text("cloud.icloud.label".localized)
                     .font(.headline)
                 
                 Spacer()
@@ -42,7 +42,7 @@ struct ModernCloudStatusView: View {
                 ProgressView(value: progress)
                     .progressViewStyle(.linear)
                     .tint(cloudService.syncStatus.color)
-                    .animation(.easeInOut, value: progress)
+                    .animation(DS.Animation.progress, value: progress)
             }
             
             // Message utilisateur
@@ -51,18 +51,18 @@ struct ModernCloudStatusView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .animation(.easeInOut, value: message)
+                    .animation(DS.Animation.micro, value: message)
             }
             
             // Dernière synchronisation
             if let lastSync = cloudService.lastSyncDate {
                 HStack {
-                    Text("Dernière synchronisation:")
+                    Text("cloud.lastSync.label".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     Spacer()
-                    
+
                     Text(timeAgo(lastSync))
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -73,15 +73,15 @@ struct ModernCloudStatusView: View {
             // Boutons d'action
             HStack(spacing: 20) {
                 SyncButton(
-                    title: "Synchroniser",
+                    title: "cloud.sync.button".localized,
                     icon: "arrow.triangle.2.circlepath",
-                    isLoading: cloudService.syncStatus == .syncing(progress: 0.0)
+                    isLoading: isSyncing
                 ) {
                     syncAction()
                 }
-                
+
                 SyncButton(
-                    title: "Détails",
+                    title: "cloud.details.button".localized,
                     icon: "info.circle",
                     secondary: true
                 ) {
@@ -101,13 +101,21 @@ struct ModernCloudStatusView: View {
         }
     }
     
+    // Check if currently syncing
+    private var isSyncing: Bool {
+        if case .syncing = cloudService.syncStatus {
+            return true
+        }
+        return false
+    }
+
     // Formater le temps écoulé depuis la dernière synchronisation
     private func timeAgo(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())
     }
-    
+
     private func syncAction() {
         Task {
             try? await cloudService.sendChanges()
@@ -123,12 +131,22 @@ struct SyncButton: View {
     var secondary: Bool = false
     let action: () -> Void
     
+    @ViewBuilder
     var body: some View {
+        if secondary {
+            button
+                .buttonStyle(.glass)
+        } else {
+            button
+                .buttonStyle(.glassProminent)
+        }
+    }
+
+    private var button: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: secondary ? .blue : .white))
                         .frame(width: 16, height: 16)
                 } else {
                     Image(systemName: icon)
@@ -144,13 +162,7 @@ struct SyncButton: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 20)
-            .foregroundColor(secondary ? .blue : .white)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(secondary ? Color.blue.opacity(0.1) : Color.blue)
-            )
         }
-        .buttonStyle(PlainButtonStyle())
         .disabled(isLoading)
     }
 }
@@ -158,20 +170,20 @@ struct SyncButton: View {
 // Vue détaillée pour la synchronisation
 struct CloudStatusDetailsView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    private var cloudService = ModernCloudService.shared
     
     var body: some View {
         NavigationStack {
             List {
                 // Section Statut
-                Section("Statut") {
+                Section("cloud.section.status".localized) {
                     HStack {
                         Label("État actuel", systemImage: "info.circle")
                         Spacer()
                         Text(cloudService.syncStatus.description)
                             .foregroundColor(cloudService.syncStatus.color)
                     }
-                    
+
                     if let lastSync = cloudService.lastSyncDate {
                         HStack {
                             Label("Dernière synchronisation", systemImage: "clock")
@@ -183,71 +195,71 @@ struct CloudStatusDetailsView: View {
                 }
                 
                 // Section Actions
-                Section("Actions") {
+                Section("cloud.section.actions".localized) {
                     Button {
                         syncAction()
                         dismiss()
                     } label: {
-                        Label("Synchroniser maintenant", systemImage: "arrow.triangle.2.circlepath")
+                        Label("cloud.syncNow".localized, systemImage: "arrow.triangle.2.circlepath")
                     }
-                    
+
                     Button {
                         // Cette fonctionnalité est automatiquement gérée par SwiftData,
                         // mais nous gardons ce bouton pour rassurer l'utilisateur
                         showSimulatedRestoreAlert()
                     } label: {
-                        Label("Restaurer les données", systemImage: "arrow.clockwise")
+                        Label("cloud.restore".localized, systemImage: "arrow.clockwise")
                     }
                 }
                 
                 // Section Avancé pour le dépannage
-                Section("Avancé") {
+                Section("cloud.section.advanced".localized) {
                     Button(role: .destructive) {
                         showResetConfirmation = true
                     } label: {
-                        Label("Réinitialiser la synchronisation", systemImage: "exclamationmark.arrow.triangle.2.circlepath")
+                        Label("cloud.reset".localized, systemImage: "exclamationmark.arrow.triangle.2.circlepath")
                             .foregroundColor(.red)
                     }
                     .confirmationDialog(
-                        "Réinitialiser la synchronisation",
+                        "cloud.reset.title".localized,
                         isPresented: $showResetConfirmation,
                         titleVisibility: .visible
                     ) {
-                        Button("Réinitialiser", role: .destructive) {
+                        Button("cloud.reset.confirm".localized, role: .destructive) {
                             resetCloudKitAction()
                             dismiss()
                         }
-                        Button("Annuler", role: .cancel) { }
+                        Button("action.cancel".localized, role: .cancel) { }
                     } message: {
-                        Text("Cette action va réinitialiser entièrement la synchronisation CloudKit. À utiliser uniquement en cas de problème persistant.\n\nL'application devra être redémarrée.")
+                        Text("cloud.reset.message".localized)
                     }
                 }
                 
                 // Section Informations
-                Section("Informations") {
+                Section("cloud.section.about".localized) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("À propos de la synchronisation")
+                        Text("cloud.about.title".localized)
                             .font(.headline)
-                        
-                        Text("Vos données sont automatiquement synchronisées avec iCloud. Si vous supprimez et réinstallez l'application, vos données seront automatiquement restaurées depuis iCloud.")
+
+                        Text("cloud.about.description".localized)
                             .font(.body)
                             .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("Synchronisation iCloud")
+            .navigationTitle("cloud.icloud.title".localized)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Fermer") {
+                    Button("action.close".localized) {
                         dismiss()
                     }
                 }
             }
-            .alert("Restauration des données", isPresented: $showingRestoreAlert) {
+            .alert("cloud.restore.alert.title".localized, isPresented: $showingRestoreAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("Vos données sont automatiquement restaurées depuis iCloud. Aucune action manuelle n'est nécessaire.")
+                Text("cloud.restore.alert.message".localized)
             }
         }
     }
@@ -280,7 +292,7 @@ struct CloudStatusDetailsView: View {
 // Vue d'information pour la première exécution ou réinstallation
 struct FirstSyncInfoView: View {
     @Binding var isPresented: Bool
-    @ObservedObject private var cloudService = ModernCloudService.shared
+    var cloudService = ModernCloudService.shared
     
     var body: some View {
         VStack(spacing: 20) {
@@ -290,39 +302,39 @@ struct FirstSyncInfoView: View {
                 .foregroundColor(.blue)
                 .symbolEffect(.bounce, options: .repeating)
             
-            Text("Synchronisation automatique")
+            Text("cloud.firstSync.title".localized)
                 .font(.title)
                 .fontWeight(.bold)
-            
+
             // Contenu
             VStack(alignment: .leading, spacing: 16) {
                 InfoRow(
                     icon: "icloud.fill",
-                    title: "Vos données sur tous vos appareils",
-                    text: "WorkTimer synchronise automatiquement vos données avec iCloud."
+                    title: "cloud.firstSync.devices".localized,
+                    text: "cloud.firstSync.devicesDesc".localized
                 )
-                
+
                 InfoRow(
                     icon: "arrow.triangle.2.circlepath",
-                    title: "Restauration automatique",
-                    text: "Si vous supprimez et réinstallez l'application, vos données seront automatiquement restaurées."
+                    title: "cloud.firstSync.restore".localized,
+                    text: "cloud.firstSync.restoreDesc".localized
                 )
-                
+
                 InfoRow(
                     icon: "lock.fill",
-                    title: "Sécurité",
-                    text: "Vos données sont chiffrées et stockées en toute sécurité dans votre compte iCloud personnel."
+                    title: "cloud.firstSync.security".localized,
+                    text: "cloud.firstSync.securityDesc".localized
                 )
             }
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(12)
-            
+
             // Statut actuel
             HStack {
                 Image(systemName: cloudService.syncStatus.iconName)
                     .foregroundColor(cloudService.syncStatus.color)
-                
+
                 Text(cloudService.syncStatus.description)
                     .foregroundColor(cloudService.syncStatus.color)
             }
@@ -330,19 +342,17 @@ struct FirstSyncInfoView: View {
             .frame(maxWidth: .infinity)
             .background(cloudService.syncStatus.color.opacity(0.1))
             .cornerRadius(12)
-            
+
             // Bouton de fermeture
             Button {
                 isPresented = false
             } label: {
-                Text("Continuer")
+                Text("action.continue".localized)
                     .font(.headline)
-                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
             }
+            .buttonStyle(.glassProminent)
             .padding(.top)
         }
         .padding()

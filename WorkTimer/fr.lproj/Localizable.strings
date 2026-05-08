@@ -1,0 +1,437 @@
+/* 
+  Localizable.strings (French)
+  WorkTimer
+
+  Created on [Date]
+*/
+
+// MARK: - Navigation & Tabs
+"navigation.home" = "Accueil";
+"navigation.workDays" = "Journées";
+"navigation.calendar" = "Calendrier";
+"navigation.stats" = "Statistiques";
+"navigation.settings" = "Réglages";
+"navigation.vacations" = "Congés";
+
+// MARK: - Common Actions
+"action.close" = "Fermer";
+"action.cancel" = "Annuler";
+"action.save" = "Enregistrer";
+"action.delete" = "Supprimer";
+"action.edit" = "Modifier";
+"action.add" = "Ajouter";
+"action.confirm" = "Confirmer";
+"action.retry" = "Réessayer";
+"action.done" = "Terminé";
+"action.select" = "Sélectionner";
+"action.deselect" = "Annuler";
+"action.viewDetails" = "Voir les détails";
+
+// MARK: - Work Days
+"workDay.title" = "Journées de Travail";
+"workDay.new" = "Nouvelle Journée";
+"workDay.edit" = "Modifier Journée";
+"workDay.type" = "Type de Journée";
+"workDay.date" = "Date de l'entrée";
+"workDay.startTime" = "Heure de Début";
+"workDay.endTime" = "Heure de Fin";
+"workDay.breakDuration" = "Temps de Pause";
+"workDay.bonus" = "BONUS";
+"workDay.note" = "NOTE";
+"workDay.summary" = "RÉSUMÉ";
+"workDay.totalDuration" = "Durée totale";
+"workDay.details" = "DÉTAILS DE LA JOURNÉE";
+
+// MARK: - Work Day Types
+"workDayType.work" = "Travail";
+"workDayType.vacation" = "Congé";
+"workDayType.halfDayVacation" = "Demi-journée de congé";
+"workDayType.sickLeave" = "Maladie";
+"workDayType.compensatory" = "Journée compensatoire";
+"workDayType.training" = "Formation";
+"workDayType.holiday" = "Férié";
+
+// MARK: - Statistics
+"stats.workDays" = "Jours travaillés";
+"stats.vacationDays" = "Congés";
+"stats.sickDays" = "Maladie";
+"stats.totalHours" = "Total heures";
+"stats.overtimeHours" = "Heures supp.";
+"stats.bonus" = "Bonus";
+"stats.year" = "Année %d";
+"stats.currentMonth" = "Mois en cours";
+"stats.currentWeek" = "Cette semaine";
+"stats.workedHours" = "Heures travaillées";
+"stats.missingHours" = "Heures manquantes";
+
+// MARK: - Vacations
+"vacation.title" = "Congés";
+"vacation.used" = "Utilisés";
+"vacation.remaining" = "Solde restant";
+"vacation.annualEntitlement" = "Droits annuels";
+"vacation.carryIn" = "Report";
+"vacation.initialBalance" = "Solde initial";
+"vacation.calculation.standard" = "Solde restant = Droits annuels + Report - Utilisés";
+"vacation.calculation.initial" = "Solde restant = Solde initial - Utilisés";
+"vacation.carryover.note" = "Le solde restant est reporté à l'année suivante";
+"vacation.empty.title" = "Aucun congé";
+"vacation.empty.message" = "Aucun congé enregistré pour l'année %d";
+"vacation.fullDay" = "1 jour";
+"vacation.halfDay" = "0.5 jour";
+"vacation.initialDate.label" = "Solde initial saisi pour le %@";
+
+// MARK: - Settings
+"settings.title" = "Réglages";
+"settings.profile" = "Profil";
+"settings.workTime" = "Horaires de travail";
+"settings.display" = "Affichage";
+"settings.features" = "Fonctionnalités";
+"settings.privacy" = "Confidentialité et données";
+"settings.export" = "Exportation";
+"settings.about" = "À propos";
+"settings.reset" = "Réinitialisation";
+"settings.weeklyHours" = "Heures par semaine";
+"settings.workingDays" = "Jours travaillés";
+"settings.dailyHours" = "Heures par jour";
+"settings.calculated" = "(calculé automatiquement)";
+"settings.annualVacationDays" = "Jours de congé annuels";
+"settings.decimalFormat" = "Format décimal";
+"settings.notifications" = "Notifications";
+"settings.notifications.subtitle" = "Rappels de pointage";
+"settings.charts" = "Graphiques";
+"settings.charts.subtitle" = "Visualiser vos heures";
+"settings.siri" = "Raccourcis Siri";
+"settings.siri.subtitle" = "Contrôle vocal";
+"settings.privacy.message" = "Vos données sont stockées localement sur votre appareil et synchronisées via iCloud de manière chiffrée de bout en bout.";
+"settings.privacy.icloud" = "Synchronisation iCloud";
+"settings.privacy.icloud.message" = "La synchronisation iCloud est optionnelle. Vos données sont toujours accessibles localement même sans connexion.";
+"settings.privacy.dataControl" = "Contrôle de vos données";
+"settings.privacy.dataControl.message" = "Vous pouvez exporter, sauvegarder ou supprimer vos données à tout moment via les options d'exportation.";
+"settings.features.title" = "Fonctionnalités";
+"settings.privacy.title" = "Confidentialité et données";
+"settings.export.format" = "Format d'export";
+"settings.export.monthly" = "Export mensuel";
+"settings.export.monthly.subtitle" = "Données détaillées pour un mois spécifique";
+"settings.export.annual" = "Export annuel";
+"settings.export.annual.subtitle" = "Résumé complet de l'année avec graphiques";
+"settings.export.customization" = "Personnalisation";
+"settings.export.companyName" = "Nom de l'entreprise:";
+"settings.export.companyName.hint" = "Ce nom sera affiché sur les documents exportés";
+"settings.reset.warning" = "Attention";
+"settings.reset.warning.message" = "Cette action supprimera définitivement toutes vos données (jours travaillés, vacances, notes, etc.) et réinitialisera tous les paramètres à leurs valeurs par défaut. Cette action est irréversible et remettra l'application à zéro comme une nouvelle installation.";
+"settings.reset.button" = "Réinitialiser les paramètres";
+"settings.reset.confirm.title" = "Réinitialiser les données";
+"settings.reset.confirm.message" = "Cette action supprimera toutes vos données (jours travaillés, vacances, etc.) et réinitialisera tous les paramètres à leurs valeurs par défaut. Cette action est irréversible.";
+"settings.version" = "Version";
+"settings.support" = "Signaler un problème";
+"settings.diagnostics" = "Diagnostic des calculs";
+
+// MARK: - Calendar
+"calendar.title" = "Calendrier";
+"calendar.mode.month" = "Mois";
+"calendar.mode.week" = "Semaine";
+"calendar.today" = "Aujourd'hui";
+"calendar.selectDate" = "Choisir une date";
+"calendar.noEvents" = "Aucun événement cette semaine";
+
+// MARK: - Months
+"month.january" = "Janvier";
+"month.february" = "Février";
+"month.march" = "Mars";
+"month.april" = "Avril";
+"month.may" = "Mai";
+"month.june" = "Juin";
+"month.july" = "Juillet";
+"month.august" = "Août";
+"month.september" = "Septembre";
+"month.october" = "Octobre";
+"month.november" = "Novembre";
+"month.december" = "Décembre";
+
+// MARK: - Days of Week
+"day.monday" = "Lundi";
+"day.tuesday" = "Mardi";
+"day.wednesday" = "Mercredi";
+"day.thursday" = "Jeudi";
+"day.friday" = "Vendredi";
+"day.saturday" = "Samedi";
+"day.sunday" = "Dimanche";
+
+// MARK: - Empty States
+"empty.noWorkDays.title" = "Aucune journée pour ce mois";
+"empty.noWorkDays.message" = "Commencez par ajouter votre première journée de travail";
+"empty.noWorkDays.action" = "Ajouter une journée";
+"empty.noResults.title" = "Aucun résultat trouvé";
+"empty.noResults.message" = "Essayez de modifier vos critères de recherche";
+"empty.noResults.action" = "Effacer les filtres";
+
+// MARK: - Errors
+"error.title" = "Erreur";
+"error.network" = "Erreur réseau : %@";
+"error.data" = "Erreur de données : %@";
+"error.cloudKit" = "Erreur iCloud : %@";
+"error.validation" = "Erreur de validation : %@";
+"error.export" = "Erreur d'export : %@";
+"error.unknown" = "Erreur : %@";
+
+// MARK: - Sync
+"sync.status.ready" = "Prêt";
+"sync.status.syncing" = "Synchronisation %d%%";
+"sync.status.error" = "Erreur: %@";
+"sync.status.offline" = "Hors ligne";
+"sync.status.failed" = "Échec: %@";
+"sync.action" = "Synchroniser";
+"sync.details" = "Détails";
+"sync.lastSync" = "Dernière synchronisation:";
+"sync.restore.title" = "Restaurer depuis iCloud ?";
+"sync.restore.message" = "Cette action va télécharger toutes les données disponibles sur iCloud. Les données existantes seront fusionnées avec celles d'iCloud.";
+
+// MARK: - Loading
+"loading" = "Chargement...";
+"loading.data" = "Chargement des données...";
+
+// MARK: - Search & Filter
+"search.placeholder" = "Rechercher...";
+"filter.title" = "Filtrer par type";
+"filter.all" = "Tous les types";
+"filter.clear" = "Effacer le filtre";
+
+// MARK: - Delete Confirmation
+"delete.confirm.title" = "Confirmer la suppression";
+"delete.confirm.message" = "Êtes-vous sûr de vouloir supprimer %d journée%@ ?";
+"delete.confirm.day" = "";
+"delete.confirm.days" = "s";
+
+// MARK: - Time Format
+"time.hours.short" = "h";
+"time.minutes.short" = "min";
+"time.days" = "jours";
+"time.day" = "jour";
+
+// MARK: - Accessibility
+"accessibility.home.hint" = "Affiche les statistiques de travail et congés";
+"accessibility.workDays.hint" = "Liste toutes vos journées de travail";
+"accessibility.calendar.hint" = "Vue calendrier de vos journées";
+"accessibility.stats.hint" = "Affiche les statistiques annuelles et mensuelles";
+"accessibility.settings.hint" = "Configurez vos paramètres et préférences";
+"accessibility.year.previous" = "Année précédente";
+"accessibility.year.next" = "Année suivante";
+"accessibility.month.previous" = "Mois précédent";
+"accessibility.month.next" = "Mois suivant";
+"accessibility.today" = "Aujourd'hui";
+"accessibility.deleteWorkDay" = "Supprimer cette journée";
+"accessibility.previousYear" = "Année précédente";
+"accessibility.nextYear" = "Année suivante";
+"accessibility.yearStats" = "Affiche les statistiques de l'année %d";
+"accessibility.days" = "%@: %@ jours";
+
+// MARK: - Vacation Formats
+"vacation.daysUsed" = "%.1f j utilisés";
+"vacation.daysOfTotal" = "%.1f j sur %.1f";
+
+// MARK: - Privacy
+"privacy.encryption" = "Chiffrement de bout en bout via iCloud";
+"privacy.noThirdParty" = "Aucune donnée partagée avec des tiers";
+"privacy.localFirst" = "Stockage local prioritaire";
+"privacy.noTracking" = "Aucun tracking ou analytics";
+"privacy.dataOwnership" = "Vos données vous appartiennent";
+"sync.restore.action" = "Restaurer";
+"error.generic" = "Une erreur est survenue";
+
+// MARK: - Charts
+"charts.title" = "Graphiques";
+"charts.year" = "Année";
+"charts.weeklyHours" = "Heures par semaine";
+"charts.monthlyHours" = "Heures par mois";
+"charts.last30Days" = "30 derniers jours";
+"charts.distribution" = "Répartition des journées";
+"charts.noData" = "Aucune donnée";
+"charts.summary" = "Résumé %d";
+
+// MARK: - Sync Details
+"sync.title" = "Synchronisation";
+"sync.section.detailed" = "Statut détaillé";
+"sync.lastSync.label" = "Dernière synchronisation";
+"sync.lastSync.never" = "Jamais";
+"sync.error.label" = "Erreur";
+"sync.error.network" = "Problème de connexion réseau";
+"sync.error.account" = "Problème avec votre compte iCloud";
+"sync.error.quota" = "Espace de stockage iCloud insuffisant";
+"sync.error.generic" = "Erreur de synchronisation";
+"sync.section.actions" = "Actions";
+"sync.syncNow" = "Synchroniser maintenant";
+"sync.reset" = "Réinitialiser la synchronisation";
+"sync.section.about" = "À propos";
+"sync.about.description" = "La synchronisation utilise iCloud pour garder vos données à jour sur tous vos appareils Apple.";
+"sync.reset.title" = "Réinitialiser la synchronisation";
+"sync.reset.confirm" = "Réinitialiser";
+"sync.reset.message" = "Cette action supprimera les données de synchronisation locales et forcera une nouvelle synchronisation complète avec iCloud.";
+
+// MARK: - Cloud Status
+"cloud.icloud.label" = "iCloud";
+"cloud.icloud.title" = "Synchronisation iCloud";
+"cloud.lastSync.label" = "Dernière synchronisation:";
+"cloud.sync.button" = "Synchroniser";
+"cloud.details.button" = "Détails";
+"cloud.section.status" = "Statut";
+"cloud.status.current" = "État actuel";
+"cloud.section.actions" = "Actions";
+"cloud.sync.now" = "Synchroniser maintenant";
+"cloud.restore.data" = "Restaurer les données";
+"cloud.section.advanced" = "Avancé";
+"cloud.sync.reset" = "Réinitialiser la synchronisation";
+"cloud.sync.reset.title" = "Réinitialiser la synchronisation";
+"cloud.sync.reset.confirm" = "Réinitialiser";
+"cloud.sync.reset.message" = "Cette action va réinitialiser complètement la synchronisation. Vos données locales seront conservées.";
+"cloud.section.info" = "Informations";
+"cloud.about.title" = "À propos de la synchronisation";
+"cloud.about.description" = "Vos données sont automatiquement synchronisées entre tous vos appareils via iCloud.";
+"cloud.restore.title" = "Restauration des données";
+"cloud.restore.message" = "Vos données sont automatiquement sauvegardées sur iCloud. En cas de besoin, elles seront restaurées automatiquement.";
+"cloud.auto.title" = "Synchronisation automatique";
+"cloud.info.devices.title" = "Vos données sur tous vos appareils";
+"cloud.info.devices.text" = "WorkTimer synchronise automatiquement vos heures de travail entre tous vos appareils Apple connectés au même compte iCloud.";
+"cloud.info.restore.title" = "Restauration automatique";
+"cloud.info.restore.text" = "Si vous supprimez et réinstallez l'app, vos données seront automatiquement restaurées depuis iCloud.";
+"action.continue" = "Continuer";
+"cloud.syncNow" = "Synchroniser maintenant";
+"cloud.restore" = "Restaurer les données";
+"cloud.reset" = "Réinitialiser la synchronisation";
+"cloud.reset.title" = "Réinitialiser la synchronisation";
+"cloud.reset.confirm" = "Réinitialiser";
+"cloud.reset.message" = "Cette action va réinitialiser complètement la synchronisation. Vos données locales seront conservées.";
+"cloud.section.about" = "À propos";
+"cloud.restore.alert.title" = "Restaurer les données";
+"cloud.restore.alert.message" = "Vos données seront restaurées depuis iCloud. Les données locales seront fusionnées.";
+"cloud.firstSync.title" = "Synchronisation automatique";
+"cloud.firstSync.devices" = "Vos données sur tous vos appareils";
+"cloud.firstSync.devicesDesc" = "WorkTimer synchronise automatiquement vos heures entre tous vos appareils Apple.";
+"cloud.firstSync.restore" = "Restauration automatique";
+"cloud.firstSync.restoreDesc" = "Si vous réinstallez l'app, vos données seront automatiquement restaurées depuis iCloud.";
+"cloud.firstSync.security" = "Sécurité et confidentialité";
+"cloud.firstSync.securityDesc" = "Vos données sont chiffrées de bout en bout via iCloud.";
+
+// MARK: - Work Time Settings
+"settings.workTime.title" = "Horaires de travail";
+"settings.workTime.weeklyHours" = "Heures par semaine";
+"settings.workTime.workingDays" = "Jours travaillés";
+"settings.workTime.dailyHours" = "Heures par jour";
+"settings.vacation.annualDays" = "Jours de congé annuels";
+"settings.vacation.total" = "Total";
+"settings.vacation.used" = "Utilisés: ";
+"settings.vacation.viewDetails" = "Voir les détails des congés";
+"settings.vacation.advancedConfig" = "Configuration avancée des vacances";
+"settings.vacation.hireDate" = "Date de début d'embauche";
+"settings.vacation.hireDateHelp" = "Détermine le point de départ pour le calcul des reports";
+"settings.vacation.initialBalance" = "Solde de vacances à cette date";
+"settings.vacation.unitDays" = "jours";
+"settings.vacation.unitHours" = "heures";
+"settings.vacation.unit.days" = "Jours";
+"settings.vacation.unit.hours" = "Heures";
+
+// MARK: - Display Settings
+"settings.display.title" = "Affichage";
+"settings.display.decimalFormat" = "Format décimal";
+"settings.display.example" = "Exemple:";
+"settings.display.weeklyHours" = "Heures hebdomadaires";
+"settings.display.presets.common" = "Préréglages communs";
+"settings.display.adjustment.precise" = "Ajustement précis";
+
+// MARK: - Export Settings
+"settings.export.title" = "Exportation";
+"settings.export.format.label" = "Format d'export";
+"export.section.options" = "OPTIONS";
+"export.hourFormat.label" = "Format des heures";
+"export.hourFormat.standard" = "Standard (8h30)";
+"export.hourFormat.decimal" = "Décimal (8.50 h)";
+"export.includeCharts" = "Inclure les graphiques";
+"export.section.period" = "PÉRIODE";
+"export.year.label" = "Année";
+"export.month.label" = "Mois";
+"export.section.info" = "INFORMATIONS";
+"export.company.placeholder" = "Nom de l'entreprise";
+"export.generate.button" = "Générer le document";
+"export.regenerate.button" = "Regénérer";
+"export.csv.generated.title" = "Fichier CSV généré";
+"export.csv.generated.help" = "Utilisez le bouton Partager pour envoyer le fichier";
+"export.share.button" = "Partager";
+"export.monthly.title" = "Export Mensuel";
+"export.annual.title" = "Export Annuel";
+"export.noDocument" = "Aucun document à partager";
+"export.csv.type.label" = "Type de rapport";
+"export.csv.period.label" = "Période";
+"export.csv.help" = "Le fichier CSV peut être ouvert dans Excel, Numbers ou Google Sheets";
+
+// MARK: - Notifications Settings
+"notification.title" = "Notifications";
+"notification.section.authorization" = "Autorisation";
+"notification.authorized" = "Autorisées";
+"notification.unauthorized" = "Non autorisées";
+"notification.authorize" = "Autoriser";
+"notification.section.activeDays" = "Jours actifs";
+"notification.section.notificationDays" = "Jours de notification";
+"notification.section.selectDaysHelp" = "Sélectionnez les jours où vous souhaitez recevoir des rappels";
+"notification.reminder.morning" = "Rappel du matin";
+"notification.reminder.evening" = "Rappel du soir";
+"notification.reminder.time" = "Heure du rappel";
+"notification.reminder.arrival" = "Rappel d'arrivée";
+"notification.reminder.departure" = "Rappel de départ";
+"notification.test.send" = "Envoyer une notification test";
+"notification.test.footer" = "La notification apparaîtra dans 5 secondes";
+"notification.alert.disabled.title" = "Notifications désactivées";
+"notification.alert.openSettings" = "Ouvrir Réglages";
+"notification.alert.disabled.message" = "Veuillez autoriser les notifications dans les réglages de votre iPhone";
+"notification.alert.sent.title" = "Notification envoyée";
+"notification.alert.sent.message" = "Une notification test va apparaître dans quelques secondes";
+
+// MARK: - Siri Shortcuts
+"siri.description" = "Utilisez ces phrases avec Siri pour interagir rapidement avec WorkTimer";
+"siri.openShortcuts" = "Ouvrir l'app Raccourcis";
+"siri.automationHelp" = "Vous pouvez créer des automatisations personnalisées dans l'app Raccourcis";
+
+// MARK: - Home Tab
+"home.vacation.balanceHours" = "Solde en heures";
+
+// MARK: - Vacation View
+"vacation.type.full" = "Congé";
+"vacation.type.halfDay" = "Demi-journée";
+"vacation.carryover.info" = "Le solde restant est reporté à l'année suivante";
+
+// MARK: - Stats View
+"stats.noData" = "Aucune donnée pour %d";
+"stats.noDataHelp" = "Ajoutez des journées de travail pour voir les statistiques";
+
+// MARK: - Settings About
+"settings.about.title" = "À propos";
+"settings.version.label" = "Version";
+
+// MARK: - Diagnostics
+"diagnostics.title" = "Diagnostic";
+"diagnostics.vacation.calculation" = "Calcul du solde de congés";
+"diagnostics.vacation.initial" = "Solde initial";
+"diagnostics.vacation.used" = "- Utilisés";
+"diagnostics.vacation.remaining" = "= Restant";
+"diagnostics.vacation.carryIn" = "Report entrant";
+"diagnostics.vacation.entitlement" = "+ Droits annuels";
+"diagnostics.hours.header" = "VÉRIFICATION HEURES";
+"diagnostics.hours.calculated" = "Heures calculées (WorkDay)";
+"diagnostics.hours.recalculated" = "Heures recalculées";
+"diagnostics.hours.matching" = "Les calculs correspondent ✓";
+"diagnostics.hours.difference" = "Différence détectée ⚠️";
+"diagnostics.duplicates.header" = "DÉTECTION DOUBLONS";
+"diagnostics.duplicates.none" = "Aucun doublon détecté ✓";
+"diagnostics.duplicates.datesCount" = "Dates avec doublons";
+"diagnostics.duplicates.entriesCount" = "Entrées en double";
+"diagnostics.duplicates.deleted" = "(supprimé)";
+"diagnostics.recalculate.all" = "Recalculer toutes les heures";
+"diagnostics.recalculate.help" = "Recalcule les heures de toutes les entrées";
+"diagnostics.tools.header" = "OUTILS DE CORRECTION";
+"diagnostics.export.report" = "Générer rapport de diagnostic";
+"diagnostics.export.header" = "EXPORT";
+"diagnostics.report.generated.title" = "Rapport généré";
+"diagnostics.report.copy" = "Copier";
+"diagnostics.report.generated.message" = "Le rapport a été généré avec succès";
+"diagnostics.recalculate.title" = "Recalculer les heures";
+"diagnostics.recalculate.confirm" = "Recalculer";
+"diagnostics.recalculate.message" = "Cette action va recalculer les heures de toutes les entrées de travail";
+"diagnostics.recalculate.completed.title" = "Recalcul terminé";
