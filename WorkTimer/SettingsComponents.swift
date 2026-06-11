@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Enums
 
 enum SettingsSection {
-    case workTime, display, features, privacy, export, about, reset
+    case workTime, display, features, privacy, export, about, reset, subscription
 }
 
 enum AppTheme: String, CaseIterable, Identifiable {
@@ -21,7 +21,7 @@ enum ExportType: Identifiable {
     }
 }
 
-enum ExportFormat {
+enum ExportFormat: Equatable {
     case pdf, csv
 }
 
@@ -34,7 +34,6 @@ struct SettingsCard<Content: View>: View {
     let isExpanded: Bool
     let onToggle: () -> Void
     let content: Content
-    @Environment(\.colorScheme) var colorScheme
 
     init(
         title: String, icon: String, color: Color,
@@ -57,18 +56,18 @@ struct SettingsCard<Content: View>: View {
                             .frame(width: DS.IconSize.settings, height: DS.IconSize.settings)
                         Image(systemName: icon)
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
                     Text(title).font(.headline)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .animation(DS.Animation.cardToggle, value: isExpanded)
                 }
                 .contentShape(Rectangle())
                 .padding()
-                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: DS.Radius.card))
+                .dsGlassSurface(cornerRadius: DS.Radius.card, interactive: true)
             }
             .buttonStyle(.pressable)
             if isExpanded {
@@ -78,11 +77,7 @@ struct SettingsCard<Content: View>: View {
                 ))
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.large)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
-        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.large))
+        .dsGlassSurface(cornerRadius: DS.Radius.large)
     }
 }
 
@@ -95,17 +90,20 @@ struct StatisticCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            HStack(alignment: .top) {
+            HStack(alignment: .top, spacing: DS.Spacing.sm) {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: DS.IconSize.inline, height: DS.IconSize.inline)
                     .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
-                Spacer()
                 Text(title)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.trailing)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             Text(value)
                 .font(.system(.title3, design: .rounded))
@@ -116,7 +114,7 @@ struct StatisticCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: DS.Radius.card))
+        .dsGlassSurface(cornerRadius: DS.Radius.card)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }
@@ -126,7 +124,9 @@ struct StatisticCard: View {
 
 struct FeatureButton: View {
     let title: String; let subtitle: String
-    let icon: String; let color: Color; let action: () -> Void
+    let icon: String; let color: Color
+    var isPro: Bool = false
+    let action: () -> Void
 
     var body: some View {
         Button(action: action) {
@@ -141,11 +141,18 @@ struct FeatureButton: View {
                     Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
+                if isPro {
+                    Text("PRO")
+                        .font(.caption2).fontWeight(.bold)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(.orange, in: Capsule())
+                }
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
             }
             .padding(.vertical, DS.Spacing.sm)
             .padding(.horizontal, DS.Spacing.md)
-            .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+            .dsGlassSurface(cornerRadius: DS.Radius.medium, interactive: true)
         }
         .buttonStyle(.pressable)
     }
@@ -157,8 +164,8 @@ struct PrivacyFeatureRow: View {
     let icon: String; let text: String; let color: Color
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon).foregroundColor(color).frame(width: 24)
-            Text(text).font(.subheadline).foregroundColor(.primary)
+            Image(systemName: icon).foregroundStyle(color).frame(width: 24)
+            Text(text).font(.subheadline).foregroundStyle(.primary)
             Spacer()
         }
     }
@@ -167,6 +174,7 @@ struct PrivacyFeatureRow: View {
 // MARK: - ConfettiView
 
 struct ConfettiView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var confetti: [ConfettiPiece] = []
     @State private var animate = false
 
@@ -198,6 +206,7 @@ struct ConfettiView: View {
         }
         .drawingGroup()
         .onAppear {
+            guard !reduceMotion else { return }
             generateConfetti()
             animate = true
         }

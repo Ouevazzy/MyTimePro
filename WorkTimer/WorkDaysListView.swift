@@ -1,17 +1,56 @@
 import SwiftUI
 import SwiftData
 
+private struct WorkDayListSection: Identifiable {
+    let date: Date
+    let days: [WorkDay]
+
+    var id: Date { date }
+}
+
+struct WorkDayMonthSelection: Hashable {
+    let startDate: Date
+    let year: Int
+    let month: Int
+
+    init(date: Date, calendar: Calendar = .current) {
+        let components = calendar.dateComponents([.year, .month], from: date)
+        let normalizedDate = calendar.date(from: DateComponents(
+            calendar: calendar,
+            timeZone: calendar.timeZone,
+            year: components.year,
+            month: components.month,
+            day: 1
+        )) ?? calendar.startOfDay(for: date)
+
+        startDate = calendar.startOfDay(for: normalizedDate)
+        year = components.year ?? calendar.component(.year, from: startDate)
+        month = components.month ?? calendar.component(.month, from: startDate)
+    }
+
+    func addingMonths(_ value: Int, calendar: Calendar = .current) -> WorkDayMonthSelection? {
+        guard let date = calendar.date(byAdding: .month, value: value, to: startDate) else {
+            return nil
+        }
+
+        return WorkDayMonthSelection(date: date, calendar: calendar)
+    }
+
+    func contains(_ date: Date, calendar: Calendar = .current) -> Bool {
+        calendar.component(.year, from: date) == year &&
+        calendar.component(.month, from: date) == month
+    }
+}
+
 struct WorkDaysListView: View {
     // MARK: - Environment & Properties
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.colorScheme) private var colorScheme
     var startInSearch: Bool = false
     
     // MARK: - State
     @State private var showAddWorkDayView = false
     @State private var selectedWorkDay: WorkDay?
-    @State private var selectedMonth = Date()
-    @State private var selectedYear = Calendar.current.component(.year, from: Date())
+    @State private var visibleMonth = WorkDayMonthSelection(date: Date())
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var showingFilters = false
@@ -21,33 +60,40 @@ struct WorkDaysListView: View {
     @State private var selectedWorkDays: Set<UUID> = []
     @State private var selectedDates: Set<Date> = []
     @State private var showingDeleteConfirmation = false
-    @FocusState private var isSearchFieldFocused: Bool
     
     // MARK: - Nouvelles propriétés pour l'optimisation
+    @State private var monthWorkDays: [WorkDay] = []
     @State private var filteredWorkDays: [WorkDay] = []
     @State private var groupedWorkDays: [Date: [WorkDay]] = [:]
+    @State private var workDaySections: [WorkDayListSection] = []
     @State private var isFilteringData = false
     @State private var cachedMonthlyStats: (totalHours: Double, overtimeSeconds: Int, totalBonus: Double) = (0, 0, 0)
-    @State private var filterTask: Task<Void, Never>?
+    @State private var loadTask: Task<Void, Never>?
+    @State private var searchTask: Task<Void, Never>?
 
     // MARK: - Computed Properties
     private var currentMonth: Int {
-        Calendar.current.component(.month, from: selectedMonth)
+        visibleMonth.month
+    }
+
+    private var selectedYear: Int {
+        visibleMonth.year
     }
 
     private var isCurrentMonth: Bool {
-        let calendar = Calendar.current
-        let currentDate = Date()
-        return calendar.component(.month, from: currentDate) == currentMonth &&
-               calendar.component(.year, from: currentDate) == selectedYear
+        visibleMonth.contains(Date())
     }
     
     private var hasFilterActive: Bool {
-        !searchText.isEmpty || selectedType != nil
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedType != nil
     }
     
     private var noResults: Bool {
-        groupedWorkDays.isEmpty
+        workDaySections.isEmpty
+    }
+
+    private var defaultNewWorkDayDate: Date {
+        visibleMonth.startDate
     }
 
     // MARK: - Body
@@ -59,11 +105,7 @@ struct WorkDaysListView: View {
                 MonthlyStatsHeader(stats: cachedMonthlyStats)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
-            
-            searchAndFilterBar
-                .padding(.vertical, 8)
-                .background(colorScheme == .dark ? Color(.systemBackground) : Color(.systemGroupedBackground))
-            
+
             if isFilteringData {
                 ProgressView("loading".localized)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -74,14 +116,21 @@ struct WorkDaysListView: View {
             }
         }
         .navigationTitle("workDay.title".localized)
-        .onAppear {
-            Analytics.shared.logScreenView("workDays")
-            if startInSearch && !isSearching {
-                isSearching = true
+        .searchable(
+            text: $searchText,
+            isPresented: $isSearching,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "search.placeholder".localized
+        )
+        .searchSuggestions {
+            ForEach(WorkDayType.allCases, id: \.self) { type in
+                Label(type.localizedName, systemImage: type.icon)
+                    .searchCompletion(type.localizedName)
             }
         }
+        .sensoryFeedback(.selection, trigger: selectedWorkDays.count)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 if !isEditMode {
                     Button(action: {
                         withAnimation(DS.Animation.interactive) {
@@ -90,6 +139,7 @@ struct WorkDaysListView: View {
                     }) {
                         Text("action.select".localized)
                     }
+                    .disabled(filteredWorkDays.isEmpty)
                 } else {
                     Button(action: {
                         withAnimation(DS.Animation.interactive) {
@@ -111,7 +161,7 @@ struct WorkDaysListView: View {
                     }) {
                         Label("action.delete".localized, systemImage: "trash")
                     }
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             } else {
                     HStack(spacing: 16) {
                         filterButton
@@ -120,12 +170,16 @@ struct WorkDaysListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showAddWorkDayView) {
+        .sheet(isPresented: $showAddWorkDayView, onDismiss: {
+            filterWorkDaysAsync()
+        }) {
             NavigationStack {
-                AddEditWorkDayView(workDay: WorkDay(date: Date(), type: .work))
+                AddEditWorkDayView(workDay: WorkDay(date: defaultNewWorkDayDate, type: .work))
             }
         }
-        .sheet(item: $selectedWorkDay) { workDay in
+        .sheet(item: $selectedWorkDay, onDismiss: {
+            filterWorkDaysAsync()
+        }) { workDay in
             NavigationStack {
                 AddEditWorkDayView(workDay: workDay)
             }
@@ -146,19 +200,19 @@ struct WorkDaysListView: View {
                     .navigationTitle("filter.title".localized)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
+                        ToolbarItem(placement: .topBarLeading) {
                             if selectedType != nil {
                                 Button("filter.clear".localized) {
                                     withAnimation(DS.Animation.micro) {
                                         selectedType = nil
                                         showingFilters = false
-                                        filterWorkDaysAsync()
+                                        applySearchAndTypeFilterAsync()
                                     }
                                 }
                                 .foregroundStyle(.red)
                             }
                         }
-                        ToolbarItem(placement: .navigationBarTrailing) {
+                        ToolbarItem(placement: .topBarTrailing) {
                             Button("action.done".localized) {
                                 showingFilters = false
                             }
@@ -171,12 +225,13 @@ struct WorkDaysListView: View {
         }
         .withErrorHandling()
         .onAppear {
+            Analytics.shared.logScreenView("workDays")
+            if startInSearch && !isSearching {
+                isSearching = true
+            }
             filterWorkDaysAsync()
         }
-        .onChange(of: selectedMonth) { _, _ in
-            filterWorkDaysAsync()
-        }
-        .onChange(of: selectedYear) { _, _ in
+        .onChange(of: visibleMonth) { _, _ in
             filterWorkDaysAsync()
         }
         .onChange(of: searchText) { _, _ in
@@ -184,6 +239,10 @@ struct WorkDaysListView: View {
         }
         .onChange(of: selectedType) { _, _ in
             applySearchAndTypeFilterAsync()
+        }
+        .onDisappear {
+            loadTask?.cancel()
+            searchTask?.cancel()
         }
     }
     
@@ -197,7 +256,8 @@ struct WorkDaysListView: View {
                     .frame(width: DS.Touch.minSize, height: DS.Touch.minSize)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.pressable)
+            .buttonStyle(.glass)
+            .accessibilityLabel("accessibility.previousMonth".localized)
 
             Spacer()
 
@@ -214,8 +274,9 @@ struct WorkDaysListView: View {
                             .foregroundStyle(.blue)
                             .padding(.horizontal, DS.Spacing.sm)
                             .padding(.vertical, DS.Spacing.xs)
-                            .background(Color.blue.opacity(0.1), in: Capsule())
+                            .dsGlassSurface(cornerRadius: DS.Radius.medium, interactive: true)
                     }
+                    .buttonStyle(.plain)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
@@ -230,106 +291,53 @@ struct WorkDaysListView: View {
                     .frame(width: DS.Touch.minSize, height: DS.Touch.minSize)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.pressable)
+            .buttonStyle(.glass)
+            .accessibilityLabel("accessibility.nextMonth".localized)
         }
         .padding(.vertical, DS.Spacing.sm)
-        .background(Color(.systemGroupedBackground))
-    }
-
-    private var searchAndFilterBar: some View {
-        HStack(spacing: 10) {
-            // Barre de recherche
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                
-                if isSearching {
-                    TextField("search.placeholder".localized, text: $searchText)
-                        .autocorrectionDisabled(true)
-                        .focused($isSearchFieldFocused)
-                } else {
-                    Button(action: {
-                        withAnimation(DS.Animation.interactive) {
-                            isSearching = true
-                        }
-                    }) {
-                        Text("search.placeholder".localized)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                    }
-                }
-
-                if isSearching {
-                    Button(action: {
-                        withAnimation(DS.Animation.interactive) {
-                            searchText = ""
-                            isSearching = false
-                            isSearchFieldFocused = false
-                            filterWorkDaysAsync() // Réinitialiser le filtre
-                        }
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            
-            // Bouton de filtre
-            Button(action: {
-                withAnimation(DS.Animation.interactive) {
-                    showingFilters.toggle()
-                }
-            }) {
-                Image(systemName: hasFilterActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-                    .font(.title3)
-                    .foregroundColor(hasFilterActive ? .blue : .secondary)
-            }
-        }
         .padding(.horizontal)
+        .background(.regularMaterial)
     }
 
     private var workDaysList: some View {
         List {
-            ForEach(Array(groupedWorkDays.keys.sorted(by: >)), id: \.self) { dateKey in
-                if let days = groupedWorkDays[dateKey] {
-                    Section(header: CustomSectionHeader(
-                        date: formatSectionDate(dateKey),
-                        isToday: isToday(dateKey),
-                        isEditMode: isEditMode,
-                        isSelected: selectedDates.contains(dateKey),
-                        onToggleSelection: {
-                            toggleDateSelection(dateKey, days)
-                        }
-                    )) {
-                        ForEach(days.sorted(by: { $0.date > $1.date })) { workDay in
-                            WorkDayRow(
-                                workDay: workDay,
-                                isSelected: selectedWorkDays.contains(workDay.id),
-                                isEditMode: isEditMode
-                            )
-                            .equatable()
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                if isEditMode {
-                                    toggleSelection(for: workDay)
-                                } else {
-                                    selectedWorkDay = workDay
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    withAnimation(DS.Animation.interactive) {
-                                        deleteWorkDay(workDay)
-                                    }
-                                } label: {
-                                    Label("action.delete".localized, systemImage: "trash")
-                                }
+            ForEach(workDaySections) { section in
+                let dateKey = section.date
+                let days = section.days
+
+                Section(header: CustomSectionHeader(
+                    date: formatSectionDate(dateKey),
+                    isToday: isToday(dateKey),
+                    isEditMode: isEditMode,
+                    isSelected: selectedDates.contains(dateKey),
+                    onToggleSelection: {
+                        toggleDateSelection(dateKey, days)
+                    }
+                )) {
+                    ForEach(days) { workDay in
+                        WorkDayRow(
+                            workDay: workDay,
+                            isSelected: selectedWorkDays.contains(workDay.id),
+                            isEditMode: isEditMode
+                        )
+                        .equatable()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if isEditMode {
+                                toggleSelection(for: workDay)
+                            } else {
+                                selectedWorkDay = workDay
                             }
                         }
-                        
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                withAnimation(DS.Animation.interactive) {
+                                    deleteWorkDay(workDay)
+                                }
+                            } label: {
+                                Label("action.delete".localized, systemImage: "trash")
+                            }
+                        }
                     }
                 }
             }
@@ -351,14 +359,15 @@ struct WorkDaysListView: View {
                 : "empty.noWorkDays.message".localized,
             actionTitle: hasFilterActive ? "empty.noResults.action".localized : "empty.noWorkDays.action".localized,
             action: {
-            if hasFilterActive {
+                if hasFilterActive {
                     withAnimation(DS.Animation.appear) {
                         searchText = ""
+                        isSearching = false
                         selectedType = nil
                         showingFilters = false
-                        filterWorkDaysAsync()
-                }
-            } else {
+                        applySearchAndTypeFilterAsync()
+                    }
+                } else {
                     showAddWorkDayView = true
                 }
             },
@@ -388,7 +397,7 @@ struct WorkDaysListView: View {
                   ? "line.3.horizontal.decrease.circle.fill"
                   : "line.3.horizontal.decrease.circle")
                 .font(.title3)
-                .foregroundColor(hasFilterActive ? .blue : .secondary)
+                .foregroundStyle(hasFilterActive ? .blue : .secondary)
         }
     }
     
@@ -424,13 +433,15 @@ struct WorkDaysListView: View {
     /// ✅ Perf Apple WWDC23: FetchDescriptor ciblé avec prédicat SQL au lieu de filter() en mémoire.
     /// propertiesToFetch: seuls les champs nécessaires à l'affichage sont chargés.
     private func filterWorkDaysAsync() {
-        filterTask?.cancel()
+        loadTask?.cancel()
+        searchTask?.cancel()
         isFilteringData = true
+        let requestedMonth = visibleMonth
 
-        filterTask = Task { @MainActor in
+        loadTask = Task { @MainActor in
             guard !Task.isCancelled else { isFilteringData = false; return }
             let calendar = Calendar.current
-            guard let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: currentMonth, day: 1)),
+            guard let startOfMonth = calendar.date(from: DateComponents(year: requestedMonth.year, month: requestedMonth.month, day: 1)),
                   let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) else {
                 isFilteringData = false
                 return
@@ -441,7 +452,8 @@ struct WorkDaysListView: View {
                 var descriptor = FetchDescriptor<WorkDay>(
                     predicate: #Predicate<WorkDay> { workDay in
                         workDay.date >= startOfMonth &&
-                        workDay.date < endOfMonth
+                        workDay.date < endOfMonth &&
+                        !workDay.isDeleted
                     },
                     sortBy: [SortDescriptor(\.date, order: .reverse)]
                 )
@@ -451,26 +463,31 @@ struct WorkDaysListView: View {
                 descriptor.propertiesToFetch = [
                     \.id, \.date, \.typeRawValue, \.totalHours,
                     \.overtimeSeconds, \.bonusAmount, \.note,
-                    \.startTime, \.endTime, \.breakDuration
+                    \.startTime, \.endTime, \.breakDuration,
+                    \.isDeleted, \.modifiedAt
                 ]
 
                 let filtered = try modelContext.fetch(descriptor)
+                guard !Task.isCancelled,
+                      requestedMonth == visibleMonth
+                else {
+                    isFilteringData = false
+                    return
+                }
 
-                let totalHours = filtered.reduce(0.0) { $0 + $1.totalHours }
-                let overtimeSeconds = filtered.reduce(0) { $0 + $1.overtimeSeconds }
-                let totalBonus = filtered.reduce(0.0) { $0 + $1.bonusAmount }
-
-                self.filteredWorkDays = filtered
-                self.groupedWorkDays = Dictionary(grouping: filtered) { dayOnly(from: $0.date) }
-                self.cachedMonthlyStats = (totalHours, overtimeSeconds, totalBonus)
+                monthWorkDays = filtered
+                cachedMonthlyStats = monthlyStats(from: filtered)
+                applyCurrentFilters(to: filtered)
                 self.isFilteringData = false
 
                 withAnimation(DS.Animation.appear) { self.animateList = true }
 
             } catch {
                 AppLogger.error("WorkDays fetch failed", category: AppLogger.general, error: error)
+                self.monthWorkDays = []
                 self.filteredWorkDays = []
                 self.groupedWorkDays = [:]
+                self.workDaySections = []
                 self.cachedMonthlyStats = (0, 0, 0)
                 self.isFilteringData = false
             }
@@ -479,18 +496,15 @@ struct WorkDaysListView: View {
     
     /// Applique les filtres de recherche et de type
     private func applySearchAndTypeFilterAsync() {
-        filterTask?.cancel()
-        isFilteringData = true
+        searchTask?.cancel()
+        let searchSnapshot = searchText
 
-        filterTask = Task { @MainActor in
-            guard !Task.isCancelled else { isFilteringData = false; return }
-            // Filtrer directement sur le thread principal
-            let filtered = filterWorkDaysWithSearchAndType()
-            
-            // Mettre à jour l'UI
-            self.filteredWorkDays = filtered
-            self.groupedWorkDays = Dictionary(grouping: filtered) { dayOnly(from: $0.date) }
-            self.isFilteringData = false
+        searchTask = Task { @MainActor in
+            if !searchSnapshot.isEmpty {
+                try? await Task.sleep(for: .milliseconds(180))
+            }
+            guard !Task.isCancelled else { return }
+            applyCurrentFilters(to: monthWorkDays)
             
             // Animer l'apparition progressive des éléments
             withAnimation(DS.Animation.appear) {
@@ -499,49 +513,49 @@ struct WorkDaysListView: View {
         }
     }
     
-    /// Filtre les WorkDays avec recherche et type - version synchrone
-    private func filterWorkDaysWithSearchAndType() -> [WorkDay] {
-        let calendar = Calendar.current
-        guard let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: currentMonth, day: 1)),
-              let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) else {
-            return []
+    /// Filtre les WorkDays du mois déjà chargé, sans nouveau passage SwiftData.
+    private func filterWorkDaysWithSearchAndType(_ workDays: [WorkDay]) -> [WorkDay] {
+        let normalizedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return workDays.filter { workDay in
+            let matchesType = selectedType == nil || workDay.type == selectedType
+            let matchesSearch = normalizedSearchText.isEmpty ||
+                (workDay.note?.localizedStandardContains(normalizedSearchText) ?? false) ||
+                workDay.type.localizedName.localizedStandardContains(normalizedSearchText)
+
+            return matchesType && matchesSearch
+        }
+    }
+
+    private func applyCurrentFilters(to workDays: [WorkDay]) {
+        replaceDisplayedWorkDays(with: filterWorkDaysWithSearchAndType(workDays))
+    }
+
+    private func replaceDisplayedWorkDays(with workDays: [WorkDay]) {
+        filteredWorkDays = workDays
+
+        let grouped = Dictionary(grouping: workDays) { dayOnly(from: $0.date) }
+        groupedWorkDays = grouped
+        workDaySections = grouped.keys.sorted(by: >).map { date in
+            WorkDayListSection(
+                date: date,
+                days: grouped[date, default: []].sorted { $0.date > $1.date }
+            )
+        }
+    }
+
+    private func monthlyStats(from workDays: [WorkDay]) -> (totalHours: Double, overtimeSeconds: Int, totalBonus: Double) {
+        var totalHours = 0.0
+        var overtimeSeconds = 0
+        var totalBonus = 0.0
+
+        for workDay in workDays {
+            totalHours += workDay.totalHours
+            overtimeSeconds += workDay.overtimeSeconds
+            totalBonus += workDay.bonusAmount
         }
 
-        do {
-            let fetched: [WorkDay]
-            if let selectedType {
-                let selectedTypeRawValue = selectedType.rawValue
-                let descriptor = FetchDescriptor<WorkDay>(
-                    predicate: #Predicate<WorkDay> { workDay in
-                        workDay.date >= startOfMonth &&
-                        workDay.date < endOfMonth &&
-                        workDay.typeRawValue == selectedTypeRawValue
-                    },
-                    sortBy: [SortDescriptor(\.date, order: .reverse)]
-                )
-                fetched = try modelContext.fetch(descriptor)
-            } else {
-                let descriptor = FetchDescriptor<WorkDay>(
-                    predicate: #Predicate<WorkDay> { workDay in
-                        workDay.date >= startOfMonth &&
-                        workDay.date < endOfMonth
-                    },
-                    sortBy: [SortDescriptor(\.date, order: .reverse)]
-                )
-                fetched = try modelContext.fetch(descriptor)
-            }
-
-            return fetched.filter { workDay in
-                let matchesSearch = searchText.isEmpty ||
-                    (workDay.note?.localizedCaseInsensitiveContains(searchText) ?? false) ||
-                    workDay.type.rawValue.localizedCaseInsensitiveContains(searchText)
-
-                return matchesSearch
-            }
-        } catch {
-            AppLogger.error("WorkDays search fetch failed", category: AppLogger.general, error: error)
-            return []
-        }
+        return (totalHours, overtimeSeconds, totalBonus)
     }
     
     /// Gère la sélection/désélection d'un workDay
@@ -603,6 +617,7 @@ struct WorkDaysListView: View {
         // Sauvegarde du contexte
         do {
             try modelContext.save()
+            SiriSummaryCacheService().refresh(using: modelContext)
             
             // Réinitialiser la sélection et quitter le mode édition
             withAnimation(DS.Animation.interactive) {
@@ -621,17 +636,19 @@ struct WorkDaysListView: View {
     
     /// Supprime un WorkDay
     private func deleteWorkDay(_ workDay: WorkDay) {
+        let workDayID = workDay.id
         StatsCache.shared.onWorkDayDeleted(workDay)
         modelContext.delete(workDay)
         
         // Sauvegarde du contexte
         do {
             try modelContext.save()
+            SiriSummaryCacheService().refresh(using: modelContext)
             
             // Actualiser la liste filtrée et le groupement
-            let workDayID = workDay.id
-            filteredWorkDays.removeAll { $0.id == workDayID }
-            groupedWorkDays = Dictionary(grouping: filteredWorkDays) { dayOnly(from: $0.date) }
+            monthWorkDays.removeAll { $0.id == workDayID }
+            cachedMonthlyStats = monthlyStats(from: monthWorkDays)
+            applyCurrentFilters(to: monthWorkDays)
             
         } catch {
             ErrorManager.shared.handle(error, context: "DeleteWorkDay")
@@ -640,30 +657,33 @@ struct WorkDaysListView: View {
     
     /// Naviguer vers le mois précédent
     private func navigateToPreviousMonth() {
-        let calendar = Calendar.current
-        if let previousMonth = calendar.date(byAdding: .month, value: -1, to: selectedMonth) {
-            selectedMonth = previousMonth
-            selectedYear = calendar.component(.year, from: previousMonth)
+        if let previousMonth = visibleMonth.addingMonths(-1) {
+            clearSelection()
+            visibleMonth = previousMonth
             animateList = false
         }
     }
     
     /// Naviguer vers le mois suivant
     private func navigateToNextMonth() {
-        let calendar = Calendar.current
-        if let nextMonth = calendar.date(byAdding: .month, value: 1, to: selectedMonth) {
-            selectedMonth = nextMonth
-            selectedYear = calendar.component(.year, from: nextMonth)
+        if let nextMonth = visibleMonth.addingMonths(1) {
+            clearSelection()
+            visibleMonth = nextMonth
             animateList = false
         }
     }
     
     /// Revenir au mois courant
     private func navigateToCurrentMonth() {
-        let currentDate = Date()
-        selectedMonth = currentDate
-        selectedYear = Calendar.current.component(.year, from: currentDate)
+        clearSelection()
+        visibleMonth = WorkDayMonthSelection(date: Date())
         animateList = false
+    }
+
+    private func clearSelection() {
+        selectedWorkDays.removeAll()
+        selectedDates.removeAll()
+        isEditMode = false
     }
     
     /// Normalise la date à 00:00 (début de journée)
@@ -683,7 +703,7 @@ struct WorkDaysListView: View {
     
     /// Affichage du mois et de l'année sélectionnés
     private var monthYearString: String {
-        selectedMonth.formatted(.dateTime.month(.wide).year())
+        visibleMonth.startDate.formatted(.dateTime.month(.wide).year())
     }
 }
 
@@ -703,7 +723,7 @@ struct CustomSectionHeader: View {
                     onToggleSelection?()
                 }) {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(isSelected ? .blue : .gray)
+                        .foregroundStyle(isSelected ? .blue : .gray)
                         .font(.title3)
                 }
                 .padding(.trailing, 8)
@@ -719,7 +739,7 @@ struct CustomSectionHeader: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
                     .background(.blue.opacity(0.2))
-                    .foregroundColor(.blue)
+                    .foregroundStyle(.blue)
                     .cornerRadius(4)
             }
             
@@ -813,6 +833,7 @@ struct MonthlyStatsHeader: View {
                     .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.semibold)
                     .monospacedDigit()
+                    .contentTransition(.numericText())
             } icon: {
                 Image(systemName: "clock.fill")
                     .foregroundStyle(.blue)
@@ -827,6 +848,7 @@ struct MonthlyStatsHeader: View {
                     .fontWeight(.semibold)
                     .monospacedDigit()
                     .foregroundStyle(stats.overtimeSeconds >= 0 ? Color.green : Color.red)
+                    .contentTransition(.numericText(countsDown: stats.overtimeSeconds < 0))
             } icon: {
                 Image(systemName: stats.overtimeSeconds >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
                     .foregroundStyle(stats.overtimeSeconds >= 0 ? Color.green : Color.red)
@@ -840,6 +862,7 @@ struct MonthlyStatsHeader: View {
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.semibold)
                         .foregroundStyle(.orange)
+                        .contentTransition(.numericText())
                 } icon: {
                     Image(systemName: "dollarsign.circle.fill")
                         .foregroundStyle(.orange)
@@ -866,18 +889,18 @@ struct StatItem: View {
             // Icône style Apple Settings
             Image(systemName: icon)
                 .font(.system(size: DS.Font.iconSmall, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .frame(width: DS.IconSize.inline, height: DS.IconSize.inline)
                 .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
 
             Text(value)
                 .font(.system(.subheadline, design: .rounded))
                 .fontWeight(.semibold)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
             
             Text(title)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
@@ -908,17 +931,17 @@ struct TypeFilterButton: View {
         }) {
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(color)
+                    .foregroundStyle(color)
                     .frame(width: 24, height: 24)
                 
-                Text(type?.rawValue ?? "Tous les types")
+                Text(type?.localizedName ?? "filter.all".localized)
                     .fontWeight(isSelected ? .semibold : .regular)
                 
                 Spacer()
                 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                 }
             }
             .padding(.vertical, 10)

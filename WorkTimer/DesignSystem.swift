@@ -155,11 +155,109 @@ enum DS {
         /// Opacité pour les bordures subtiles
         static let tintedBorder: Double = 0.3
     }
+
+    // MARK: - Surfaces
+    enum Glass {
+        /// Intensité de la teinte sémantique appliquée au verre.
+        static let tintStrength: Double = 0.35
+        /// Distance de fusion entre plusieurs surfaces Liquid Glass proches.
+        static let groupSpacing: CGFloat = 20
+    }
 }
 
 // MARK: - View Modifier : Ombre standardisée
 extension View {
     func dsShadow(_ shadow: DS.Shadow) -> some View {
         self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
+    }
+
+    /// Couche 2 de la hiérarchie de profondeur : carte de contenu en verre natif.
+    /// `tint` applique une teinte sémantique (type de jour, état) au verre.
+    func dsGlassSurface(
+        cornerRadius: CGFloat = DS.Radius.card,
+        tint: Color? = nil,
+        interactive: Bool = false
+    ) -> some View {
+        modifier(DSGlassSurfaceModifier(
+            cornerRadius: cornerRadius,
+            tint: tint,
+            interactive: interactive
+        ))
+    }
+
+    /// Couche 1 de la hiérarchie de profondeur : fond d'écran dégradé subtil.
+    func dsScreenBackground(_ tint: Color = .blue) -> some View {
+        background {
+            LinearGradient(
+                colors: [
+                    tint.opacity(0.10),
+                    Color(.systemGroupedBackground)
+                ],
+                startPoint: .top,
+                endPoint: .center
+            )
+            .background(Color(.systemGroupedBackground))
+            .ignoresSafeArea()
+        }
+    }
+
+    func dsGlassEffectGroup(spacing: CGFloat? = DS.Glass.groupSpacing) -> some View {
+        DSGlassEffectGroup(spacing: spacing) {
+            self
+        }
+    }
+}
+
+struct DSGlassEffectGroup<Content: View>: View {
+    let spacing: CGFloat?
+    let content: Content
+
+    init(spacing: CGFloat? = DS.Glass.groupSpacing, @ViewBuilder content: () -> Content) {
+        self.spacing = spacing
+        self.content = content()
+    }
+
+    var body: some View {
+        GlassEffectContainer(spacing: spacing) {
+            content
+        }
+    }
+}
+
+private struct DSGlassSurfaceModifier: ViewModifier {
+    let cornerRadius: CGFloat
+    let tint: Color?
+    let interactive: Bool
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+
+        if reduceTransparency {
+            content
+                .background {
+                    shape.fill(Color(.secondarySystemGroupedBackground))
+                    if let tint {
+                        shape.fill(tint.opacity(DS.Background.tintedCard))
+                    }
+                }
+                .clipShape(shape)
+        } else {
+            content
+                .glassEffect(glass, in: shape)
+        }
+    }
+
+    private var glass: Glass {
+        var glass: Glass = .regular
+        if let tint {
+            glass = glass.tint(tint.opacity(DS.Glass.tintStrength))
+        }
+        if interactive {
+            glass = glass.interactive()
+        }
+        return glass
     }
 }
