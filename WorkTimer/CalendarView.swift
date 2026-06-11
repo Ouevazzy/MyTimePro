@@ -162,6 +162,10 @@ struct CalendarView: View {
     // Nouvelles optimisations
     @State private var workDaysByDate: [Date: WorkDay] = [:]  // Lookup O(1) au lieu de O(n)
     @State private var isFiltering = false
+
+    // Scroll vertical continu entre les mois (façon Calendrier Apple)
+    @State private var scrolledMonth: Date?
+    @AppStorage("calendar.showWeekNumbers") private var showWeekNumbers = false
     
     // Valeurs calculées
     private let calendar = CalendarGridLayout.displayCalendar
@@ -184,6 +188,7 @@ struct CalendarView: View {
         _selectedDate = State(initialValue: initialDate)
         _displayDate = State(initialValue: CalendarGridLayout.monthDisplayDate(for: initialDate, calendar: calendar))
         _preferredDayOfMonth = State(initialValue: calendar.component(.day, from: initialDate))
+        _scrolledMonth = State(initialValue: CalendarGridLayout.monthDisplayDate(for: initialDate, calendar: calendar))
     }
     
     // Jours de la semaine alignés sur la même grille que les dates.
@@ -238,14 +243,48 @@ struct CalendarView: View {
                 
                 // Affichage du calendrier selon le mode
                 ZStack {
-                    // Le calendrier est toujours présent — le loader s'affiche en overlay
-                    // pour éviter le flash (calendrier → vide → calendrier) lors de la navigation.
                     if calendarViewMode == .month {
+                        // Scroll vertical continu entre les mois (façon Calendrier Apple)
                         monthCalendarView
-                            .transition(slideTransition(for: slideDirection))
+                            .transition(.opacity)
                     } else {
                         weekCalendarView
                             .transition(slideTransition(for: slideDirection))
+                            .offset(x: dragOffset)
+                            .clipped()
+                            .animation(.spring(response: 0.3, dampingFraction: 0.86), value: displayDate)
+                            .gesture(
+                                DragGesture(minimumDistance: 10)
+                                    .onChanged { value in
+                                        // Feedback live : le calendrier suit le doigt à 25%
+                                        dragOffset = value.translation.width * 0.25
+                                    }
+                                    .onEnded { value in
+                                        let threshold: CGFloat = 50
+                                        let velocity = value.predictedEndTranslation.width
+
+                                        if value.translation.width > threshold || velocity > 500 {
+                                            // Swipe droite → semaine précédente
+                                            dragOffset = 0
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.86)) {
+                                                slideDirection = .right
+                                                shiftWeek(by: -1)
+                                            }
+                                        } else if value.translation.width < -threshold || velocity < -500 {
+                                            // Swipe gauche → semaine suivante
+                                            dragOffset = 0
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.86)) {
+                                                slideDirection = .left
+                                                shiftWeek(by: 1)
+                                            }
+                                        } else {
+                                            // Seuil non atteint : retour élastique
+                                            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                                                dragOffset = 0
+                                            }
+                                        }
+                                    }
+                            )
                     }
 
                     if isFiltering {
@@ -255,44 +294,7 @@ struct CalendarView: View {
                             .transition(.opacity)
                     }
                 }
-                .offset(x: dragOffset)
-                .clipped()
-                .animation(.spring(response: 0.3, dampingFraction: 0.86), value: displayDate)
-                .gesture(
-                    DragGesture(minimumDistance: 10)
-                        .onChanged { value in
-                            // Feedback live : le calendrier suit le doigt à 25%
-                            dragOffset = value.translation.width * 0.25
-                        }
-                        .onEnded { value in
-                            let threshold: CGFloat = 50
-                            let velocity = value.predictedEndTranslation.width
 
-                            if value.translation.width > threshold || velocity > 500 {
-                                // Swipe droite → mois/semaine précédent
-                                dragOffset = 0
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.86)) {
-                                    slideDirection = .right
-                                    if calendarViewMode == .month { shiftMonth(by: -1) }
-                                    else { shiftWeek(by: -1) }
-                                }
-                            } else if value.translation.width < -threshold || velocity < -500 {
-                                // Swipe gauche → mois/semaine suivant
-                                dragOffset = 0
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.86)) {
-                                    slideDirection = .left
-                                    if calendarViewMode == .month { shiftMonth(by: 1) }
-                                    else { shiftWeek(by: 1) }
-                                }
-                            } else {
-                                // Seuil non atteint : retour élastique
-                                withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
-                                    dragOffset = 0
-                                }
-                            }
-                        }
-                )
-                
                 Spacer(minLength: 0)
                 
                 // Détails de la journée sélectionnée
@@ -305,7 +307,7 @@ struct CalendarView: View {
             .dsScreenBackground(.purple)
             .overlay(alignment: .bottomLeading) {
                 // Bouton « Aujourd'hui » flottant, façon Calendrier Apple
-                if !isSelectedDateToday && selectedWorkDay == nil {
+                if (!isSelectedDateToday || !isDisplayedMonthCurrent) && selectedWorkDay == nil {
                     Button(action: goToToday) {
                         Text("calendar.today".localized)
                             .fontWeight(.semibold)
@@ -330,10 +332,18 @@ struct CalendarView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        showingDatePicker = true
-                    }) {
-                        Image(systemName: "calendar")
+                    Menu {
+                        Button {
+                            showingDatePicker = true
+                        } label: {
+                            Label("calendar.selectDate".localized, systemImage: "calendar")
+                        }
+
+                        Toggle(isOn: $showWeekNumbers) {
+                            Label("calendar.weekNumbers".localized, systemImage: "number")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                             .foregroundStyle(.blue)
                     }
                     .buttonStyle(.glass)
@@ -422,24 +432,25 @@ struct CalendarView: View {
     // En-tête avec navigation du calendrier
     private var calendarHeader: some View {
         HStack(alignment: .firstTextBaseline) {
-            // Grand titre aligné à gauche, façon Calendrier Apple
+            // Titre aligné à gauche, façon Calendrier Apple.
+            // En mode mois, les grands noms de mois défilent dans le scroll :
+            // le header n'affiche que l'année.
             HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm) {
                 if calendarViewMode == .month {
-                    Text(monthTitle)
+                    Text(displayDate.formatted(.dateTime.year()))
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .matchedGeometryEffect(id: "monthTitle", in: monthTransition)
                 } else {
                     Text(weekRange)
                         .font(.title2)
                         .fontWeight(.bold)
                         .matchedGeometryEffect(id: "weekTitle", in: monthTransition)
-                }
 
-                Text(displayDate.formatted(.dateTime.year()))
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
+                    Text(displayDate.formatted(.dateTime.year()))
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                }
             }
             .contentTransition(.numericText())
 
@@ -495,6 +506,10 @@ struct CalendarView: View {
     // En-tête des jours de la semaine — 1 lettre, week-ends grisés (façon Calendrier Apple)
     private var weekdayHeader: some View {
         HStack(spacing: 0) {
+            if showWeekNumbers && calendarViewMode == .month {
+                Color.clear.frame(width: 22, height: 1)
+            }
+
             ForEach(Array(weekDaySymbols.enumerated()), id: \.offset) { index, symbol in
                 Text(String(symbol.prefix(1)).uppercased())
                     .font(.caption)
@@ -507,54 +522,126 @@ struct CalendarView: View {
         .padding(.vertical, 8)
     }
     
-    // Vue du calendrier mensuel — lignes de semaine séparées par un filet (façon Calendrier Apple)
-    private var monthCalendarView: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(stride(from: 0, to: visibleMonthSlots.count, by: 7)), id: \.self) { weekStart in
-                if weekStart > 0 {
-                    Divider()
-                }
+    /// Plage de mois pour le scroll continu : ±10 ans autour du mois courant.
+    private var continuousMonths: [Date] {
+        let base = CalendarGridLayout.monthDisplayDate(for: Date(), calendar: calendar)
+        return (-120...120).compactMap { calendar.date(byAdding: .month, value: $0, to: base) }
+    }
 
-                HStack(spacing: 0) {
-                    ForEach(visibleMonthSlots[weekStart..<min(weekStart + 7, visibleMonthSlots.count)]) { slot in
-                        if let date = slot.date {
-                            let workDay = findWorkDay(for: date)
-                            Button {
-                                withAnimation(DS.Animation.micro) {
-                                    selectDate(date, workDay: workDay)
+    // Vue du calendrier mensuel — scroll vertical continu entre les mois (façon Calendrier Apple)
+    private var monthCalendarView: some View {
+        ScrollView {
+            LazyVStack(spacing: DS.Spacing.md) {
+                ForEach(continuousMonths, id: \.self) { month in
+                    monthSection(for: month)
+                        .id(month)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrolledMonth, anchor: .top)
+        .scrollIndicators(.hidden)
+        .onAppear {
+            // Le positionnement initial de scrollPosition dérive avec des hauteurs
+            // de sections variables : on re-cible le mois affiché après le premier layout.
+            let target = CalendarGridLayout.monthDisplayDate(for: displayDate, calendar: calendar)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                scrolledMonth = target
+            }
+        }
+        .onChange(of: scrolledMonth) { _, newValue in
+            // Le mois visible en haut pilote le titre et le chargement des données
+            guard let newValue,
+                  !calendar.isDate(newValue, equalTo: displayDate, toGranularity: .month) else { return }
+            displayDate = newValue
+        }
+        .onChange(of: displayDate) { _, newValue in
+            // Navigation externe (chevrons, date picker, Siri, Aujourd'hui) → scroll
+            guard calendarViewMode == .month else { return }
+            let target = CalendarGridLayout.monthDisplayDate(for: newValue, calendar: calendar)
+            guard scrolledMonth != target else { return }
+            withAnimation(DS.Animation.navigation) { scrolledMonth = target }
+        }
+    }
+
+    /// Un mois du scroll continu : titre inline + grille de semaines séparées par un filet.
+    private func monthSection(for month: Date) -> some View {
+        let slots = CalendarGridLayout.monthSlots(for: month, calendar: calendar)
+
+        return VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+            Text(monthSectionTitle(for: month))
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.leading, DS.Spacing.xs)
+                .padding(.top, DS.Spacing.sm)
+
+            VStack(spacing: 0) {
+                ForEach(Array(stride(from: 0, to: slots.count, by: 7)), id: \.self) { weekStart in
+                    if weekStart > 0 {
+                        Divider()
+                    }
+
+                    HStack(spacing: 0) {
+                        if showWeekNumbers {
+                            Text(weekNumberText(for: slots[weekStart..<min(weekStart + 7, slots.count)]))
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.tertiary)
+                                .frame(width: 22, alignment: .leading)
+                        }
+
+                        ForEach(slots[weekStart..<min(weekStart + 7, slots.count)]) { slot in
+                            if let date = slot.date {
+                                let workDay = findWorkDay(for: date)
+                                Button {
+                                    withAnimation(DS.Animation.micro) {
+                                        selectDate(date, workDay: workDay)
+                                    }
+                                } label: {
+                                    ImprovedCalendarCell(
+                                        date: date,
+                                        workDay: workDay,
+                                        isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
+                                        isToday: calendar.isDateInToday(date),
+                                        isWeekend: calendar.isDateInWeekend(date)
+                                    )
                                 }
-                            } label: {
-                                ImprovedCalendarCell(
-                                    date: date,
-                                    workDay: workDay,
-                                    isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
-                                    isToday: calendar.isDateInToday(date),
-                                    isWeekend: calendar.isDateInWeekend(date)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .id(slot.id)
-                            .accessibilityIdentifier("calendar-day-\(CalendarGridLayout.dateIdentity(for: date, calendar: calendar))")
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(accessibilityLabel(for: date, workDay: workDay))
-                            .accessibilityAddTraits(calendar.isDate(date, inSameDayAs: selectedDate) ? [.isButton, .isSelected] : .isButton)
-                            .accessibilityAction {
-                                withAnimation(DS.Animation.micro) {
-                                    selectDate(date, workDay: workDay)
-                                }
-                            }
-                        } else {
-                            // Cellule vide
-                            Color.clear
-                                .frame(maxWidth: .infinity)
+                                .buttonStyle(.plain)
                                 .id(slot.id)
+                                .accessibilityIdentifier("calendar-day-\(CalendarGridLayout.dateIdentity(for: date, calendar: calendar))")
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(accessibilityLabel(for: date, workDay: workDay))
+                                .accessibilityAddTraits(calendar.isDate(date, inSameDayAs: selectedDate) ? [.isButton, .isSelected] : .isButton)
+                                .accessibilityAction {
+                                    withAnimation(DS.Animation.micro) {
+                                        selectDate(date, workDay: workDay)
+                                    }
+                                }
+                            } else {
+                                // Cellule vide
+                                Color.clear
+                                    .frame(maxWidth: .infinity)
+                                    .id(slot.id)
+                            }
                         }
                     }
                 }
             }
         }
         .padding(.horizontal)
-        .id("month-\(CalendarGridLayout.dateIdentity(for: displayDate, calendar: calendar))")
+    }
+
+    /// « Juin », ou « Juin 2027 » si l'année diffère de l'année en cours.
+    private func monthSectionTitle(for month: Date) -> String {
+        let name = month.formatted(.dateTime.month(.wide)).capitalized
+        let year = calendar.component(.year, from: month)
+        let currentYear = calendar.component(.year, from: Date())
+        return year == currentYear ? name : "\(name) \(year)"
+    }
+
+    private func weekNumberText(for slots: ArraySlice<CalendarMonthSlot>) -> String {
+        guard let date = slots.compactMap(\.date).first else { return "" }
+        return String(calendar.component(.weekOfYear, from: date))
     }
     
     // Vue du calendrier hebdomadaire - version optimisée
@@ -733,9 +820,10 @@ struct CalendarView: View {
         var relevantWorkDays: [WorkDay] = []
         do {
             if currentMode == .month,
-               let interval = calendar.dateInterval(of: .month, for: currentDisplayDate) {
-                let start = interval.start
-                let end   = interval.end
+               let interval = calendar.dateInterval(of: .month, for: currentDisplayDate),
+               // Scroll continu : précharge ±2 mois autour du mois visible
+               let start = calendar.date(byAdding: .month, value: -2, to: interval.start),
+               let end = calendar.date(byAdding: .month, value: 2, to: interval.end) {
                 var descriptor = FetchDescriptor<WorkDay>(
                     predicate: #Predicate<WorkDay> {
                         $0.date >= start &&

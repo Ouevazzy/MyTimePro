@@ -41,6 +41,15 @@
 "workDay.summary" = "RÉSUMÉ";
 "workDay.totalDuration" = "Durée totale";
 "workDay.details" = "DÉTAILS DE LA JOURNÉE";
+"workDay.validation.title" = "À vérifier";
+"workDay.validation.dateTooFarInFuture" = "La date ne peut pas être à plus d’un an dans le futur.";
+"workDay.validation.dateTooFarInPast" = "La date ne peut pas être à plus de 10 ans dans le passé.";
+"workDay.validation.noteTooLong" = "La note doit contenir 500 caractères maximum.";
+"workDay.validation.negativeBonus" = "Le bonus ne peut pas être négatif.";
+"workDay.validation.missingTimes" = "Les heures de début et de fin sont nécessaires.";
+"workDay.validation.invalidDuration" = "L’heure de fin doit être après l’heure de début.";
+"workDay.validation.breakTooLong" = "La pause ne peut pas dépasser la durée travaillée.";
+"workDay.validation.noNetHours" = "La durée travaillée doit rester supérieure à zéro après la pause.";
 
 // MARK: - Work Day Types
 "workDayType.work" = "Travail";
@@ -83,6 +92,8 @@
 // MARK: - Settings
 "settings.title" = "Réglages";
 "settings.profile" = "Profil";
+"settings.profile.name" = "Votre nom";
+"settings.profile.company" = "Entreprise";
 "settings.workTime" = "Horaires de travail";
 "settings.display" = "Affichage";
 "settings.features" = "Fonctionnalités";
@@ -125,6 +136,7 @@
 "settings.version" = "Version";
 "settings.support" = "Signaler un problème";
 "settings.diagnostics" = "Diagnostic des calculs";
+"settings.privacyPolicy" = "Politique de confidentialité";
 
 // MARK: - Calendar
 "calendar.title" = "Calendrier";
@@ -132,6 +144,7 @@
 "calendar.mode.week" = "Semaine";
 "calendar.today" = "Aujourd'hui";
 "calendar.selectDate" = "Choisir une date";
+"calendar.weekNumbers" = "Numéros de semaine";
 "calendar.noEvents" = "Aucun événement cette semaine";
 
 // MARK: - Months
@@ -205,6 +218,7 @@
 // MARK: - Time Format
 "time.hours.short" = "h";
 "time.minutes.short" = "min";
+"time.days.short" = "j";
 "time.days" = "jours";
 "time.day" = "jour";
 
@@ -241,12 +255,35 @@
 // MARK: - Charts
 "charts.title" = "Graphiques";
 "charts.year" = "Année";
+"charts.daily" = "Jours";
+"charts.weekly" = "Semaines";
+"charts.monthly" = "Mois";
+"charts.type.daily" = "Jours";
+"charts.type.weekly" = "Semaines";
+"charts.type.monthly" = "Mois";
+"charts.type.distribution" = "Types";
 "charts.weeklyHours" = "Heures par semaine";
 "charts.monthlyHours" = "Heures par mois";
 "charts.last30Days" = "30 derniers jours";
 "charts.distribution" = "Répartition des journées";
 "charts.noData" = "Aucune donnée";
+"charts.noDataHelp" = "Ajoutez des journées de travail pour afficher ce graphique";
 "charts.summary" = "Résumé %d";
+"charts.averagePerDay" = "Moyenne/jour";
+"charts.axis.week" = "Semaine";
+"charts.axis.hours" = "Heures";
+"charts.axis.month" = "Mois";
+"charts.axis.day" = "Jour";
+"charts.axis.overtime" = "Heures supp.";
+"charts.axis.deficit" = "Déficit";
+"charts.axis.count" = "Nombre";
+"charts.legend.total" = "Total";
+"charts.legend.surplus" = "Surplus";
+"charts.legend.deficit" = "Déficit";
+"charts.accessibility.weekly" = "Graphique des heures par semaine, %d semaines affichées";
+"charts.accessibility.monthly" = "Graphique des heures par mois pour l'année %d";
+"charts.accessibility.daily" = "Graphique des 30 derniers jours, %d jours affichés";
+"charts.accessibility.distribution" = "Graphique de répartition des types de journées";
 
 // MARK: - Sync Details
 "sync.title" = "Synchronisation";
@@ -326,8 +363,14 @@
 "settings.vacation.initialBalance" = "Solde de vacances à cette date";
 "settings.vacation.unitDays" = "jours";
 "settings.vacation.unitHours" = "heures";
+"settings.vacation.unit" = "Unité";
 "settings.vacation.unit.days" = "Jours";
 "settings.vacation.unit.hours" = "Heures";
+"settings.vacation.equivalentHours" = "≈ %.1f heures";
+"settings.vacation.equivalentDays" = "≈ %.1f jours";
+"settings.vacation.summary.initial" = "• %d: %.1f %@ (%.1f%@) (%@)";
+"settings.vacation.summary.following" = "• %d et après: %d %@/an + %@";
+"settings.vacation.summary.carryover" = "• Le solde non utilisé est reporté à l'année suivante";
 
 // MARK: - Display Settings
 "settings.display.title" = "Affichage";
@@ -336,6 +379,8 @@
 "settings.display.weeklyHours" = "Heures hebdomadaires";
 "settings.display.presets.common" = "Préréglages communs";
 "settings.display.adjustment.precise" = "Ajustement précis";
+"settings.display.standardHours" = "Standard 40h";
+"settings.display.hoursValue" = "%@ heures";
 
 // MARK: - Export Settings
 "settings.export.title" = "Exportation";
@@ -361,6 +406,9 @@
 "export.csv.type.label" = "Type de rapport";
 "export.csv.period.label" = "Période";
 "export.csv.help" = "Le fichier CSV peut être ouvert dans Excel, Numbers ou Google Sheets";
+"export.csv.header" = "Date,Type,Début,Fin,Pause,Heures Totales,Heures Supp.,Bonus,Note";
+"export.error.pdf" = "Impossible de générer le PDF";
+"export.error.csv" = "Impossible de générer le CSV";
 
 // MARK: - Notifications Settings
 "notification.title" = "Notifications";
@@ -376,18 +424,97 @@
 "notification.reminder.time" = "Heure du rappel";
 "notification.reminder.arrival" = "Rappel d'arrivée";
 "notification.reminder.departure" = "Rappel de départ";
+"notification.reminder.scheduleSummary" = "Rappel programmé pour %d %@ par semaine";
 "notification.test.send" = "Envoyer une notification test";
 "notification.test.footer" = "La notification apparaîtra dans 5 secondes";
+"notification.morning.title" = "Bonne journée !";
+"notification.morning.body" = "N'oubliez pas de pointer votre arrivée";
+"notification.evening.title" = "Fin de journée";
+"notification.evening.body" = "N'oubliez pas de pointer votre départ";
+"notification.test.title" = "Test de notification";
+"notification.test.body" = "Les notifications WorkTimer fonctionnent correctement !";
 "notification.alert.disabled.title" = "Notifications désactivées";
 "notification.alert.openSettings" = "Ouvrir Réglages";
 "notification.alert.disabled.message" = "Veuillez autoriser les notifications dans les réglages de votre iPhone";
 "notification.alert.sent.title" = "Notification envoyée";
 "notification.alert.sent.message" = "Une notification test va apparaître dans quelques secondes";
+"notification.day.selected" = "Sélectionné";
+"notification.day.notSelected" = "Non sélectionné";
 
 // MARK: - Siri Shortcuts
 "siri.description" = "Utilisez ces phrases avec Siri pour interagir rapidement avec WorkTimer";
 "siri.openShortcuts" = "Ouvrir l'app Raccourcis";
 "siri.automationHelp" = "Vous pouvez créer des automatisations personnalisées dans l'app Raccourcis";
+"siri.section.timeTracking" = "Pointer";
+"siri.section.consult" = "Consulter";
+"siri.section.add" = "Ajouter";
+"siri.section.navigate" = "Ouvrir";
+"siri.phrase.arrival" = "\"Hey Siri, pointer mon arrivée avec WorkTimer\"";
+"siri.phrase.departure" = "\"Hey Siri, pointer mon départ avec WorkTimer\"";
+"siri.phrase.overtime" = "\"Hey Siri, mes heures supplémentaires avec WorkTimer\"";
+"siri.phrase.vacation" = "\"Hey Siri, mes jours de congés avec WorkTimer\"";
+"siri.phrase.quickAdd" = "\"Hey Siri, ajouter une journée avec WorkTimer\"";
+"siri.phrase.openDestination" = "\"Hey Siri, ouvrir calendrier dans WorkTimer\"";
+"siri.phrase.openDate" = "\"Hey Siri, ouvrir une date dans WorkTimer\"";
+"siri.phrase.openPresetDate" = "\"Hey Siri, ouvrir demain dans WorkTimer\"";
+"siri.description.arrival" = "Enregistre votre heure d'arrivée";
+"siri.description.departure" = "Enregistre votre heure de départ";
+"siri.description.overtime" = "Affiche votre solde d'heures";
+"siri.description.vacation" = "Affiche votre solde de congés";
+"siri.description.quickAdd" = "Crée ou met à jour la journée du jour avec le type choisi";
+"siri.description.openDestination" = "Ouvre directement l'accueil, le calendrier, les journées, les statistiques ou les réglages";
+"siri.description.openDate" = "Ouvre le calendrier directement sur la date demandée";
+"siri.description.openPresetDate" = "Ouvre rapidement le calendrier sur aujourd'hui, demain ou hier";
+"siri.dialog.arrival" = "Arrivée enregistrée à %@. Ouvrez WorkTimer pour compléter votre journée.";
+"siri.dialog.departure" = "Départ enregistré à %@. Bonne soirée !";
+"siri.dialog.overtime.positive" = "Vous avez %@ d'heures supplémentaires. Bon travail !";
+"siri.dialog.overtime.negative" = "Vous avez %@ d'heures à rattraper.";
+"siri.dialog.overtime.zero" = "Votre solde d'heures est à zéro. Parfait !";
+"siri.dialog.vacation.high" = "Il vous reste %@ jours de congés. Pensez à prendre des vacances !";
+"siri.dialog.vacation.available" = "Il vous reste %@ jours de congés.";
+"siri.dialog.vacation.none" = "Vous n'avez plus de jours de congés disponibles.";
+"siri.dialog.weeklySummary" = "Cette semaine : %@ h travaillées. Heures sup : %@. Congés restants : %@ jours.";
+"siri.dialog.quickAdd" = "Ouverture de WorkTimer pour ajouter une journée...";
+"siri.dialog.openDestination" = "Ouverture de %@ dans WorkTimer.";
+"siri.dialog.openDate" = "Ouverture du calendrier au %@.";
+"siri.dialog.openDatePreset" = "Ouverture du calendrier : %@.";
+"siri.shortcut.arrival.title" = "Pointer l'arrivée";
+"siri.shortcut.departure.title" = "Pointer le départ";
+"siri.shortcut.overtime.title" = "Heures supplémentaires";
+"siri.shortcut.vacation.title" = "Solde congés";
+"siri.shortcut.weeklySummary.title" = "Résumé semaine";
+"siri.shortcut.quickAdd.title" = "Ajouter journée";
+"siri.shortcut.openDestination.title" = "Ouvrir";
+"siri.shortcut.openDate.title" = "Ouvrir une date";
+"siri.shortcut.openPresetDate.title" = "Ouvrir jour rapide";
+"siri.intent.arrival.title" = "Pointer l'arrivée";
+"siri.intent.arrival.description" = "Enregistre votre heure d'arrivée au travail";
+"siri.intent.departure.title" = "Pointer le départ";
+"siri.intent.departure.description" = "Enregistre votre heure de départ du travail";
+"siri.intent.overtime.title" = "Consulter les heures supplémentaires";
+"siri.intent.overtime.description" = "Affiche votre solde d'heures supplémentaires";
+"siri.intent.vacation.title" = "Consulter le solde de congés";
+"siri.intent.vacation.description" = "Affiche votre solde de jours de congés";
+"siri.intent.weeklySummary.title" = "Résumé de la semaine";
+"siri.intent.weeklySummary.description" = "Affiche un résumé de votre semaine de travail";
+"siri.intent.quickAdd.title" = "Ajouter une journée";
+"siri.intent.quickAdd.description" = "Ajoute rapidement une journée de travail";
+"siri.intent.quickAdd.dayType" = "Type";
+"siri.intent.workDayType.title" = "Type de journée";
+"siri.intent.openDestination.title" = "Ouvrir WorkTimer";
+"siri.intent.openDestination.description" = "Ouvre directement une partie de WorkTimer";
+"siri.intent.openDestination.destination" = "Destination";
+"siri.intent.destination.title" = "Destination";
+"siri.intent.openDate.title" = "Ouvrir une date";
+"siri.intent.openDate.description" = "Ouvre le calendrier WorkTimer sur une date précise";
+"siri.intent.openDate.date" = "Date";
+"siri.intent.openPresetDate.title" = "Ouvrir un jour rapide";
+"siri.intent.openPresetDate.description" = "Ouvre le calendrier WorkTimer sur aujourd'hui, demain ou hier";
+"siri.intent.openPresetDate.preset" = "Jour";
+"siri.intent.datePreset.title" = "Jour rapide";
+"siri.intent.datePreset.today" = "aujourd'hui";
+"siri.intent.datePreset.tomorrow" = "demain";
+"siri.intent.datePreset.yesterday" = "hier";
 
 // MARK: - Home Tab
 "home.vacation.balanceHours" = "Solde en heures";
@@ -400,6 +527,15 @@
 // MARK: - Stats View
 "stats.noData" = "Aucune donnée pour %d";
 "stats.noDataHelp" = "Ajoutez des journées de travail pour voir les statistiques";
+
+// MARK: - Settings Subscription
+"settings.subscription.title" = "Abonnement";
+"settings.subscription.free" = "Version gratuite";
+"settings.subscription.manage" = "Gérer mon abonnement";
+"settings.subscription.lifetimeActive" = "Accès à vie actif";
+"settings.subscription.upgrade" = "Passer à Pro";
+"settings.subscription.terms" = "Conditions d'utilisation";
+"settings.subscription.privacy" = "Confidentialité";
 
 // MARK: - Settings About
 "settings.about.title" = "À propos";
@@ -435,3 +571,47 @@
 "diagnostics.recalculate.confirm" = "Recalculer";
 "diagnostics.recalculate.message" = "Cette action va recalculer les heures de toutes les entrées de travail";
 "diagnostics.recalculate.completed.title" = "Recalcul terminé";
+
+// MARK: - Paywall
+"paywall.headline" = "Passez à Pro";
+"paywall.subtitle" = "Débloquez tout le potentiel\nde WorkTimer";
+"paywall.close" = "Fermer";
+"paywall.feature.export.title" = "Export PDF & CSV";
+"paywall.feature.export.subtitle" = "Rapports mensuels et annuels clés en main";
+"paywall.feature.charts.title" = "Graphiques avancés";
+"paywall.feature.charts.subtitle" = "Visualisez vos tendances d'heures";
+"paywall.feature.siri.title" = "Raccourcis Siri";
+"paywall.feature.siri.subtitle" = "Contrôle vocal";
+"paywall.feature.icloud.subtitle" = "Vos données sur tous vos appareils";
+"paywall.plan.monthly" = "Mensuel";
+"paywall.plan.annual" = "Annuel";
+"paywall.plan.lifetime" = "À vie";
+"paywall.plan.popular" = "Plus populaire";
+"paywall.plan.bestDeal" = "Meilleur deal";
+"paywall.plan.perMonth" = "par mois";
+"paywall.plan.perYear" = "par an";
+"paywall.plan.oneTime" = "paiement unique";
+"paywall.plan.monthlyEquiv" = "soit %@/mois";
+"paywall.purchase.choosePlan" = "Choisir un plan";
+"paywall.purchase.subscribe" = "S'abonner — %@";
+"paywall.purchase.lifetime" = "Acheter à vie — %@";
+"paywall.redeemCode.title" = "Utiliser un code promo";
+"paywall.redeemCode.subtitle" = "Saisissez un code App Store Connect pour débloquer une offre, y compris l'accès à vie.";
+"paywall.restore" = "Restaurer les achats";
+"paywall.legal.privacy" = "Politique de confidentialité";
+"paywall.legal.terms" = "Conditions d'utilisation";
+"paywall.legal" = "L'abonnement se renouvelle automatiquement sauf résiliation au moins 24h avant la fin de la période en cours. Gérez vos abonnements dans Réglages > [Votre nom] > Abonnements.";
+"paywall.legal.subscription" = "L'abonnement se renouvelle automatiquement sauf résiliation au moins 24h avant la fin de la période en cours. Gérez vos abonnements dans Réglages > [Votre nom] > Abonnements.";
+"paywall.legal.lifetime" = "L'accès à vie est un achat unique lié à votre compte Apple et peut être restauré sur vos appareils compatibles.";
+"paywall.error.title" = "Erreur d'achat";
+"paywall.error.purchase" = "L'achat a échoué. Veuillez réessayer.";
+"paywall.error.redeemCode" = "Le code n'a pas pu être validé. Vérifiez le code ou réessayez plus tard.";
+"paywall.loading" = "Chargement des offres…";
+"siri.dialog.proRequired" = "Les raccourcis Siri font partie de WorkTimer Pro. Ouvrez l'app pour passer à Pro ou utiliser un code promo.";
+
+// MARK: - Tips
+"tips.calendar.add.title" = "Ajoutez une journée";
+"tips.calendar.add.message" = "Touchez + pour enregistrer rapidement un jour de travail, de congé ou de récupération.";
+
+"accessibility.previousMonth" = "Mois précédent";
+"accessibility.nextMonth" = "Mois suivant";

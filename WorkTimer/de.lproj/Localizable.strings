@@ -44,6 +44,13 @@
 "addworkday.delete" = "Löschen";
 
 // MARK: - Work Day Types
+"workDayType.work" = "Arbeit";
+"workDayType.vacation" = "Urlaub";
+"workDayType.halfDayVacation" = "Halber Urlaubstag";
+"workDayType.sickLeave" = "Krankheit";
+"workDayType.compensatory" = "Zeitausgleich";
+"workDayType.training" = "Schulung";
+"workDayType.holiday" = "Feiertag";
 "workday.type.work" = "Arbeit";
 "workday.type.vacation" = "Urlaub";
 "workday.type.halfDayVacation" = "Halbtag";
@@ -79,14 +86,34 @@
 "settings.display" = "Anzeige";
 "settings.decimal.hours" = "Dezimalstunden";
 "settings.notifications" = "Benachrichtigungen";
+"settings.notifications.subtitle" = "Zeiterfassungs-Erinnerungen";
 "settings.export" = "Export";
+"settings.profile.name" = "Ihr Name";
+"settings.profile.company" = "Unternehmen";
+"settings.export.title" = "Export";
+"settings.export.format" = "Exportformat";
+"settings.export.monthly" = "Monatlicher Export";
+"settings.export.monthly.subtitle" = "Detaillierte Daten für einen bestimmten Monat";
+"settings.export.annual" = "Jährlicher Export";
+"settings.export.annual.subtitle" = "Vollständige Jahresübersicht mit Diagrammen";
+"settings.export.customization" = "Anpassung";
+"settings.export.companyName" = "Firmenname:";
+"settings.export.companyName.hint" = "Dieser Name wird auf exportierten Dokumenten angezeigt";
 "settings.export.pdf" = "PDF exportieren";
 "settings.export.csv" = "CSV exportieren";
 "settings.about" = "Über";
 "settings.version" = "Version";
+"settings.subscription.title" = "Abonnement";
+"settings.subscription.free" = "Kostenlose Version";
+"settings.subscription.manage" = "Abonnement verwalten";
+"settings.subscription.lifetimeActive" = "Lebenslanger Zugriff aktiv";
+"settings.subscription.upgrade" = "Auf Pro upgraden";
+"settings.subscription.terms" = "Nutzungsbedingungen";
+"settings.subscription.privacy" = "Datenschutz";
 "settings.support" = "Support";
 "settings.diagnostics" = "Diagnose";
 "settings.siri" = "Siri-Kurzbefehle";
+"settings.siri.subtitle" = "Sprachsteuerung";
 
 // MARK: - Notifications
 "notifications.title" = "Benachrichtigungen";
@@ -97,15 +124,69 @@
 "notifications.authorized" = "Erlaubt";
 "notifications.not.authorized" = "Nicht erlaubt";
 "notifications.authorize" = "Erlauben";
+"notification.title" = "Benachrichtigungen";
+"notification.section.authorization" = "Autorisierung";
+"notification.authorized" = "Erlaubt";
+"notification.unauthorized" = "Nicht erlaubt";
+"notification.authorize" = "Erlauben";
+"notification.section.activeDays" = "Aktive Tage";
+"notification.section.notificationDays" = "Benachrichtigungstage";
+"notification.section.selectDaysHelp" = "Wählen Sie die Tage aus, an denen Sie Erinnerungen erhalten möchten";
+"notification.reminder.morning" = "Morgenerinnerung";
+"notification.reminder.evening" = "Abenderinnerung";
+"notification.reminder.time" = "Erinnerungszeit";
+"notification.reminder.arrival" = "Ankunftserinnerung";
+"notification.reminder.departure" = "Abfahrtserinnerung";
+"notification.reminder.scheduleSummary" = "Geplant für %d %@ pro Woche";
+"notification.test.send" = "Testbenachrichtigung senden";
+"notification.test.footer" = "Die Benachrichtigung erscheint in 5 Sekunden";
+"notification.morning.title" = "Guten Morgen!";
+"notification.morning.body" = "Vergessen Sie nicht, Ihre Ankunft zu erfassen";
+"notification.evening.title" = "Feierabend";
+"notification.evening.body" = "Vergessen Sie nicht, Ihre Abfahrt zu erfassen";
+"notification.test.title" = "Benachrichtigungstest";
+"notification.test.body" = "WorkTimer-Benachrichtigungen funktionieren korrekt!";
+"notification.alert.disabled.title" = "Benachrichtigungen deaktiviert";
+"notification.alert.openSettings" = "Einstellungen öffnen";
+"notification.alert.disabled.message" = "Bitte erlauben Sie Benachrichtigungen in den iPhone-Einstellungen";
+"notification.alert.sent.title" = "Benachrichtigung gesendet";
+"notification.alert.sent.message" = "Eine Testbenachrichtigung erscheint in wenigen Sekunden";
+"notification.day.selected" = "Ausgewählt";
+"notification.day.notSelected" = "Nicht ausgewählt";
 
 // MARK: - Charts
 "charts.title" = "Diagramme";
+"charts.year" = "Jahr";
 "charts.weekly" = "Wöchentlich";
 "charts.monthly" = "Monatlich";
 "charts.daily" = "Täglich";
+"charts.type.daily" = "Tage";
+"charts.type.weekly" = "Wochen";
+"charts.type.monthly" = "Monate";
+"charts.type.distribution" = "Typen";
+"charts.weeklyHours" = "Stunden pro Woche";
+"charts.monthlyHours" = "Stunden pro Monat";
+"charts.last30Days" = "Letzte 30 Tage";
 "charts.distribution" = "Verteilung";
 "charts.summary" = "Zusammenfassung %d";
+"charts.noData" = "Keine Daten";
+"charts.noDataHelp" = "Fügen Sie Arbeitstage hinzu, um dieses Diagramm anzuzeigen";
 "charts.no.data" = "Keine Daten";
+"charts.averagePerDay" = "Durchschnitt/Tag";
+"charts.axis.week" = "Woche";
+"charts.axis.hours" = "Stunden";
+"charts.axis.month" = "Monat";
+"charts.axis.day" = "Tag";
+"charts.axis.overtime" = "Überstunden";
+"charts.axis.deficit" = "Defizit";
+"charts.axis.count" = "Anzahl";
+"charts.legend.total" = "Gesamt";
+"charts.legend.surplus" = "Überschuss";
+"charts.legend.deficit" = "Defizit";
+"charts.accessibility.weekly" = "Diagramm der Wochenstunden, %d Wochen angezeigt";
+"charts.accessibility.monthly" = "Diagramm der Monatsstunden für %d";
+"charts.accessibility.daily" = "Diagramm der letzten 30 Tage, %d Tage angezeigt";
+"charts.accessibility.distribution" = "Diagramm zur Verteilung der Tagestypen";
 
 // MARK: - CSV Export
 "csv.title" = "CSV-Export";
@@ -116,6 +197,30 @@
 "csv.type.overtime" = "Überstundenbericht";
 "csv.export" = "Als CSV exportieren";
 "csv.close" = "Schließen";
+"export.section.options" = "OPTIONEN";
+"export.hourFormat.label" = "Stundenformat";
+"export.hourFormat.standard" = "Standard (8h30)";
+"export.hourFormat.decimal" = "Dezimal (8.50 h)";
+"export.includeCharts" = "Diagramme einschließen";
+"export.section.period" = "ZEITRAUM";
+"export.year.label" = "Jahr";
+"export.month.label" = "Monat";
+"export.section.info" = "INFORMATIONEN";
+"export.company.placeholder" = "Firmenname";
+"export.generate.button" = "Dokument erstellen";
+"export.regenerate.button" = "Neu erstellen";
+"export.csv.generated.title" = "CSV-Datei erstellt";
+"export.csv.generated.help" = "Verwenden Sie Teilen, um die Datei zu senden";
+"export.share.button" = "Teilen";
+"export.monthly.title" = "Monatlicher Export";
+"export.annual.title" = "Jährlicher Export";
+"export.noDocument" = "Kein Dokument zum Teilen";
+"export.csv.type.label" = "Berichtstyp";
+"export.csv.period.label" = "Zeitraum";
+"export.csv.help" = "Die CSV-Datei kann in Excel, Numbers oder Google Sheets geöffnet werden";
+"export.csv.header" = "Datum,Typ,Start,Ende,Pause,Gesamtstunden,Überstunden,Bonus,Notiz";
+"export.error.pdf" = "PDF konnte nicht erstellt werden";
+"export.error.csv" = "CSV konnte nicht erstellt werden";
 
 // MARK: - PDF Export
 "pdf.title" = "PDF-Bericht";
@@ -129,6 +234,17 @@
 "vacation.entitlement" = "Anspruch";
 "vacation.used" = "Verwendet";
 "vacation.remaining" = "Verbleibend";
+"vacation.annualEntitlement" = "Jahresanspruch";
+"vacation.carryIn" = "Übertrag";
+"vacation.initialBalance" = "Anfangssaldo";
+"vacation.calculation.standard" = "Restguthaben = Jahresanspruch + Übertrag - Verwendet";
+"vacation.calculation.initial" = "Restguthaben = Anfangssaldo - Verwendet";
+"vacation.carryover.note" = "Das Restguthaben wird ins nächste Jahr übertragen";
+"vacation.empty.title" = "Kein Urlaub";
+"vacation.empty.message" = "Für das Jahr %d wurde kein Urlaub erfasst";
+"vacation.fullDay" = "1 Tag";
+"vacation.halfDay" = "0,5 Tag";
+"vacation.initialDate.label" = "Anfangssaldo erfasst für %@";
 
 // MARK: - Siri
 "siri.title" = "Siri-Kurzbefehle";
@@ -136,6 +252,79 @@
 "siri.departure" = "Abfahrt erfassen";
 "siri.overtime" = "Überstunden prüfen";
 "siri.vacation" = "Urlaub prüfen";
+"siri.description" = "Verwenden Sie diese Sätze mit Siri, um WorkTimer schnell zu steuern";
+"siri.openShortcuts" = "Kurzbefehle-App öffnen";
+"siri.automationHelp" = "Sie können eigene Automationen in der Kurzbefehle-App erstellen";
+"siri.section.timeTracking" = "Zeiterfassung";
+"siri.section.consult" = "Abfragen";
+"siri.section.add" = "Hinzufügen";
+"siri.section.navigate" = "Öffnen";
+"siri.phrase.arrival" = "\"Hey Siri, Ankunft mit WorkTimer erfassen\"";
+"siri.phrase.departure" = "\"Hey Siri, Abfahrt mit WorkTimer erfassen\"";
+"siri.phrase.overtime" = "\"Hey Siri, meine Überstunden mit WorkTimer\"";
+"siri.phrase.vacation" = "\"Hey Siri, meine Urlaubstage mit WorkTimer\"";
+"siri.phrase.quickAdd" = "\"Hey Siri, Tag mit WorkTimer hinzufügen\"";
+"siri.phrase.openDestination" = "\"Hey Siri, Kalender in WorkTimer öffnen\"";
+"siri.phrase.openDate" = "\"Hey Siri, Datum in WorkTimer öffnen\"";
+"siri.phrase.openPresetDate" = "\"Hey Siri, morgen in WorkTimer öffnen\"";
+"siri.description.arrival" = "Erfasst Ihre Ankunftszeit";
+"siri.description.departure" = "Erfasst Ihre Abfahrtszeit";
+"siri.description.overtime" = "Zeigt Ihren Überstundensaldo";
+"siri.description.vacation" = "Zeigt Ihren Urlaubssaldo";
+"siri.description.quickAdd" = "Erstellt oder aktualisiert den heutigen Tag mit dem gewählten Typ";
+"siri.description.openDestination" = "Öffnet Start, Kalender, Arbeitstage, Statistiken oder Einstellungen direkt";
+"siri.description.openDate" = "Öffnet den Kalender direkt am gewünschten Datum";
+"siri.description.openPresetDate" = "Öffnet den Kalender schnell für heute, morgen oder gestern";
+"siri.dialog.arrival" = "Ankunft um %@ erfasst. Öffnen Sie WorkTimer, um den Tag zu vervollständigen.";
+"siri.dialog.departure" = "Abfahrt um %@ erfasst. Schönen Abend!";
+"siri.dialog.overtime.positive" = "Sie haben %@ Überstunden. Gute Arbeit!";
+"siri.dialog.overtime.negative" = "Sie haben %@ nachzuholen.";
+"siri.dialog.overtime.zero" = "Ihr Überstundensaldo ist null. Perfekt!";
+"siri.dialog.vacation.high" = "Sie haben noch %@ Urlaubstage. Denken Sie an eine Pause!";
+"siri.dialog.vacation.available" = "Sie haben noch %@ Urlaubstage.";
+"siri.dialog.vacation.none" = "Sie haben keine Urlaubstage mehr verfügbar.";
+"siri.dialog.weeklySummary" = "Diese Woche: %@ h gearbeitet. Überstunden: %@. Resturlaub: %@ Tage.";
+"siri.dialog.quickAdd" = "WorkTimer wird geöffnet, um einen Tag hinzuzufügen...";
+"siri.dialog.openDestination" = "%@ wird in WorkTimer geöffnet.";
+"siri.dialog.openDate" = "Kalender wird am %@ geöffnet.";
+"siri.dialog.openDatePreset" = "Kalender wird geöffnet: %@.";
+"siri.shortcut.arrival.title" = "Ankunft erfassen";
+"siri.shortcut.departure.title" = "Abfahrt erfassen";
+"siri.shortcut.overtime.title" = "Überstunden";
+"siri.shortcut.vacation.title" = "Urlaubssaldo";
+"siri.shortcut.weeklySummary.title" = "Wochenübersicht";
+"siri.shortcut.quickAdd.title" = "Tag hinzufügen";
+"siri.shortcut.openDestination.title" = "Öffnen";
+"siri.shortcut.openDate.title" = "Datum öffnen";
+"siri.shortcut.openPresetDate.title" = "Schnelltag öffnen";
+"siri.intent.arrival.title" = "Ankunft erfassen";
+"siri.intent.arrival.description" = "Erfasst Ihre Ankunftszeit bei der Arbeit";
+"siri.intent.departure.title" = "Abfahrt erfassen";
+"siri.intent.departure.description" = "Erfasst Ihre Abfahrtszeit von der Arbeit";
+"siri.intent.overtime.title" = "Überstunden prüfen";
+"siri.intent.overtime.description" = "Zeigt Ihren Überstundensaldo";
+"siri.intent.vacation.title" = "Urlaubssaldo prüfen";
+"siri.intent.vacation.description" = "Zeigt Ihren Urlaubstage-Saldo";
+"siri.intent.weeklySummary.title" = "Wochenübersicht";
+"siri.intent.weeklySummary.description" = "Zeigt eine Zusammenfassung Ihrer Arbeitswoche";
+"siri.intent.quickAdd.title" = "Tag hinzufügen";
+"siri.intent.quickAdd.description" = "Fügt schnell einen Arbeitstag hinzu";
+"siri.intent.quickAdd.dayType" = "Typ";
+"siri.intent.workDayType.title" = "Tagestyp";
+"siri.intent.openDestination.title" = "WorkTimer öffnen";
+"siri.intent.openDestination.description" = "Öffnet einen bestimmten Bereich von WorkTimer";
+"siri.intent.openDestination.destination" = "Ziel";
+"siri.intent.destination.title" = "Ziel";
+"siri.intent.openDate.title" = "Datum öffnen";
+"siri.intent.openDate.description" = "Öffnet den WorkTimer-Kalender an einem bestimmten Datum";
+"siri.intent.openDate.date" = "Datum";
+"siri.intent.openPresetDate.title" = "Schnelltag öffnen";
+"siri.intent.openPresetDate.description" = "Öffnet den WorkTimer-Kalender für heute, morgen oder gestern";
+"siri.intent.openPresetDate.preset" = "Tag";
+"siri.intent.datePreset.title" = "Schnelltag";
+"siri.intent.datePreset.today" = "heute";
+"siri.intent.datePreset.tomorrow" = "morgen";
+"siri.intent.datePreset.yesterday" = "gestern";
 
 // MARK: - Days of Week
 "day.monday" = "Montag";
@@ -226,6 +415,15 @@
 "workDay.summary" = "ZUSAMMENFASSUNG";
 "workDay.totalDuration" = "Gesamtdauer";
 "workDay.details" = "TAGESDETAILS";
+"workDay.validation.title" = "Bitte prüfen";
+"workDay.validation.dateTooFarInFuture" = "Das Datum darf nicht mehr als ein Jahr in der Zukunft liegen.";
+"workDay.validation.dateTooFarInPast" = "Das Datum darf nicht mehr als 10 Jahre in der Vergangenheit liegen.";
+"workDay.validation.noteTooLong" = "Die Notiz darf höchstens 500 Zeichen enthalten.";
+"workDay.validation.negativeBonus" = "Der Bonus darf nicht negativ sein.";
+"workDay.validation.missingTimes" = "Start- und Endzeit sind erforderlich.";
+"workDay.validation.invalidDuration" = "Die Endzeit muss nach der Startzeit liegen.";
+"workDay.validation.breakTooLong" = "Die Pause darf nicht länger als die Arbeitsdauer sein.";
+"workDay.validation.noNetHours" = "Die Arbeitsdauer muss nach der Pause größer als null bleiben.";
 "stats.workDays" = "Arbeitstage";
 "stats.vacationDays" = "Urlaub";
 "stats.sickDays" = "Krankheit";
@@ -238,6 +436,8 @@
 "stats.workedHours" = "Arbeitsstunden";
 "stats.missingHours" = "Fehlende Stunden";
 "calendar.today" = "Heute";
+"calendar.selectDate" = "Datum auswählen";
+"calendar.weekNumbers" = "Kalenderwochen";
 "calendar.noEvents" = "Keine Ereignisse diese Woche";
 "loading" = "Laden...";
 "empty.noWorkDays.title" = "Keine Einträge für diesen Monat";
@@ -249,12 +449,39 @@
 "filter.title" = "Nach Typ filtern";
 "error.title" = "Fehler";
 "error.generic" = "Ein Fehler ist aufgetreten";
+"time.hours.short" = "h";
+"time.minutes.short" = "min";
+"time.days.short" = "Tg.";
 "time.days" = "Tage";
 "time.day" = "Tag";
 "settings.weeklyHours" = "Wochenstunden";
 "settings.annualVacationDays" = "Jahresurlaub";
+"settings.calculated" = "(automatisch berechnet)";
+"settings.workTime.title" = "Arbeitszeit";
+"settings.workTime.weeklyHours" = "Stunden pro Woche";
+"settings.workTime.workingDays" = "Arbeitstage";
+"settings.workTime.dailyHours" = "Stunden pro Tag";
+"settings.vacation.annualDays" = "Jährliche Urlaubstage";
+"settings.vacation.total" = "Gesamt";
+"settings.vacation.used" = "Verwendet: ";
+"settings.vacation.viewDetails" = "Urlaubsdetails anzeigen";
+"settings.vacation.advancedConfig" = "Erweiterte Urlaubseinstellungen";
+"settings.vacation.hireDate" = "Startdatum";
+"settings.vacation.hireDateHelp" = "Bestimmt den Startpunkt für die Übertragsberechnung";
+"settings.vacation.initialBalance" = "Urlaubssaldo zu diesem Datum";
+"settings.vacation.unitDays" = "Tage";
+"settings.vacation.unitHours" = "Stunden";
+"settings.vacation.unit" = "Einheit";
+"settings.vacation.unit.days" = "Tage";
+"settings.vacation.unit.hours" = "Stunden";
+"settings.vacation.equivalentHours" = "≈ %.1f Stunden";
+"settings.vacation.equivalentDays" = "≈ %.1f Tage";
+"settings.vacation.summary.initial" = "• %d: %.1f %@ (%.1f%@) (%@)";
+"settings.vacation.summary.following" = "• Ab %d: %d %@/Jahr + %@";
+"settings.vacation.summary.carryover" = "• Nicht genutztes Guthaben wird ins nächste Jahr übertragen";
 "settings.support" = "Problem melden";
 "settings.diagnostics" = "Berechnungsdiagnose";
+"settings.privacyPolicy" = "Datenschutzrichtlinie";
 "settings.privacy.message" = "Ihre Daten werden lokal gespeichert und über iCloud mit Ende-zu-Ende-Verschlüsselung synchronisiert.";
 "settings.privacy.icloud" = "iCloud-Synchronisierung";
 "settings.privacy.icloud.message" = "Die iCloud-Synchronisierung ist optional. Ihre Daten sind auch offline zugänglich.";
@@ -277,13 +504,232 @@
 "accessibility.stats.hint" = "Zeigt Jahres- und Monatsstatistiken";
 "accessibility.settings.hint" = "Einstellungen und Präferenzen konfigurieren";
 
+// MARK: - Paywall
+"paywall.headline" = "Pro werden";
+"paywall.subtitle" = "Schöpfen Sie das volle Potenzial\nvon WorkTimer aus";
+"paywall.close" = "Schließen";
+"paywall.feature.export.title" = "PDF- & CSV-Export";
+"paywall.feature.export.subtitle" = "Monatliche und jährliche Berichte auf Knopfdruck";
+"paywall.feature.charts.title" = "Erweiterte Diagramme";
+"paywall.feature.charts.subtitle" = "Visualisieren Sie Ihre Arbeitsstundentrends";
+"paywall.feature.siri.title" = "Siri-Kurzbefehle";
+"paywall.feature.siri.subtitle" = "Sprachsteuerung";
+"paywall.feature.icloud.subtitle" = "Ihre Daten auf allen Geräten";
+"paywall.plan.monthly" = "Monatlich";
+"paywall.plan.annual" = "Jährlich";
+"paywall.plan.lifetime" = "Lebenslang";
+"paywall.plan.popular" = "Am beliebtesten";
+"paywall.plan.bestDeal" = "Bestes Angebot";
+"paywall.plan.perMonth" = "pro Monat";
+"paywall.plan.perYear" = "pro Jahr";
+"paywall.plan.oneTime" = "Einmalzahlung";
+"paywall.plan.monthlyEquiv" = "nur %@/Monat";
+"paywall.purchase.choosePlan" = "Plan wählen";
+"paywall.purchase.subscribe" = "Abonnieren — %@";
+"paywall.purchase.lifetime" = "Lebenslang kaufen — %@";
+"paywall.redeemCode.title" = "Promo-Code einlösen";
+"paywall.redeemCode.subtitle" = "Geben Sie einen App Store Connect Code ein, um ein Angebot einschließlich lebenslangem Zugriff freizuschalten.";
+"paywall.restore" = "Käufe wiederherstellen";
+"paywall.legal.privacy" = "Datenschutzrichtlinie";
+"paywall.legal.terms" = "Nutzungsbedingungen";
+"paywall.legal" = "Das Abonnement verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt wird. Abonnements verwalten: Einstellungen > [Ihr Name] > Abonnements.";
+"paywall.legal.subscription" = "Das Abonnement verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt wird. Abonnements verwalten: Einstellungen > [Ihr Name] > Abonnements.";
+"paywall.legal.lifetime" = "Lebenslanger Zugriff ist ein einmaliger Kauf, der mit Ihrem Apple Account verknüpft ist und auf kompatiblen Geräten wiederhergestellt werden kann.";
+"paywall.error.title" = "Kauffehler";
+"paywall.error.purchase" = "Kauf fehlgeschlagen. Bitte erneut versuchen.";
+"paywall.error.redeemCode" = "Der Code konnte nicht validiert werden. Prüfen Sie den Code oder versuchen Sie es später erneut.";
+"paywall.loading" = "Angebote werden geladen…";
+"siri.dialog.proRequired" = "Siri-Kurzbefehle sind Teil von WorkTimer Pro. Öffnen Sie die App, um auf Pro zu wechseln oder einen Promo-Code einzulösen.";
 
+// MARK: - Tips
+"tips.calendar.add.title" = "Tag hinzufügen";
+"tips.calendar.add.message" = "Tippen Sie auf +, um schnell einen Arbeitstag, Urlaubstag oder Ausgleichstag zu erfassen.";
 
+"accessibility.previousMonth" = "Vorheriger Monat";
+"accessibility.nextMonth" = "Nächster Monat";
 
+// MARK: - Accessibility (ergänzt)
+"accessibility.days" = "%@: %@ Tage";
+"accessibility.deleteWorkDay" = "Diesen Arbeitstag löschen";
+"accessibility.month.next" = "Nächster Monat";
+"accessibility.month.previous" = "Vorheriger Monat";
+"accessibility.nextYear" = "Nächstes Jahr";
+"accessibility.previousYear" = "Vorheriges Jahr";
+"accessibility.today" = "Heute";
+"accessibility.year.next" = "Nächstes Jahr";
+"accessibility.year.previous" = "Vorheriges Jahr";
+"accessibility.yearStats" = "Zeigt Statistiken für das Jahr %d";
 
+// MARK: - Actions
+"action.continue" = "Weiter";
+"action.deselect" = "Abwählen";
+"action.select" = "Auswählen";
+"action.viewDetails" = "Details anzeigen";
 
+// MARK: - Calendar mode
+"calendar.mode.month" = "Monat";
+"calendar.mode.week" = "Woche";
 
+// MARK: - Cloud / Sync
+"cloud.about.description" = "Ihre Daten werden automatisch über iCloud auf allen Ihren Geräten synchronisiert.";
+"cloud.about.title" = "Über die Synchronisierung";
+"cloud.auto.title" = "Automatische Synchronisierung";
+"cloud.details.button" = "Details";
+"cloud.firstSync.devices" = "Ihre Daten auf allen Geräten";
+"cloud.firstSync.devicesDesc" = "WorkTimer synchronisiert Ihre Arbeitszeiten automatisch auf allen Ihren Apple-Geräten.";
+"cloud.firstSync.restore" = "Automatische Wiederherstellung";
+"cloud.firstSync.restoreDesc" = "Wenn Sie die App neu installieren, werden Ihre Daten automatisch aus iCloud wiederhergestellt.";
+"cloud.firstSync.security" = "Sicherheit und Datenschutz";
+"cloud.firstSync.securityDesc" = "Ihre Daten sind über iCloud Ende-zu-Ende-verschlüsselt.";
+"cloud.firstSync.title" = "Automatische Synchronisierung";
+"cloud.icloud.label" = "iCloud";
+"cloud.icloud.title" = "iCloud-Synchronisierung";
+"cloud.info.devices.text" = "WorkTimer synchronisiert Ihre Arbeitszeiten automatisch auf allen Apple-Geräten, die mit demselben iCloud-Konto verbunden sind.";
+"cloud.info.devices.title" = "Ihre Daten auf allen Geräten";
+"cloud.info.restore.text" = "Wenn Sie die App löschen und neu installieren, werden Ihre Daten automatisch aus iCloud wiederhergestellt.";
+"cloud.info.restore.title" = "Automatische Wiederherstellung";
+"cloud.lastSync.label" = "Letzte Synchronisierung:";
+"cloud.reset" = "Synchronisierung zurücksetzen";
+"cloud.reset.confirm" = "Zurücksetzen";
+"cloud.reset.message" = "Dadurch wird die Synchronisierung vollständig zurückgesetzt. Ihre lokalen Daten bleiben erhalten.";
+"cloud.reset.title" = "Synchronisierung zurücksetzen";
+"cloud.restore" = "Daten wiederherstellen";
+"cloud.restore.alert.message" = "Ihre Daten werden aus iCloud wiederhergestellt. Lokale Daten werden zusammengeführt.";
+"cloud.restore.alert.title" = "Daten wiederherstellen";
+"cloud.restore.data" = "Daten wiederherstellen";
+"cloud.restore.message" = "Ihre Daten werden automatisch in iCloud gesichert. Sie werden bei Bedarf automatisch wiederhergestellt.";
+"cloud.restore.title" = "Datenwiederherstellung";
+"cloud.section.about" = "Über";
+"cloud.section.actions" = "Aktionen";
+"cloud.section.advanced" = "Erweitert";
+"cloud.section.info" = "Informationen";
+"cloud.section.status" = "Status";
+"cloud.status.current" = "Aktueller Status";
+"cloud.sync.button" = "Synchronisieren";
+"cloud.sync.now" = "Jetzt synchronisieren";
+"cloud.sync.reset" = "Synchronisierung zurücksetzen";
+"cloud.sync.reset.confirm" = "Zurücksetzen";
+"cloud.sync.reset.message" = "Dadurch wird die Synchronisierung vollständig zurückgesetzt. Ihre lokalen Daten bleiben erhalten.";
+"cloud.sync.reset.title" = "Synchronisierung zurücksetzen";
+"cloud.syncNow" = "Jetzt synchronisieren";
 
+// MARK: - Delete confirmation
+"delete.confirm.day" = "";
+"delete.confirm.days" = "e";
+"delete.confirm.message" = "Möchten Sie wirklich %d Tag%@ löschen?";
+"delete.confirm.title" = "Löschen bestätigen";
 
+// MARK: - Diagnostics
+"diagnostics.duplicates.datesCount" = "Datumsangaben mit Duplikaten";
+"diagnostics.duplicates.deleted" = "(gelöscht)";
+"diagnostics.duplicates.entriesCount" = "Doppelte Einträge";
+"diagnostics.duplicates.header" = "DUPLIKATERKENNUNG";
+"diagnostics.duplicates.none" = "Keine Duplikate erkannt ✓";
+"diagnostics.export.header" = "EXPORT";
+"diagnostics.export.report" = "Diagnosebericht erstellen";
+"diagnostics.hours.calculated" = "Berechnete Stunden (WorkDay)";
+"diagnostics.hours.difference" = "Abweichung erkannt ⚠️";
+"diagnostics.hours.header" = "STUNDENPRÜFUNG";
+"diagnostics.hours.matching" = "Berechnungen stimmen überein ✓";
+"diagnostics.hours.recalculated" = "Neu berechnete Stunden";
+"diagnostics.recalculate.all" = "Alle Stunden neu berechnen";
+"diagnostics.recalculate.completed.title" = "Neuberechnung abgeschlossen";
+"diagnostics.recalculate.confirm" = "Neu berechnen";
+"diagnostics.recalculate.help" = "Berechnet die Stunden für alle Einträge neu";
+"diagnostics.recalculate.message" = "Dadurch werden die Stunden für alle Arbeitseinträge neu berechnet";
+"diagnostics.recalculate.title" = "Stunden neu berechnen";
+"diagnostics.report.copy" = "Kopieren";
+"diagnostics.report.generated.message" = "Der Bericht wurde erfolgreich erstellt";
+"diagnostics.report.generated.title" = "Bericht erstellt";
+"diagnostics.title" = "Diagnose";
+"diagnostics.tools.header" = "KORREKTURWERKZEUGE";
+"diagnostics.vacation.calculation" = "Berechnung des Urlaubssaldos";
+"diagnostics.vacation.carryIn" = "Übertrag aus Vorjahr";
+"diagnostics.vacation.entitlement" = "+ Jahresanspruch";
+"diagnostics.vacation.initial" = "Anfangssaldo";
+"diagnostics.vacation.remaining" = "= Verbleibend";
+"diagnostics.vacation.used" = "- Verbraucht";
 
+// MARK: - Errors
+"error.cloudKit" = "iCloud-Fehler: %@";
+"error.data" = "Datenfehler: %@";
+"error.export" = "Exportfehler: %@";
+"error.network" = "Netzwerkfehler: %@";
+"error.unknown" = "Fehler: %@";
+"error.validation" = "Validierungsfehler: %@";
 
+// MARK: - Filters
+"filter.all" = "Alle Typen";
+"filter.clear" = "Filter zurücksetzen";
+
+// MARK: - Home
+"home.vacation.balanceHours" = "Saldo in Stunden";
+
+// MARK: - Loading / Search
+"loading.data" = "Daten werden geladen…";
+"search.placeholder" = "Suchen…";
+
+// MARK: - Settings (ergänzt)
+"settings.about.title" = "Über";
+"settings.charts" = "Diagramme";
+"settings.charts.subtitle" = "Visualisieren Sie Ihre Stunden";
+"settings.dailyHours" = "Stunden pro Tag";
+"settings.decimalFormat" = "Dezimalformat";
+"settings.display.adjustment.precise" = "Feineinstellung";
+"settings.display.standardHours" = "Standard 40h";
+"settings.display.hoursValue" = "%@ Stunden";
+"settings.display.decimalFormat" = "Dezimalformat";
+"settings.display.example" = "Beispiel:";
+"settings.display.presets.common" = "Gängige Voreinstellungen";
+"settings.display.title" = "Anzeige";
+"settings.display.weeklyHours" = "Wochenstunden";
+"settings.export.format.label" = "Exportformat";
+"settings.features" = "Funktionen";
+"settings.features.title" = "Funktionen";
+"settings.privacy" = "Datenschutz und Daten";
+"settings.privacy.title" = "Datenschutz und Daten";
+"settings.profile" = "Profil";
+"settings.reset" = "Zurücksetzen";
+"settings.reset.warning" = "Warnung";
+"settings.reset.warning.message" = "Diese Aktion löscht dauerhaft alle Ihre Daten (Arbeitstage, Urlaub, Notizen usw.) und setzt alle Einstellungen auf ihre Standardwerte zurück. Diese Aktion ist unwiderruflich und versetzt die App in einen frischen Zustand wie bei einer Neuinstallation.";
+"settings.version.label" = "Version";
+"settings.workTime" = "Arbeitszeit";
+"settings.workingDays" = "Arbeitstage";
+
+// MARK: - Stats (ergänzt)
+"stats.noData" = "Keine Daten für %d";
+"stats.noDataHelp" = "Fügen Sie Arbeitstage hinzu, um Statistiken zu sehen";
+
+// MARK: - Sync
+"sync.about.description" = "Die Synchronisierung verwendet iCloud, um Ihre Daten auf allen Ihren Apple-Geräten aktuell zu halten.";
+"sync.action" = "Synchronisieren";
+"sync.details" = "Details";
+"sync.error.account" = "Problem mit Ihrem iCloud-Konto";
+"sync.error.generic" = "Synchronisierungsfehler";
+"sync.error.label" = "Fehler";
+"sync.error.network" = "Problem mit der Netzwerkverbindung";
+"sync.error.quota" = "Nicht genügend iCloud-Speicher";
+"sync.lastSync" = "Letzte Synchronisierung:";
+"sync.lastSync.label" = "Letzte Synchronisierung";
+"sync.lastSync.never" = "Nie";
+"sync.reset" = "Synchronisierung zurücksetzen";
+"sync.reset.confirm" = "Zurücksetzen";
+"sync.reset.message" = "Dadurch werden lokale Synchronisierungsdaten gelöscht und eine vollständige Neusynchronisierung mit iCloud erzwungen.";
+"sync.reset.title" = "Synchronisierung zurücksetzen";
+"sync.section.about" = "Über";
+"sync.section.actions" = "Aktionen";
+"sync.section.detailed" = "Detaillierter Status";
+"sync.status.error" = "Fehler: %@";
+"sync.status.failed" = "Fehlgeschlagen: %@";
+"sync.status.offline" = "Offline";
+"sync.status.ready" = "Bereit";
+"sync.status.syncing" = "Synchronisierung %d%%";
+"sync.syncNow" = "Jetzt synchronisieren";
+"sync.title" = "Synchronisierung";
+
+// MARK: - Vacation (ergänzt)
+"vacation.carryover.info" = "Der verbleibende Saldo wird ins nächste Jahr übertragen";
+"vacation.daysOfTotal" = "%.1f T von %.1f";
+"vacation.daysUsed" = "%.1f T verbraucht";
+"vacation.type.full" = "Urlaub";
+"vacation.type.halfDay" = "Halber Tag";
