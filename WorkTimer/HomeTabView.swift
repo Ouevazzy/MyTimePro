@@ -7,8 +7,11 @@ struct HomeTabView: View {
 
     // Seuls les jours de congé — nécessaires pour le calcul multi-année du report
     @Query(filter: #Predicate<WorkDay> {
-        $0.typeRawValue == "workDayType.vacation" || $0.typeRawValue == "workDayType.halfDayVacation"
+        !$0.isDeleted &&
+        ($0.typeRawValue == "workDayType.vacation" || $0.typeRawValue == "workDayType.halfDayVacation")
     }, sort: \WorkDay.date) private var vacationWorkDays: [WorkDay]
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - State Properties
     @State private var selectedYear: Int
@@ -37,76 +40,119 @@ struct HomeTabView: View {
 
     // MARK: - Body
     var body: some View {
-        List {
-            // — Section Année —
-            Section {
-                StatsRow(
+        ScrollView {
+            VStack(spacing: DS.Spacing.lg) {
+                heroCard
+                    .cardAppear(index: 0, animate: animateCards, reduceMotion: reduceMotion)
+
+                statsCard(
+                    title: "stats.year".localized(selectedYear),
+                    icon: "calendar",
+                    color: .blue,
                     stats: yearlyStats,
                     showMissing: false
                 )
-                .equatable()
-            } header: {
-                SectionHeader(
-                    title: "stats.year".localized(selectedYear),
-                    icon: "calendar",
-                    color: .blue
-                )
-            }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
+                .cardAppear(index: 1, animate: animateCards, reduceMotion: reduceMotion)
 
-            // — Section Mois —
-            Section {
-                StatsRow(
+                statsCard(
+                    title: "stats.currentMonth".localized,
+                    icon: "calendar.badge.clock",
+                    color: .orange,
                     stats: monthlyStats,
                     showMissing: true
                 )
-                .equatable()
-            } header: {
-                SectionHeader(
-                    title: "stats.currentMonth".localized,
-                    icon: "calendar.badge.clock",
-                    color: .orange
-                )
-            }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
+                .cardAppear(index: 2, animate: animateCards, reduceMotion: reduceMotion)
 
-            // — Section Semaine —
-            Section {
-                StatsRow(
+                statsCard(
+                    title: "stats.currentWeek".localized,
+                    icon: "briefcase.fill",
+                    color: .green,
                     stats: weeklyStats,
                     showMissing: true
                 )
-                .equatable()
-            } header: {
-                SectionHeader(
-                    title: "stats.currentWeek".localized,
-                    icon: "briefcase.fill",
-                    color: .green
-                )
-            }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
+                .cardAppear(index: 3, animate: animateCards, reduceMotion: reduceMotion)
 
-            // — Section Congés —
-            VacationSection(
-                stats: vacationStats,
-                isStartYear: isCurrentYearStartYear
-            )
+                VacationSection(
+                    stats: vacationStats,
+                    isStartYear: isCurrentYearStartYear
+                )
+                .cardAppear(index: 4, animate: animateCards, reduceMotion: reduceMotion)
+            }
+            .padding(.horizontal)
+            .padding(.top, DS.Spacing.sm)
+            .padding(.bottom, DS.Spacing.xl)
+            .dsGlassEffectGroup()
         }
-        .listStyle(.insetGrouped)
+        .dsScreenBackground(.blue)
         .navigationTitle("navigation.home".localized)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
             Analytics.shared.logScreenView("home")
             updateCurrentPeriod()
             loadStats()
+            animateCards = true
         }
         .refreshable {
             updateCurrentPeriod()
             loadStats()
         }
+        .overlay(alignment: .topLeading) {
+            Color.clear
+                .frame(width: 0, height: 0)
+                .accessibilityHidden(true)
+                .id(StatsCache.shared.lastUpdate)
+        }
         .onChange(of: StatsCache.shared.lastUpdate) { _, _ in
             loadStats()
         }
+    }
+
+    // MARK: - Hero & Cards
+
+    /// Carte héro : le solde d'heures supplémentaires de l'année, la donnée
+    /// la plus consultée, en très grand.
+    private var heroCard: some View {
+        let isPositive = yearlyStats.overtimeSeconds >= 0
+        let balanceColor = isPositive ? DS.Colors.positive : DS.Colors.negative
+
+        return VStack(spacing: DS.Spacing.xs) {
+            Text(isPositive
+                 ? "stats.overtimeHours".localized
+                 : "stats.missingHours".localized)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+
+            Text(WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds))
+                .font(.system(size: DS.Font.statDisplay, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(balanceColor)
+                .contentTransition(.numericText(countsDown: !isPositive))
+
+            Text("stats.year".localized(selectedYear))
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DS.Spacing.xl)
+        .padding(.horizontal)
+        .dsGlassSurface(cornerRadius: DS.Radius.large, tint: balanceColor)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func statsCard(
+        title: String,
+        icon: String,
+        color: Color,
+        stats: (totalHours: Double, overtimeSeconds: Int),
+        showMissing: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            SectionHeader(title: title, icon: icon, color: color)
+            StatsRow(stats: stats, showMissing: showMissing)
+                .equatable()
+        }
+        .padding()
+        .dsGlassSurface(cornerRadius: DS.Radius.card)
     }
 
     // MARK: - Stats Loading
@@ -116,29 +162,39 @@ struct HomeTabView: View {
 
         let startOfYear = calendar.date(from: DateComponents(year: selectedYear))!
         let endOfYear = calendar.date(byAdding: DateComponents(year: 1), to: startOfYear)!
-        yearlyStats = fetchStats(from: startOfYear, to: endOfYear)
-
         let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: selectedMonth))!
         let endOfMonth = calendar.date(byAdding: DateComponents(month: 1), to: startOfMonth)!
-        monthlyStats = fetchStats(from: startOfMonth, to: endOfMonth)
-
         let weekComponents = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek)
         let startOfWeek = calendar.date(from: weekComponents)!
         let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek)!
-        weeklyStats = fetchStats(from: startOfWeek, to: endOfWeek)
+        let fetchStart = min(startOfYear, startOfMonth, startOfWeek)
+        let fetchEnd = max(endOfYear, endOfMonth, endOfWeek)
+        let days = fetchWorkDays(from: fetchStart, to: fetchEnd)
+        let newYearlyStats = WorkTimeCalculations.activePeriodStats(from: days, startDate: startOfYear, endDate: endOfYear)
+        let newMonthlyStats = WorkTimeCalculations.activePeriodStats(from: days, startDate: startOfMonth, endDate: endOfMonth)
+        let newWeeklyStats = WorkTimeCalculations.activePeriodStats(from: days, startDate: startOfWeek, endDate: endOfWeek)
+
+        withAnimation(DS.Animation.navigation) {
+            yearlyStats = newYearlyStats
+            monthlyStats = newMonthlyStats
+            weeklyStats = newWeeklyStats
+        }
 
         updateVacationStats()
     }
 
-    private func fetchStats(from startDate: Date, to endDate: Date) -> (totalHours: Double, overtimeSeconds: Int) {
+    private func fetchWorkDays(from startDate: Date, to endDate: Date) -> [WorkDay] {
         let predicate = #Predicate<WorkDay> {
-            $0.date >= startDate && $0.date < endDate
+            $0.date >= startDate &&
+            $0.date < endDate &&
+            !$0.isDeleted
         }
-        let descriptor = FetchDescriptor<WorkDay>(predicate: predicate)
-        guard let days = try? modelContext.fetch(descriptor) else { return (0, 0) }
-        let totalHours = days.reduce(0.0) { $0 + $1.totalHours }
-        let overtimeSeconds = days.reduce(0) { $0 + $1.overtimeSeconds }
-        return (totalHours, overtimeSeconds)
+        var descriptor = FetchDescriptor<WorkDay>(predicate: predicate)
+        descriptor.propertiesToFetch = [
+            \.date, \.typeRawValue, \.totalHours,
+            \.overtimeSeconds, \.isDeleted
+        ]
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     private func updateVacationStats() {
@@ -212,6 +268,7 @@ private struct StatsRow: View, Equatable {
                     .font(.system(.title3, design: .rounded))
                     .fontWeight(.semibold)
                     .monospacedDigit()
+                    .contentTransition(.numericText())
             }
 
             Spacer()
@@ -227,6 +284,7 @@ private struct StatsRow: View, Equatable {
                     .fontWeight(.semibold)
                     .monospacedDigit()
                     .foregroundStyle(stats.overtimeSeconds >= 0 ? Color.green : Color.red)
+                    .contentTransition(.numericText(countsDown: stats.overtimeSeconds < 0))
             }
         }
         .padding(.vertical, DS.Spacing.xs)
@@ -248,11 +306,18 @@ private struct VacationSection: View {
     }
 
     var body: some View {
-        Section {
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            SectionHeader(
+                title: "navigation.vacations".localized,
+                icon: "sun.max.fill",
+                color: .orange
+            )
+
             // Barre de progression
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                 ProgressView(value: usageProgress)
                     .tint(.orange)
+                    .animation(DS.Animation.progress, value: usageProgress)
 
                 HStack {
                     Text(String(format: "vacation.daysUsed".localized, stats.used))
@@ -264,7 +329,8 @@ private struct VacationSection: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
+
+            Divider()
 
             // Équivalent en heures
             HStack {
@@ -272,11 +338,10 @@ private struct VacationSection: View {
                     .font(.subheadline)
                 Spacer()
                 Text(formatDaysAsHours(stats.remaining))
-                    .font(.subheadline)
+                    .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.semibold)
                     .foregroundStyle(stats.remaining > 0 ? .green : .red)
             }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
 
             // Stats détaillées
             if isStartYear {
@@ -291,6 +356,8 @@ private struct VacationSection: View {
                     color: stats.remaining > 0 ? .green : .red,
                     bold: true)
 
+            Divider()
+
             // Bouton détails
             Button {
                 showVacationsView = true
@@ -302,16 +369,12 @@ private struct VacationSection: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
+                .contentShape(Rectangle())
             }
-            .listRowBackground(Color(.secondarySystemGroupedBackground))
-        } header: {
-            SectionHeader(
-                title: "navigation.vacations".localized,
-                icon: "sun.max.fill",
-                color: .orange
-            )
+            .buttonStyle(.plain)
         }
-        .listRowBackground(Color(.secondarySystemGroupedBackground))
+        .padding()
+        .dsGlassSurface(cornerRadius: DS.Radius.card, tint: .orange)
         .sheet(isPresented: $showVacationsView) {
             VacationsView()
         }
@@ -322,25 +385,28 @@ private struct VacationSection: View {
             Text(title)
                 .font(.subheadline)
             Spacer()
-            Text(String(format: "%.1f j", value) + "  (" + formatDaysAsHours(value) + ")")
-                .font(.subheadline)
+            Text("\(formatDaysValue(value))  (\(formatDaysAsHours(value)))")
+                .font(.system(.subheadline, design: .rounded))
                 .fontWeight(bold ? .semibold : .regular)
                 .foregroundStyle(color)
         }
-        .listRowBackground(Color(.secondarySystemGroupedBackground))
+    }
+
+    private func formatDaysValue(_ days: Double) -> String {
+        String(format: "%.1f %@", days, "time.days.short".localized)
     }
 
     /// Convertit un nombre de jours en heures formatées
     private func formatDaysAsHours(_ days: Double) -> String {
         let hours = days * UserSettings.shared.standardDailyHours
         if UserSettings.shared.useDecimalHours {
-            return String(format: "%.1fh", hours)
+            return String(format: "%.1f%@", hours, "time.hours.short".localized)
         } else {
             let totalMinutes = Int(round(hours * 60))
             let h = abs(totalMinutes / 60)
             let m = abs(totalMinutes % 60)
             let sign = hours < 0 ? "-" : ""
-            return String(format: "%@%dh%02d", sign, h, m)
+            return String(format: "%@%d%@%02d", sign, h, "time.hours.short".localized, m)
         }
     }
 }
@@ -349,7 +415,6 @@ private struct VacationSection: View {
 
 struct CardView<Content: View>: View {
     let content: Content
-    @Environment(\.colorScheme) var colorScheme
 
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -358,11 +423,7 @@ struct CardView<Content: View>: View {
     var body: some View {
         content
             .padding()
-            .background {
-                RoundedRectangle(cornerRadius: DS.Radius.card)
-                    .fill(Color(.secondarySystemGroupedBackground))
-            }
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
+            .dsGlassSurface(cornerRadius: DS.Radius.card)
     }
 }
 
@@ -377,10 +438,10 @@ struct StatsComponent: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Text(value)
                 .font(.system(.title3, design: .rounded))
-                .foregroundColor(valueColor)
+                .foregroundStyle(valueColor)
                 .fontWeight(.medium)
         }
         .accessibilityElement(children: .combine)
@@ -397,10 +458,10 @@ struct VacationStatsComponent: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
-            Text(String(format: "%.1f j", value))
+                .foregroundStyle(.secondary)
+            Text(String(format: "%.1f %@", value, "time.days.short".localized))
                 .font(.system(.title3, design: .rounded))
-                .foregroundColor(valueColor)
+                .foregroundStyle(valueColor)
                 .fontWeight(.medium)
         }
         .accessibilityElement(children: .combine)

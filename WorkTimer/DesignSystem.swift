@@ -159,7 +159,7 @@ enum DS {
     // MARK: - Surfaces
     enum Glass {
         /// Intensité de la teinte sémantique appliquée au verre.
-        static let tintStrength: Double = 0.35
+        static let tintStrength: Double = 0.16
         /// Distance de fusion entre plusieurs surfaces Liquid Glass proches.
         static let groupSpacing: CGFloat = 20
     }
@@ -205,6 +205,19 @@ extension View {
         DSGlassEffectGroup(spacing: spacing) {
             self
         }
+    }
+}
+
+extension View {
+    /// Apparition étagée des cartes : fade + léger décalage vertical,
+    /// retardée selon la position de la carte. Inerte si reduceMotion.
+    func cardAppear(index: Int, animate: Bool, reduceMotion: Bool) -> some View {
+        opacity(reduceMotion || animate ? 1 : 0)
+            .offset(y: reduceMotion || animate ? 0 : 12)
+            .animation(
+                reduceMotion ? nil : DS.Animation.appear.delay(Double(index) * 0.06),
+                value: animate
+            )
     }
 }
 
