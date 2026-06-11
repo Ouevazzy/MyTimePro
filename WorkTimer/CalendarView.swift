@@ -228,19 +228,6 @@ struct CalendarView: View {
                         }
                     }
                     
-                    // Bouton aujourd'hui
-                    if !isSelectedDateToday {
-                        Button(action: goToToday) {
-                            Label("calendar.today".localized, systemImage: "calendar.badge.clock")
-                                .font(.caption)
-                            .foregroundStyle(.blue)
-                            .padding(.vertical, DS.Spacing.xs)
-                            .padding(.horizontal, DS.Spacing.sm)
-                                .dsGlassSurface(cornerRadius: DS.Radius.medium, interactive: true)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("accessibility.today".localized)
-                    }
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -316,6 +303,23 @@ struct CalendarView: View {
                 }
             }
             .dsScreenBackground(.purple)
+            .overlay(alignment: .bottomLeading) {
+                // Bouton « Aujourd'hui » flottant, façon Calendrier Apple
+                if !isSelectedDateToday && selectedWorkDay == nil {
+                    Button(action: goToToday) {
+                        Text("calendar.today".localized)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, DS.Spacing.lg)
+                            .padding(.vertical, DS.Spacing.md)
+                    }
+                    .buttonStyle(.glass)
+                    .clipShape(Capsule())
+                    .padding(.leading, DS.Spacing.xl)
+                    .padding(.bottom, DS.Spacing.sm)
+                    .transition(.scale.combined(with: .opacity))
+                    .accessibilityLabel("accessibility.today".localized)
+                }
+            }
             .navigationTitle("calendar.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .sensoryFeedback(.selection, trigger: calendarViewMode)
@@ -417,83 +421,85 @@ struct CalendarView: View {
     
     // En-tête avec navigation du calendrier
     private var calendarHeader: some View {
-        HStack {
-            Button(action: {
-                withAnimation(DS.Animation.navigation) {
-                    slideDirection = .right
-                    if calendarViewMode == .month {
-                        shiftMonth(by: -1)
-                    } else {
-                        shiftWeek(by: -1)
-                    }
-                }
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.glass)
-            .accessibilityLabel("accessibility.previousMonth".localized)
-
-            Spacer()
-
-            // Titre du mois ou de la semaine avec effet de transition
-            VStack(spacing: 4) {
+        HStack(alignment: .firstTextBaseline) {
+            // Grand titre aligné à gauche, façon Calendrier Apple
+            HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm) {
                 if calendarViewMode == .month {
-                    Text(monthAndYear)
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    Text(monthTitle)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                         .matchedGeometryEffect(id: "monthTitle", in: monthTransition)
                 } else {
                     Text(weekRange)
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
                         .matchedGeometryEffect(id: "weekTitle", in: monthTransition)
                 }
 
-                // Petit indicateur d'année si en mode semaine
-                if calendarViewMode == .week {
-                    Text(displayDate.formatted(.dateTime.year()))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Text(displayDate.formatted(.dateTime.year()))
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
             }
-            .frame(height: 50)
+            .contentTransition(.numericText())
 
             Spacer()
 
-            Button(action: {
-                withAnimation(DS.Animation.navigation) {
-                    slideDirection = .left
-                    if calendarViewMode == .month {
-                        shiftMonth(by: 1)
-                    } else {
-                        shiftWeek(by: 1)
+            HStack(spacing: DS.Spacing.sm) {
+                Button(action: {
+                    withAnimation(DS.Animation.navigation) {
+                        slideDirection = .right
+                        if calendarViewMode == .month {
+                            shiftMonth(by: -1)
+                        } else {
+                            shiftWeek(by: -1)
+                        }
                     }
+                }) {
+                    Image(systemName: "chevron.left")
+                        .fontWeight(.semibold)
+                        .frame(width: 38, height: 38)
+                        .contentShape(Rectangle())
                 }
-            }) {
-                Image(systemName: "chevron.right")
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                .buttonStyle(.glass)
+                .accessibilityLabel("accessibility.previousMonth".localized)
+
+                Button(action: {
+                    withAnimation(DS.Animation.navigation) {
+                        slideDirection = .left
+                        if calendarViewMode == .month {
+                            shiftMonth(by: 1)
+                        } else {
+                            shiftWeek(by: 1)
+                        }
+                    }
+                }) {
+                    Image(systemName: "chevron.right")
+                        .fontWeight(.semibold)
+                        .frame(width: 38, height: 38)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.glass)
+                .accessibilityLabel("accessibility.nextMonth".localized)
             }
-            .buttonStyle(.glass)
-            .accessibilityLabel("accessibility.nextMonth".localized)
         }
         .padding(.horizontal)
         .padding(.top, 8)
-        .background(.regularMaterial)
     }
 
-    // En-tête des jours de la semaine
+    /// Nom du mois seul, capitalisé (« Juin »), façon Calendrier Apple.
+    private var monthTitle: String {
+        displayDate.formatted(.dateTime.month(.wide)).capitalized
+    }
+
+    // En-tête des jours de la semaine — 1 lettre, week-ends grisés (façon Calendrier Apple)
     private var weekdayHeader: some View {
         HStack(spacing: 0) {
-            ForEach(Array(weekDaySymbols.enumerated()), id: \.offset) { _, symbol in
-                Text(symbol)
+            ForEach(Array(weekDaySymbols.enumerated()), id: \.offset) { index, symbol in
+                Text(String(symbol.prefix(1)).uppercased())
                     .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(index >= 5 ? .tertiary : .secondary)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -501,40 +507,49 @@ struct CalendarView: View {
         .padding(.vertical, 8)
     }
     
-    // Vue du calendrier mensuel - version optimisée
+    // Vue du calendrier mensuel — lignes de semaine séparées par un filet (façon Calendrier Apple)
     private var monthCalendarView: some View {
-        LazyVGrid(columns: columns, spacing: 3) {
-            ForEach(visibleMonthSlots) { slot in
-                if let date = slot.date {
-                    let workDay = findWorkDay(for: date)
-                    Button {
-                        withAnimation(DS.Animation.micro) {
-                            selectDate(date, workDay: workDay)
+        VStack(spacing: 0) {
+            ForEach(Array(stride(from: 0, to: visibleMonthSlots.count, by: 7)), id: \.self) { weekStart in
+                if weekStart > 0 {
+                    Divider()
+                }
+
+                HStack(spacing: 0) {
+                    ForEach(visibleMonthSlots[weekStart..<min(weekStart + 7, visibleMonthSlots.count)]) { slot in
+                        if let date = slot.date {
+                            let workDay = findWorkDay(for: date)
+                            Button {
+                                withAnimation(DS.Animation.micro) {
+                                    selectDate(date, workDay: workDay)
+                                }
+                            } label: {
+                                ImprovedCalendarCell(
+                                    date: date,
+                                    workDay: workDay,
+                                    isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
+                                    isToday: calendar.isDateInToday(date),
+                                    isWeekend: calendar.isDateInWeekend(date)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .id(slot.id)
+                            .accessibilityIdentifier("calendar-day-\(CalendarGridLayout.dateIdentity(for: date, calendar: calendar))")
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(accessibilityLabel(for: date, workDay: workDay))
+                            .accessibilityAddTraits(calendar.isDate(date, inSameDayAs: selectedDate) ? [.isButton, .isSelected] : .isButton)
+                            .accessibilityAction {
+                                withAnimation(DS.Animation.micro) {
+                                    selectDate(date, workDay: workDay)
+                                }
+                            }
+                        } else {
+                            // Cellule vide
+                            Color.clear
+                                .frame(maxWidth: .infinity)
+                                .id(slot.id)
                         }
-                    } label: {
-                        ImprovedCalendarCell(
-                            date: date,
-                            workDay: workDay,
-                            isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
-                            isToday: calendar.isDateInToday(date)
-                        )
                     }
-                    .buttonStyle(.plain)
-                    .id(slot.id)
-                    .accessibilityIdentifier("calendar-day-\(CalendarGridLayout.dateIdentity(for: date, calendar: calendar))")
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(accessibilityLabel(for: date, workDay: workDay))
-                    .accessibilityAddTraits(calendar.isDate(date, inSameDayAs: selectedDate) ? [.isButton, .isSelected] : .isButton)
-                    .accessibilityAction {
-                        withAnimation(DS.Animation.micro) {
-                            selectDate(date, workDay: workDay)
-                        }
-                    }
-                } else {
-                    // Cellule vide
-                    Color.clear
-                        .aspectRatio(1, contentMode: .fill)
-                        .id(slot.id)
                 }
             }
         }
@@ -1086,17 +1101,18 @@ struct ImprovedCalendarCell: View {
     let workDay: WorkDay?
     let isSelected: Bool
     let isToday: Bool
-    
+    var isWeekend: Bool = false
+
     @Environment(\.colorScheme) var colorScheme
     private let calendar = CalendarGridLayout.displayCalendar
-    
+
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 3) {
             // Numéro du jour dans un cercle (visible uniquement si sélectionné/aujourd'hui)
             ZStack {
                 if isSelected {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(isToday ? Color.blue : Color.secondary.opacity(0.35))
                         .transition(.scale.combined(with: .opacity))
                 } else if isToday {
                     Circle()
@@ -1109,16 +1125,30 @@ struct ImprovedCalendarCell: View {
                     .monospacedDigit()
                     .foregroundStyle(textColor)
             }
-            .frame(width: 36, height: 36)
+            .frame(width: 34, height: 34)
 
-            // Pastille d'événement, colorée par type de journée
-            Circle()
-                .fill(workDay.map { $0.type.color } ?? .clear)
-                .frame(width: 5, height: 5)
+            // Étiquette du type de journée, façon événement Calendrier Apple
+            if let workDay {
+                Text(workDay.type.localizedName)
+                    .font(.system(size: 9, weight: .semibold))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundStyle(workDay.type.color)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        workDay.type.color.opacity(colorScheme == .dark ? 0.28 : 0.16),
+                        in: RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    )
+                    .padding(.horizontal, 2)
+            } else {
+                Color.clear
+                    .frame(height: 17)
+            }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
         .frame(maxWidth: .infinity)
-        .aspectRatio(0.9, contentMode: .fill)
         .contentShape(Rectangle())
     }
 
@@ -1129,7 +1159,7 @@ struct ImprovedCalendarCell: View {
         } else if isToday {
             return .blue
         }
-        return .primary
+        return isWeekend ? .secondary : .primary
     }
 }
 
