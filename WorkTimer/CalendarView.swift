@@ -245,7 +245,6 @@ struct CalendarView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
-                .background(.regularMaterial)
                 
                 // Ligne des jours de la semaine
                 weekdayHeader
@@ -316,6 +315,7 @@ struct CalendarView: View {
                         .zIndex(1)
                 }
             }
+            .dsScreenBackground(.purple)
             .navigationTitle("calendar.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .sensoryFeedback(.selection, trigger: calendarViewMode)
@@ -503,7 +503,7 @@ struct CalendarView: View {
     
     // Vue du calendrier mensuel - version optimisée
     private var monthCalendarView: some View {
-        LazyVGrid(columns: columns, spacing: 2) {
+        LazyVGrid(columns: columns, spacing: 3) {
             ForEach(visibleMonthSlots) { slot in
                 if let date = slot.date {
                     let workDay = findWorkDay(for: date)
@@ -538,6 +538,8 @@ struct CalendarView: View {
                 }
             }
         }
+        .padding(DS.Spacing.sm)
+        .dsGlassSurface(cornerRadius: DS.Radius.card)
         .padding(.horizontal)
         .id("month-\(CalendarGridLayout.dateIdentity(for: displayDate, calendar: calendar))")
     }
@@ -1199,7 +1201,9 @@ struct ImprovedCalendarCell: View {
         } else if isToday {
             return Color.blue.opacity(colorScheme == .dark ? 0.08 : 0.05)
         }
-        return colorScheme == .dark ? Color(.systemGray6).opacity(0.5) : Color(.systemBackground)
+        return colorScheme == .dark
+            ? Color.white.opacity(0.04)
+            : Color.black.opacity(0.03)
     }
     
     // Couleur du texte basée sur l'état
