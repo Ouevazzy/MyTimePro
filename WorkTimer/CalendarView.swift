@@ -538,8 +538,6 @@ struct CalendarView: View {
                 }
             }
         }
-        .padding(DS.Spacing.sm)
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
         .padding(.horizontal)
         .id("month-\(CalendarGridLayout.dateIdentity(for: displayDate, calendar: calendar))")
     }
@@ -1093,119 +1091,37 @@ struct ImprovedCalendarCell: View {
     private let calendar = CalendarGridLayout.displayCalendar
     
     var body: some View {
-        ZStack {
-            // Fond avec effet Liquid Glass
-            RoundedRectangle(cornerRadius: 12)
-                .fill(backgroundColor)
-                .overlay {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                LinearGradient(
-                                    colors: [.blue, .blue.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                }
-                .overlay {
-                    if isToday && !isSelected {
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.blue, lineWidth: 2)
-                    }
-                }
-                .shadow(
-                    color: isSelected ? Color.blue.opacity(0.2) : .clear,
-                    radius: isSelected ? 4 : 0,
-                    x: 0,
-                    y: isSelected ? 2 : 0
-                )
-            
-            VStack(spacing: 2) {
-                // Indicateur "aujourd'hui"
-                if isToday && !isSelected {
+        VStack(spacing: 4) {
+            // Numéro du jour dans un cercle (visible uniquement si sélectionné/aujourd'hui)
+            ZStack {
+                if isSelected {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [.blue, .blue.opacity(0.7)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 6, height: 6)
-                        .padding(.top, 2)
+                        .fill(Color.blue)
+                        .transition(.scale.combined(with: .opacity))
+                } else if isToday {
+                    Circle()
+                        .fill(Color.blue.opacity(colorScheme == .dark ? 0.22 : 0.12))
                 }
-                
-                // Numéro du jour
+
                 Text(String(calendar.component(.day, from: date)))
                     .font(.system(.body, design: .rounded))
-                    .fontWeight(isToday || isSelected ? .bold : .medium)
+                    .fontWeight(isToday || isSelected ? .semibold : .regular)
+                    .monospacedDigit()
                     .foregroundStyle(textColor)
-                
-                // Indicateurs d'événements
-                if let workDay = workDay {
-                    // Icône de type avec effet de transition
-                    Image(systemName: workDay.type.icon)
-                        .foregroundStyle(isSelected ? .white.opacity(0.9) : workDay.type.color)
-                        .font(.caption2)
-                        .transition(.scale.combined(with: .opacity))
-                    
-                    // Badge pour les bonus
-                    if workDay.bonusAmount > 0 {
-                        Text("+" + String(format: "%.0f", workDay.bonusAmount))
-                            .font(.system(size: 8, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .background(
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [.orange, .orange.opacity(0.8)],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                            )
-                    }
-                }
             }
-            .padding(.vertical, 4)
+            .frame(width: 36, height: 36)
+
+            // Pastille d'événement, colorée par type de journée
+            Circle()
+                .fill(workDay.map { $0.type.color } ?? .clear)
+                .frame(width: 5, height: 5)
         }
-        .aspectRatio(1, contentMode: .fill)
+        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
+        .aspectRatio(0.9, contentMode: .fill)
         .contentShape(Rectangle())
     }
-    
-    // Couleur de fond basée sur l'état et le type
-    private var backgroundColor: Color {
-        if isSelected {
-            return .clear // Le gradient est appliqué via overlay
-        } else if let workDay = workDay {
-            // Couleur basée sur le type avec opacité adaptée au mode sombre/clair
-            let opacity = colorScheme == .dark ? 0.15 : 0.12
-            switch workDay.type {
-            case .work:
-                return Color.blue.opacity(opacity)
-            case .vacation, .halfDayVacation:
-                return Color.orange.opacity(opacity)
-            case .sickLeave:
-                return Color.red.opacity(opacity)
-            case .compensatory:
-                return Color.green.opacity(opacity)
-            case .training:
-                return Color.purple.opacity(opacity)
-            case .holiday:
-                return Color.yellow.opacity(opacity)
-            }
-        } else if isToday {
-            return Color.blue.opacity(colorScheme == .dark ? 0.08 : 0.05)
-        }
-        return colorScheme == .dark
-            ? Color.white.opacity(0.04)
-            : Color.black.opacity(0.03)
-    }
-    
+
     // Couleur du texte basée sur l'état
     private var textColor: Color {
         if isSelected {
