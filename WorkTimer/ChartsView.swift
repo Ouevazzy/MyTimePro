@@ -94,6 +94,7 @@ struct ChartsView: View {
             .dsGlassEffectGroup()
             .padding()
         }
+        .dsScreenBackground(.teal)
         .scrollEdgeEffectStyle(.soft, for: .vertical)
         .refreshable {
             dataRevision += 1

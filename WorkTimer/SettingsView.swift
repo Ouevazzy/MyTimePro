@@ -1,16 +1,19 @@
 import SwiftUI
 import SwiftData
+import StoreKit
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
     @Bindable private var settings = UserSettings.shared
-    @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
 
     // MARK: - State
     @State private var activeSection: SettingsSection? = nil
     @State private var showConfetti = false
+    @State private var showPaywall = false
     @State private var showDiagnostics = false
+    @State private var showOfferCodeRedemption = false
+    @State private var subscriptionErrorMessage: String?
     @State private var showResetAlert = false
     @State private var animateWorkHours = false
     @State private var animateAnnualDays = false
@@ -18,6 +21,8 @@ struct SettingsView: View {
     // Export
     @State private var exportType: ExportType?
     @State private var exportFormat: ExportFormat = .pdf
+    @State private var exportYear = Calendar.current.component(.year, from: Date())
+    @State private var exportMonth = Calendar.current.component(.month, from: Date())
     @AppStorage("userProfile.name") private var userName = ""
     @AppStorage("userProfile.company") private var userCompany = ""
 
@@ -33,6 +38,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: DS.Spacing.lg) {
                     profileHeader
+                    subscriptionCard
                     WorkTimeSettingsSection(
                         settings: settings,
                         activeSection: $activeSection,
@@ -57,17 +63,21 @@ struct SettingsView: View {
                 .padding(.bottom, 30)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .dsScreenBackground(.gray)
         }
-        .navigationTitle("Réglages")
+        .navigationTitle("navigation.settings".localized)
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showDiagnostics) { DiagnosticsView() }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
+        .offerCodeRedemption(isPresented: $showOfferCodeRedemption) { result in
+            handleOfferCodeRedemption(result)
+        }
         .sheet(item: $exportType) { type in
             PDFExportView(
                 type: type,
                 format: $exportFormat,
-                selectedYear: .constant(Calendar.current.component(.year, from: Date())),
-                selectedMonth: .constant(Calendar.current.component(.month, from: Date())),
+                selectedYear: $exportYear,
+                selectedMonth: $exportMonth,
                 userCompany: $userCompany
             )
         }
@@ -76,6 +86,14 @@ struct SettingsView: View {
             Button("settings.reset.button".localized, role: .destructive) { resetAllData() }
         } message: {
             Text("settings.reset.confirm.message".localized)
+        }
+        .alert("paywall.error.title".localized, isPresented: Binding(
+            get: { subscriptionErrorMessage != nil },
+            set: { if !$0 { subscriptionErrorMessage = nil } }
+        )) {
+            Button("OK") { subscriptionErrorMessage = nil }
+        } message: {
+            Text(subscriptionErrorMessage ?? "")
         }
         .onAppear {
             Task {
@@ -107,10 +125,10 @@ struct SettingsView: View {
                     }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    TextField("Votre nom", text: $userName)
+                    TextField("settings.profile.name".localized, text: $userName)
                         .font(.system(.body, design: .rounded))
                         .fontWeight(.semibold)
-                    TextField("Entreprise", text: $userCompany)
+                    TextField("settings.profile.company".localized, text: $userCompany)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -138,11 +156,229 @@ struct SettingsView: View {
         .padding(.vertical, DS.Spacing.sm)
     }
 
+    // MARK: - Subscription Card
+
+    private var subscriptionCard: some View {
+        SettingsCard(
+            title: "settings.subscription.title".localized,
+            icon: "star.fill",
+            color: .orange,
+            isExpanded: activeSection == .subscription,
+            onToggle: {
+                withAnimation(DS.Animation.cardToggle) {
+                    activeSection = activeSection == .subscription ? nil : .subscription
+                }
+            }
+        ) {
+            VStack(spacing: DS.Spacing.sm) {
+                // Status banner
+                HStack(spacing: DS.Spacing.md) {
+                    Image(systemName: StoreManager.shared.isPro ? "checkmark.seal.fill" : "lock.fill")
+                        .font(.title2)
+                        .foregroundStyle(StoreManager.shared.isPro ? .orange : .secondary)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(StoreManager.shared.isPro
+                             ? "WorkTimer Pro"
+                             : "settings.subscription.free".localized)
+                            .font(.headline)
+                        Text(subscriptionPlanName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if StoreManager.shared.isPro {
+                        Text("PRO")
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(.orange, in: Capsule())
+                    }
+                }
+                .padding(DS.Spacing.md)
+                .background(
+                    StoreManager.shared.isPro
+                        ? Color.orange.opacity(0.1)
+                        : Color(.tertiarySystemGroupedBackground),
+                    in: RoundedRectangle(cornerRadius: DS.Radius.medium)
+                )
+
+                if StoreManager.shared.isPro {
+                    if StoreManager.shared.activeProductID == StoreManager.lifetimeID {
+                        HStack(spacing: DS.Spacing.sm) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(.orange)
+                            Text("settings.subscription.lifetimeActive".localized)
+                                .font(.subheadline)
+                            Spacer()
+                        }
+                        .padding(DS.Spacing.md)
+                        .background(Color(.tertiarySystemGroupedBackground),
+                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                    } else {
+                        // Manage subscription
+                        Button(action: openSubscriptionManagement) {
+                            HStack(spacing: DS.Spacing.sm) {
+                                Image(systemName: "creditcard.fill")
+                                    .foregroundStyle(.orange)
+                                Text("settings.subscription.manage".localized)
+                                    .font(.subheadline)
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(DS.Spacing.md)
+                            .background(Color(.tertiarySystemGroupedBackground),
+                                        in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                        }
+                        .foregroundStyle(.primary)
+                        .buttonStyle(.pressable)
+
+                        redeemCodeButton
+                    }
+                } else {
+                    // Upgrade button
+                    Button(action: { showPaywall = true }) {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "star.fill")
+                            Text("settings.subscription.upgrade".localized)
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(colors: [.orange, .yellow],
+                                           startPoint: .leading, endPoint: .trailing),
+                            in: RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        )
+                        .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.pressable)
+
+                    redeemCodeButton
+
+                    // Restore purchases
+                    Button(action: {
+                        Task {
+                            await StoreManager.shared.restorePurchases()
+                        }
+                    }) {
+                        HStack(spacing: DS.Spacing.sm) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .foregroundStyle(.blue)
+                            Text("paywall.restore".localized)
+                                .font(.subheadline)
+                            Spacer()
+                        }
+                        .padding(DS.Spacing.md)
+                        .background(Color(.tertiarySystemGroupedBackground),
+                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                    }
+                    .foregroundStyle(.primary)
+                    .buttonStyle(.pressable)
+                }
+
+                // Legal links — always visible (Apple requirement)
+                HStack(spacing: DS.Spacing.sm) {
+                    Link(destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!) {
+                        HStack(spacing: DS.Spacing.xs) {
+                            Image(systemName: "doc.text.fill")
+                                .foregroundStyle(.blue)
+                            Text("settings.subscription.terms".localized)
+                                .font(.subheadline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(DS.Spacing.md)
+                        .background(Color(.tertiarySystemGroupedBackground),
+                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                    }
+                    .foregroundStyle(.primary)
+
+                    Link(destination: URL(string: "https://ouevazzy.github.io/MyTimePro-Support/")!) {
+                        HStack(spacing: DS.Spacing.xs) {
+                            Image(systemName: "hand.raised.fill")
+                                .foregroundStyle(.green)
+                            Text("settings.subscription.privacy".localized)
+                                .font(.subheadline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(DS.Spacing.md)
+                        .background(Color(.tertiarySystemGroupedBackground),
+                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                    }
+                    .foregroundStyle(.primary)
+                }
+            }
+            .padding()
+        }
+    }
+
+    private var redeemCodeButton: some View {
+        Button {
+            showOfferCodeRedemption = true
+        } label: {
+            HStack(spacing: DS.Spacing.sm) {
+                Image(systemName: "ticket.fill")
+                    .foregroundStyle(.orange)
+                Text("paywall.redeemCode.title".localized)
+                    .font(.subheadline)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(DS.Spacing.md)
+            .background(Color(.tertiarySystemGroupedBackground),
+                        in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+        }
+        .foregroundStyle(.primary)
+        .buttonStyle(.pressable)
+    }
+
+    private var subscriptionPlanName: String {
+        guard StoreManager.shared.isPro, let id = StoreManager.shared.activeProductID else {
+            return "settings.subscription.free".localized
+        }
+        switch id {
+        case StoreManager.monthlyID:  return "paywall.plan.monthly".localized
+        case StoreManager.annualID:   return "paywall.plan.annual".localized
+        case StoreManager.lifetimeID: return "paywall.plan.lifetime".localized
+        default: return "Pro"
+        }
+    }
+
+    private func openSubscriptionManagement() {
+        guard let url = URL(string: "itms-apps://apps.apple.com/account/subscriptions") else { return }
+        openURL(url)
+    }
+
+    private func handleOfferCodeRedemption(_ result: Result<Void, Error>) {
+        switch result {
+        case .success:
+            Task { @MainActor in
+                await StoreManager.shared.refreshAfterExternalRedemption()
+                guard StoreManager.shared.isPro else { return }
+
+                withAnimation(DS.Animation.appear) {
+                    showConfetti = true
+                }
+                try? await Task.sleep(for: .seconds(2))
+                withAnimation(DS.Animation.appear) {
+                    showConfetti = false
+                }
+            }
+        case .failure(let error):
+            AppLogger.error("StoreKit: rachat de code échoué", category: AppLogger.data, error: error)
+            subscriptionErrorMessage = "paywall.error.redeemCode".localized
+        }
+    }
+
     // MARK: - About Card
 
     private var aboutCard: some View {
         SettingsCard(
-            title: "À propos", icon: "info.circle.fill", color: .blue,
+            title: "settings.about.title".localized, icon: "info.circle.fill", color: .blue,
             isExpanded: activeSection == .about,
             onToggle: {
                 withAnimation(DS.Animation.cardToggle) {
@@ -152,7 +388,7 @@ struct SettingsView: View {
         ) {
             VStack(spacing: DS.Spacing.sm) {
                 HStack {
-                    Text("Version")
+                    Text("settings.version.label".localized)
                         .font(.subheadline)
                     Spacer()
                     Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
@@ -170,6 +406,23 @@ struct SettingsView: View {
                             .font(.subheadline)
                         Spacer()
                         Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(DS.Spacing.md)
+                    .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                }
+                .foregroundStyle(.primary)
+                .buttonStyle(.pressable)
+
+                Button(action: openPrivacyPolicy) {
+                    HStack(spacing: DS.Spacing.sm) {
+                        Image(systemName: "hand.raised.fill")
+                            .foregroundStyle(.green)
+                        Text("settings.privacyPolicy".localized)
+                            .font(.subheadline)
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
                     }
@@ -204,36 +457,36 @@ struct SettingsView: View {
 
     private var resetCard: some View {
         SettingsCard(
-            title: "Réinitialisation", icon: "arrow.counterclockwise", color: .red,
+            title: "settings.reset".localized, icon: "arrow.counterclockwise", color: .red,
             isExpanded: activeSection == .reset,
             onToggle: {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                withAnimation(DS.Animation.cardToggle) {
                     activeSection = activeSection == .reset ? nil : .reset
                 }
             }
         ) {
-            VStack(spacing: 15) {
-                HStack(spacing: 15) {
+            VStack(spacing: DS.Spacing.lg) {
+                HStack(spacing: DS.Spacing.lg) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.largeTitle).foregroundColor(.yellow)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("settings.reset.warning".localized).font(.headline).foregroundColor(.orange)
-                        Text("settings.reset.warning.message".localized).font(.caption).foregroundColor(.secondary)
+                        .font(.largeTitle).foregroundStyle(.yellow)
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                        Text("settings.reset.warning".localized).font(.headline).foregroundStyle(.orange)
+                        Text("settings.reset.warning.message".localized).font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 .padding()
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange.opacity(0.1)))
+                .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: DS.Radius.medium))
 
                 Button(role: .destructive) { showResetAlert = true } label: {
                     HStack {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
-                        Text("Réinitialiser les paramètres").fontWeight(.semibold)
+                        Text("settings.reset.button".localized).fontWeight(.semibold)
                         Spacer()
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.red.opacity(0.1)))
-                    .foregroundColor(.red)
+                    .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: DS.Radius.medium))
+                    .foregroundStyle(.red)
                 }
             }
             .padding()
@@ -243,13 +496,20 @@ struct SettingsView: View {
     // MARK: - Actions
 
     private func resetAllData() {
-        for workDay in workDays { modelContext.delete(workDay) }
         do {
+            let all = try modelContext.fetch(FetchDescriptor<WorkDay>())
+            for workDay in all { modelContext.delete(workDay) }
             try modelContext.save()
             settings.resetToDefaults()
+            SiriSummaryCacheService().refresh(using: modelContext)
         } catch {
             ErrorManager.shared.handleDataError("Erreur suppression: \(error.localizedDescription)")
         }
+    }
+
+    private func openPrivacyPolicy() {
+        guard let url = URL(string: "https://ouevazzy.github.io/MyTimePro-Support/") else { return }
+        openURL(url)
     }
 
     private func sendSupportEmail() {
