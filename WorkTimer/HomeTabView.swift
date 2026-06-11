@@ -84,6 +84,7 @@ struct HomeTabView: View {
             .dsGlassEffectGroup()
         }
         .dsScreenBackground(.blue)
+        .quickAddOverlay()
         .navigationTitle("navigation.home".localized)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
