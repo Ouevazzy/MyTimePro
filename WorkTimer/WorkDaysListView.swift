@@ -115,6 +115,7 @@ struct WorkDaysListView: View {
                 workDaysList
             }
         }
+        .dsScreenBackground(.blue)
         .navigationTitle("workDay.title".localized)
         .searchable(
             text: $searchText,
@@ -338,11 +339,18 @@ struct WorkDaysListView: View {
                                 Label("action.delete".localized, systemImage: "trash")
                             }
                         }
+                        .padding(.horizontal, DS.Spacing.md)
+                        .padding(.vertical, DS.Spacing.sm)
+                        .dsGlassSurface(cornerRadius: DS.Radius.medium)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
         .refreshable {
             // Rafraîchir les données
             filterWorkDaysAsync()
@@ -374,7 +382,6 @@ struct WorkDaysListView: View {
             iconColors: hasFilterActive ? [.orange, .red] : [.blue, .purple]
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
     }
 
     private var addButton: some View {
