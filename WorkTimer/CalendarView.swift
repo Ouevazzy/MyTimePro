@@ -469,7 +469,7 @@ struct CalendarView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .fontWeight(.semibold)
-                        .frame(width: 38, height: 38)
+                        .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.glass)
@@ -487,7 +487,7 @@ struct CalendarView: View {
                 }) {
                     Image(systemName: "chevron.right")
                         .fontWeight(.semibold)
-                        .frame(width: 38, height: 38)
+                        .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.glass)
@@ -672,14 +672,12 @@ struct CalendarView: View {
                                 )
                         }
                         
-                        // Indicateur de type de journée
+                        // Indicateur de type de journée — capsule, comme en mode mois
                         if let workDay = workDay {
-                            Image(systemName: workDay.type.icon)
-                                .font(.caption)
-                                .foregroundStyle(workDay.type.color)
+                            DayTypeBadge(type: workDay.type)
                         } else {
-                            Spacer()
-                                .frame(height: 16)
+                            Color.clear
+                                .frame(height: 17)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -1184,6 +1182,32 @@ struct CalendarDetailRow: View {
 // MARK: - Sous-vues améliorées
 
 /// Cellule de calendrier améliorée avec design Liquid Glass
+/// Étiquette capsule du type de journée, façon événement Calendrier Apple.
+/// Contraste renforcé + fallback opaque si reduceTransparency.
+struct DayTypeBadge: View {
+    let type: WorkDayType
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    var body: some View {
+        Text(type.localizedName)
+            .font(.caption2)
+            .fontWeight(.semibold)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .foregroundStyle(reduceTransparency ? Color.white : type.color)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .frame(maxWidth: .infinity)
+            .background(
+                type.color.opacity(reduceTransparency ? 1.0 : (colorScheme == .dark ? 0.30 : 0.20)),
+                in: RoundedRectangle(cornerRadius: 5, style: .continuous)
+            )
+            .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+    }
+}
+
 struct ImprovedCalendarCell: View {
     let date: Date
     let workDay: WorkDay?
@@ -1217,18 +1241,7 @@ struct ImprovedCalendarCell: View {
 
             // Étiquette du type de journée, façon événement Calendrier Apple
             if let workDay {
-                Text(workDay.type.localizedName)
-                    .font(.system(size: 9, weight: .semibold))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .foregroundStyle(workDay.type.color)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 2)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        workDay.type.color.opacity(colorScheme == .dark ? 0.28 : 0.16),
-                        in: RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    )
+                DayTypeBadge(type: workDay.type)
                     .padding(.horizontal, 2)
             } else {
                 Color.clear

@@ -2,101 +2,117 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @AppStorage("selectedTab") private var selectedTab = 0
-    
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("selectedTab") private var selectedTab = AppTab.home.rawValue
+    @State private var focusedCalendarDate: Date?
+
     var body: some View {
         mainTabView
             .tint(.blue)
-            .onChange(of: selectedTab) { _, _ in
-                // Rafraîchir le cache stats lors du changement d'onglet
-                StatsCache.shared.invalidateAll()
+            .scrollEdgeEffectStyle(.soft, for: .all)
+            .sensoryFeedback(.selection, trigger: selectedTab)
+            .onChange(of: selectedTab) { _, newValue in
+                if newValue == AppTab.stats.rawValue {
+                    StatsCache.shared.invalidateAll()
+                }
+            }
+            .onAppear(perform: handlePendingSiriAction)
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    handlePendingSiriAction()
+                }
             }
     }
     
     // MARK: - Tab View
     private var mainTabView: some View {
         modernTabView
-            .tabBarMinimizeBehavior(.onScrollDown)
     }
 
     // MARK: - iOS 26 Tab API (native Liquid Glass tab styling)
     private var modernTabView: some View {
         TabView(selection: $selectedTab) {
-            Tab("navigation.home".localized, systemImage: "house.fill", value: 0) {
+            Tab("navigation.home".localized, systemImage: "house.fill", value: AppTab.home.rawValue) {
                 NavigationStack {
                     HomeTabView()
                 }
             }
             .accessibilityHint("accessibility.home.hint".localized)
 
-            Tab("navigation.workDays".localized, systemImage: "list.bullet", value: 1) {
+            Tab("navigation.workDays".localized, systemImage: "list.bullet", value: AppTab.workDays.rawValue) {
                 NavigationStack {
-                    LazyView { WorkDaysListView() }
+                    WorkDaysListView()
                 }
             }
             .accessibilityHint("accessibility.workDays.hint".localized)
 
-            Tab("navigation.calendar".localized, systemImage: "calendar", value: 2) {
+            Tab("navigation.calendar".localized, systemImage: "calendar", value: AppTab.calendar.rawValue) {
                 NavigationStack {
-                    LazyView { CalendarView() }
+                    CalendarView(focusedDate: $focusedCalendarDate)
                 }
             }
             .accessibilityHint("accessibility.calendar.hint".localized)
 
-            Tab("navigation.stats".localized, systemImage: "chart.bar.fill", value: 3) {
+            Tab("navigation.stats".localized, systemImage: "chart.bar.fill", value: AppTab.stats.rawValue) {
                 NavigationStack {
-                    LazyView { StatsView() }
+                    StatsView()
                 }
             }
             .accessibilityHint("accessibility.stats.hint".localized)
 
-            Tab("navigation.settings".localized, systemImage: "gear", value: 4) {
+            Tab("navigation.settings".localized, systemImage: "gear", value: AppTab.settings.rawValue) {
                 NavigationStack {
-                    LazyView { SettingsView() }
+                    SettingsView()
                 }
             }
             .accessibilityHint("accessibility.settings.hint".localized)
         }
     }
-}
 
-// MARK: - LazyView optimisé
-/// Composant pour charger paresseusement les vues - vraiment paresseux cette fois
-struct LazyView<Content: View>: View {
-    @State private var hasAppeared = false
-    let content: () -> Content
-    
-    init(@ViewBuilder content: @escaping () -> Content) {
-        self.content = content
-    }
-    
-    var body: some View {
-        Group {
-            if hasAppeared {
-        content()
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
-            } else {
-                // Vue de chargement élégante
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text("loading".localized)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemGroupedBackground))
+    private enum AppTab: Int {
+        case home = 0
+        case workDays
+        case calendar
+        case stats
+        case settings
+
+        init(destination: WorkTimerDestinationIntentValue) {
+            switch destination {
+            case .home:
+                self = .home
+            case .workDays:
+                self = .workDays
+            case .calendar:
+                self = .calendar
+            case .stats:
+                self = .stats
+            case .settings:
+                self = .settings
             }
         }
-        .animation(DS.Animation.micro, value: hasAppeared)
-        .onAppear {
-            if !hasAppeared {
-                // Petit délai pour laisser l'animation de tab s'effectuer
-                Task {
-                    try? await Task.sleep(for: .milliseconds(50))
-                    hasAppeared = true
-                }
-            }
+    }
+
+    private func handlePendingSiriAction() {
+        guard let action = SiriShortcutsHelper.shared.checkSiriActions() else { return }
+
+        if case .openDestination(let destination) = action {
+            selectedTab = AppTab(destination: destination).rawValue
+            return
+        }
+
+        if case .openCalendarDate(let date) = action {
+            focusedCalendarDate = Calendar.current.startOfDay(for: date)
+            selectedTab = AppTab.calendar.rawValue
+            return
+        }
+
+        do {
+            try SiriActionProcessor(modelContext: modelContext).process(action)
+            selectedTab = AppTab.calendar.rawValue
+            Haptic.notification(.success)
+        } catch {
+            ErrorManager.shared.handle(error, context: "SiriAction")
         }
     }
 }

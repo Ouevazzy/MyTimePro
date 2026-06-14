@@ -10,16 +10,19 @@ import SwiftUI
 
 struct QuickAddButton: View {
     @State private var showAddSheet = false
+    @State private var bounce = 0
 
     var body: some View {
         Button {
             Haptic.impact(.medium)
+            bounce += 1
             showAddSheet = true
         } label: {
             Image(systemName: "plus")
                 .font(.system(size: 22, weight: .semibold))
                 .frame(width: 56, height: 56)
                 .contentShape(Circle())
+                .symbolEffect(.bounce, value: bounce)
         }
         .buttonStyle(.glassProminent)
         .clipShape(Circle())

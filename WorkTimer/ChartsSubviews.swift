@@ -120,22 +120,15 @@ struct MonthlyChartView: View {
                     )
                     .cornerRadius(4)
 
-                    // Overtime en superposition
-                    if item.overtime > 0 {
-                        BarMark(
-                            x: .value("charts.axis.month".localized, item.monthName),
-                            y: .value("charts.axis.overtime".localized, animate ? item.overtime : 0)
-                        )
-                        .foregroundStyle(.green.opacity(0.7))
-                        .cornerRadius(4)
-                    } else if item.overtime < 0 {
-                        BarMark(
-                            x: .value("charts.axis.month".localized, item.monthName),
-                            y: .value("charts.axis.deficit".localized, animate ? abs(item.overtime) : 0)
-                        )
-                        .foregroundStyle(.red.opacity(0.7))
-                        .cornerRadius(4)
-                    }
+                    // Overtime / déficit en superposition.
+                    // BarMark toujours émis (hauteur nulle si overtime == 0) pour éviter
+                    // un _ConditionalContent dont la conformité à ChartContent exige iOS 27+.
+                    BarMark(
+                        x: .value("charts.axis.month".localized, item.monthName),
+                        y: .value("charts.axis.overtime".localized, animate ? abs(item.overtime) : 0)
+                    )
+                    .foregroundStyle((item.overtime >= 0 ? Color.green : Color.red).opacity(0.7))
+                    .cornerRadius(4)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading)

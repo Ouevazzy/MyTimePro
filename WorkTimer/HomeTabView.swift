@@ -13,6 +13,9 @@ struct HomeTabView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// Taille du chiffre héro : part de 40pt mais suit Dynamic Type (plafonné).
+    @ScaledMetric(relativeTo: .largeTitle) private var heroFontSize: CGFloat = DS.Font.statDisplay
+
     // MARK: - State Properties
     @State private var selectedYear: Int
     @State private var selectedMonth: Int
@@ -124,8 +127,10 @@ struct HomeTabView: View {
                 .foregroundStyle(.secondary)
 
             Text(WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds))
-                .font(.system(size: DS.Font.statDisplay, weight: .bold, design: .rounded))
+                .font(.system(size: heroFontSize, weight: .bold, design: .rounded))
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .foregroundStyle(balanceColor)
                 .contentTransition(.numericText(countsDown: !isPositive))
 

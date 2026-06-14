@@ -186,24 +186,39 @@ extension View {
     }
 
     /// Couche 1 de la hiérarchie de profondeur : fond d'écran dégradé subtil.
+    /// Retombe sur un fond uni si `reduceTransparency` est activé.
     func dsScreenBackground(_ tint: Color = .blue) -> some View {
-        background {
-            LinearGradient(
-                colors: [
-                    tint.opacity(0.10),
-                    Color(.systemGroupedBackground)
-                ],
-                startPoint: .top,
-                endPoint: .center
-            )
-            .background(Color(.systemGroupedBackground))
-            .ignoresSafeArea()
-        }
+        modifier(DSScreenBackgroundModifier(tint: tint))
     }
 
     func dsGlassEffectGroup(spacing: CGFloat? = DS.Glass.groupSpacing) -> some View {
         DSGlassEffectGroup(spacing: spacing) {
             self
+        }
+    }
+}
+
+private struct DSScreenBackgroundModifier: ViewModifier {
+    let tint: Color
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        content.background {
+            if reduceTransparency {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+            } else {
+                LinearGradient(
+                    colors: [
+                        tint.opacity(0.10),
+                        Color(.systemGroupedBackground)
+                    ],
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .background(Color(.systemGroupedBackground))
+                .ignoresSafeArea()
+            }
         }
     }
 }
