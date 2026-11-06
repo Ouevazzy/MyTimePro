@@ -76,9 +76,14 @@ enum DS {
         static let halfDayVacation = Color.mint
 
         // Couleurs d'état
-        static let positive = Color.green
-        static let negative = Color.red
+        static let positive = Color("PositiveBalance")
+        static let negative = Color("NegativeBalance")
         static let neutral = Color.secondary
+        static let secondaryText = Color.primary.opacity(0.72)
+
+        static func balance(_ value: Double) -> Color {
+            value > 0 ? positive : value < 0 ? negative : .primary
+        }
 
         // Opacités standardisées pour les backgrounds
         static let backgroundOpacity: Double = 0.12
@@ -171,17 +176,15 @@ extension View {
         self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
     }
 
-    /// Couche 2 de la hiérarchie de profondeur : carte de contenu en verre natif.
-    /// `tint` applique une teinte sémantique (type de jour, état) au verre.
-    func dsGlassSurface(
+    /// Fond opaque pour les cartes de contenu. Le verre reste sur les commandes
+    /// et la navigation, afin de laisser les données au premier plan.
+    func dsContentSurface(
         cornerRadius: CGFloat = DS.Radius.card,
-        tint: Color? = nil,
-        interactive: Bool = false
+        tint: Color? = nil
     ) -> some View {
-        modifier(DSGlassSurfaceModifier(
+        modifier(DSContentSurfaceModifier(
             cornerRadius: cornerRadius,
-            tint: tint,
-            interactive: interactive
+            tint: tint
         ))
     }
 
@@ -210,7 +213,7 @@ private struct DSScreenBackgroundModifier: ViewModifier {
             } else {
                 LinearGradient(
                     colors: [
-                        tint.opacity(0.10),
+                        tint.opacity(0.04),
                         Color(.systemGroupedBackground)
                     ],
                     startPoint: .top,
@@ -252,40 +255,19 @@ struct DSGlassEffectGroup<Content: View>: View {
     }
 }
 
-private struct DSGlassSurfaceModifier: ViewModifier {
+private struct DSContentSurfaceModifier: ViewModifier {
     let cornerRadius: CGFloat
     let tint: Color?
-    let interactive: Bool
 
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    @ViewBuilder
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-
-        if reduceTransparency {
-            content
-                .background {
-                    shape.fill(Color(.secondarySystemGroupedBackground))
-                    if let tint {
-                        shape.fill(tint.opacity(DS.Background.tintedCard))
-                    }
+        content
+            .background {
+                shape.fill(Color(.secondarySystemGroupedBackground))
+                if let tint {
+                    shape.fill(tint.opacity(DS.Background.tintedCard))
                 }
-                .clipShape(shape)
-        } else {
-            content
-                .glassEffect(glass, in: shape)
-        }
-    }
-
-    private var glass: Glass {
-        var glass: Glass = .regular
-        if let tint {
-            glass = glass.tint(tint.opacity(DS.Glass.tintStrength))
-        }
-        if interactive {
-            glass = glass.interactive()
-        }
-        return glass
+            }
+            .clipShape(shape)
     }
 }

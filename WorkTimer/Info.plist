@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.mytiempo.sync</string>
+		<string>com.mytiempo.cleanup</string>
+	</array>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>
@@ -16,37 +21,20 @@
 			<false/>
 		</dict>
 	</dict>
-	<key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-		<string>processing</string>
-		<string>fetch</string>
-	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.mytiempo.sync</string>
-		<string>com.mytiempo.cleanup</string>
-	</array>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>fr</string>
 		<string>en</string>
 		<string>de</string>
 	</array>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>fr</string>
-	<key>INIntentsSupported</key>
-	<array>
-		<string>LogArrivalIntent</string>
-		<string>LogDepartureIntent</string>
-		<string>GetOvertimeIntent</string>
-		<string>GetVacationBalanceIntent</string>
-	</array>
-	<key>NSSiriUsageDescription</key>
-	<string>WorkTimer utilise Siri pour vous permettre de pointer vos heures et consulter vos statistiques par la voix.</string>
+	<key>NSPersistentCloudKitContainerSchemaMigrationEnabled</key>
+	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>WorkTimer vous envoie des rappels pour pointer vos heures de travail.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>processing</string>
+	</array>
 </dict>
 </plist>

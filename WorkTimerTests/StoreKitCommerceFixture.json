@@ -1,0 +1,99 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "138D6C00",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "19.99",
+      "familyShareable" : false,
+      "internalID" : "7C62050E-BC7D-450C-9DD7-54EF9B427125",
+      "localizations" : [
+        {
+          "description" : "Accès à vie à toutes les fonctionnalités Pro de WorkTimer",
+          "displayName" : "WorkTimer Pro À vie",
+          "locale" : "fr_FR"
+        }
+      ],
+      "productID" : "com.worktimer.pro.lifetime",
+      "referenceName" : "Lifetime Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6739806374",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "U4M6G8S4VP",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 800297690.93242097,
+    "_locale" : "fr_FR",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "FRA",
+    "_storeKitErrors" : [],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "AF7DDB67-ABE8-4287-847C-1CF0DE0B1435",
+      "localizations" : [],
+      "name" : "Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "BE0FF116-BE09-4D22-8A05-92CC52606F2B",
+          "localizations" : [
+            {
+              "description" : "Accès à toutes les fonctionnalités Pro de WorkTimer",
+              "displayName" : "WorkTimer Pro Mensuel",
+              "locale" : "fr_FR"
+            }
+          ],
+          "productID" : "com.worktimer.pro.subscription.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Pro",
+          "subscriptionGroupID" : "AF7DDB67-ABE8-4287-847C-1CF0DE0B1435",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "696965AD-60E3-4861-BD37-D9723896D20F",
+          "localizations" : [
+            {
+              "description" : "Accès à toutes les fonctionnalités Pro de WorkTimer",
+              "displayName" : "WorkTimer Pro Annuel",
+              "locale" : "fr_FR"
+            }
+          ],
+          "productID" : "com.worktimer.pro.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual Pro",
+          "subscriptionGroupID" : "AF7DDB67-ABE8-4287-847C-1CF0DE0B1435",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 5,
+    "minor" : 0
+  }
+}

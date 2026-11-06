@@ -115,6 +115,7 @@ struct WorkDaysListView: View {
                 workDaysList
             }
         }
+        .accessibilityIdentifier("workdays.content")
         .dsScreenBackground(.blue)
         .navigationTitle("workDay.title".localized)
         .searchable(
@@ -275,9 +276,8 @@ struct WorkDaysListView: View {
                             .foregroundStyle(.blue)
                             .padding(.horizontal, DS.Spacing.sm)
                             .padding(.vertical, DS.Spacing.xs)
-                            .dsGlassSurface(cornerRadius: DS.Radius.medium, interactive: true)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
@@ -309,6 +309,8 @@ struct WorkDaysListView: View {
                 Section(header: CustomSectionHeader(
                     date: formatSectionDate(dateKey),
                     isToday: isToday(dateKey),
+                    entryCount: days.count,
+                    dailyOvertimeSeconds: days.reduce(0) { $0 + $1.overtimeSeconds },
                     isEditMode: isEditMode,
                     isSelected: selectedDates.contains(dateKey),
                     onToggleSelection: {
@@ -318,11 +320,14 @@ struct WorkDaysListView: View {
                     ForEach(days) { workDay in
                         WorkDayRow(
                             workDay: workDay,
+                            showsOvertime: days.count == 1,
                             isSelected: selectedWorkDays.contains(workDay.id),
                             isEditMode: isEditMode
                         )
                         .equatable()
                         .contentShape(Rectangle())
+                        .accessibilityElement(children: .combine)
+                        .accessibilityAddTraits(.isButton)
                         .onTapGesture {
                             if isEditMode {
                                 toggleSelection(for: workDay)
@@ -341,7 +346,7 @@ struct WorkDaysListView: View {
                         }
                         .padding(.horizontal, DS.Spacing.md)
                         .padding(.vertical, DS.Spacing.sm)
-                        .dsGlassSurface(cornerRadius: DS.Radius.medium)
+                        .dsContentSurface(cornerRadius: DS.Radius.medium)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
@@ -615,6 +620,7 @@ struct WorkDaysListView: View {
     /// Exécute la suppression par lot des journées sélectionnées
     private func performBatchDelete() {
         let workDaysToDelete = filteredWorkDays.filter { selectedWorkDays.contains($0.id) }
+        let affectedDates = workDaysToDelete.map(\.date)
 
         for workDay in workDaysToDelete {
             StatsCache.shared.onWorkDayDeleted(workDay)
@@ -623,6 +629,7 @@ struct WorkDaysListView: View {
         
         // Sauvegarde du contexte
         do {
+            _ = try WorkDay.reconcileDailyOvertime(in: modelContext, for: affectedDates)
             try modelContext.save()
             SiriSummaryCacheService().refresh(using: modelContext)
             
@@ -637,6 +644,7 @@ struct WorkDaysListView: View {
             filterWorkDaysAsync()
             
         } catch {
+            modelContext.rollback()
             ErrorManager.shared.handle(error, context: "BatchDeleteWorkDays")
         }
     }
@@ -644,11 +652,13 @@ struct WorkDaysListView: View {
     /// Supprime un WorkDay
     private func deleteWorkDay(_ workDay: WorkDay) {
         let workDayID = workDay.id
+        let affectedDate = workDay.date
         StatsCache.shared.onWorkDayDeleted(workDay)
         modelContext.delete(workDay)
         
         // Sauvegarde du contexte
         do {
+            _ = try WorkDay.reconcileDailyOvertime(in: modelContext, for: [affectedDate])
             try modelContext.save()
             SiriSummaryCacheService().refresh(using: modelContext)
             
@@ -658,6 +668,7 @@ struct WorkDaysListView: View {
             applyCurrentFilters(to: monthWorkDays)
             
         } catch {
+            modelContext.rollback()
             ErrorManager.shared.handle(error, context: "DeleteWorkDay")
         }
     }
@@ -719,6 +730,8 @@ struct WorkDaysListView: View {
 struct CustomSectionHeader: View {
     let date: String
     let isToday: Bool
+    var entryCount: Int = 1
+    var dailyOvertimeSeconds: Int = 0
     var isEditMode: Bool = false
     var isSelected: Bool = false
     var onToggleSelection: (() -> Void)? = nil
@@ -751,12 +764,29 @@ struct CustomSectionHeader: View {
             }
             
             Spacer()
+
+            if entryCount > 1 {
+                Label("workDays.entries.count".localized(entryCount), systemImage: "rectangle.stack.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                let formattedBalance = WorkTimeCalculations.formattedSecondsTruncated(dailyOvertimeSeconds)
+                Label(
+                    dailyOvertimeSeconds > 0 ? "+\(formattedBalance)" : formattedBalance,
+                    systemImage: dailyOvertimeSeconds >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill"
+                )
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(dailyOvertimeSeconds >= 0 ? Color.green : Color.red)
+                .accessibilityLabel("stats.overtimeHours".localized)
+            }
         }
     }
 }
 
 struct WorkDayRow: View, Equatable {
     let workDay: WorkDay
+    var showsOvertime: Bool = true
     var isSelected: Bool = false
     var isEditMode: Bool = false
 
@@ -764,6 +794,7 @@ struct WorkDayRow: View, Equatable {
     static func == (lhs: WorkDayRow, rhs: WorkDayRow) -> Bool {
         lhs.workDay.id == rhs.workDay.id &&
         lhs.workDay.modifiedAt == rhs.workDay.modifiedAt &&
+        lhs.showsOvertime == rhs.showsOvertime &&
         lhs.isSelected == rhs.isSelected &&
         lhs.isEditMode == rhs.isEditMode
     }
@@ -800,7 +831,7 @@ struct WorkDayRow: View, Equatable {
 
                     Spacer()
 
-                    if workDay.type == .work && workDay.overtimeSeconds != 0 {
+                    if showsOvertime && workDay.type == .work && workDay.overtimeSeconds != 0 {
                         Text(workDay.formattedOvertimeHours)
                             .foregroundStyle(workDay.overtimeSeconds > 0 ? Color.green : Color.red)
                             .font(.system(.callout, design: .rounded))

@@ -1,0 +1,5 @@
+"widget.displayName" = "WorkTimer";
+"widget.description" = "Heures de la semaine, heures supplémentaires et solde de congés.";
+"widget.thisWeek" = "Cette semaine";
+"widget.overtime" = "Heures supp";
+"widget.vacationRemaining" = "Congés restants";

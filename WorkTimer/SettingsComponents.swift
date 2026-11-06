@@ -27,6 +27,33 @@ enum ExportFormat: Equatable {
 
 // MARK: - SettingsCard
 
+private struct SettingsGroupedRowsKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var settingsGroupedRows: Bool {
+        get { self[SettingsGroupedRowsKey.self] }
+        set { self[SettingsGroupedRowsKey.self] = newValue }
+    }
+}
+
+struct SettingsGroup<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            content
+        }
+        .dsContentSurface()
+        .environment(\.settingsGroupedRows, true)
+    }
+}
+
 struct SettingsCard<Content: View>: View {
     let title: String
     let icon: String
@@ -34,6 +61,7 @@ struct SettingsCard<Content: View>: View {
     let isExpanded: Bool
     let onToggle: () -> Void
     let content: Content
+    @Environment(\.settingsGroupedRows) private var groupedRows
 
     init(
         title: String, icon: String, color: Color,
@@ -46,30 +74,42 @@ struct SettingsCard<Content: View>: View {
     }
 
     var body: some View {
+        if groupedRows {
+            cardContent
+        } else {
+            cardContent.dsContentSurface()
+        }
+    }
+
+    private var cardContent: some View {
         VStack(spacing: 0) {
             Button(action: { onToggle() }) {
-                HStack {
+                HStack(spacing: DS.Spacing.md) {
                     ZStack {
                         RoundedRectangle(cornerRadius: DS.IconRadius.settings)
-                            .fill(LinearGradient(colors: [color, color.opacity(0.8)],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: DS.IconSize.settings, height: DS.IconSize.settings)
+                            .fill(color)
+                            .frame(width: DS.IconSize.sectionHeader, height: DS.IconSize.sectionHeader)
                         Image(systemName: icon)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: DS.Font.iconSmall, weight: .semibold))
                             .foregroundStyle(.white)
                     }
-                    Text(title).font(.headline)
+                    Text(title)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.secondary)
+                        .font(.caption.weight(.semibold))
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .animation(DS.Animation.cardToggle, value: isExpanded)
                 }
                 .contentShape(Rectangle())
-                .padding()
-                .dsGlassSurface(cornerRadius: DS.Radius.card, interactive: true)
+                .padding(.horizontal, DS.Spacing.lg)
+                .padding(.vertical, DS.Spacing.md)
             }
-            .buttonStyle(.pressable)
+            .buttonStyle(.plain)
+            .accessibilityValue(isExpanded ? "accessibility.expanded".localized : "accessibility.collapsed".localized)
             if isExpanded {
                 content.transition(.asymmetric(
                     insertion: .opacity.combined(with: .move(edge: .top)),
@@ -77,7 +117,6 @@ struct SettingsCard<Content: View>: View {
                 ))
             }
         }
-        .dsGlassSurface(cornerRadius: DS.Radius.large)
     }
 }
 
@@ -86,7 +125,7 @@ struct SettingsCard<Content: View>: View {
 struct StatisticCard: View {
     let title: String; let value: String
     let icon: String; let color: Color
-    let iconBackground: Color; let animate: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
@@ -98,9 +137,9 @@ struct StatisticCard: View {
                     .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
                 Text(title)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.Colors.secondaryText)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(2)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                     .minimumScaleFactor(0.85)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,12 +148,10 @@ struct StatisticCard: View {
                 .font(.system(.title3, design: .rounded))
                 .fontWeight(.bold)
                 .monospacedDigit()
-                .scaleEffect(animate ? 1.0 : 0.8)
-                .opacity(animate ? 1.0 : 0.4)
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }
@@ -152,7 +189,7 @@ struct FeatureButton: View {
             }
             .padding(.vertical, DS.Spacing.sm)
             .padding(.horizontal, DS.Spacing.md)
-            .dsGlassSurface(cornerRadius: DS.Radius.medium, interactive: true)
+            .dsContentSurface(cornerRadius: DS.Radius.medium)
         }
         .buttonStyle(.pressable)
     }
@@ -203,19 +240,24 @@ struct ConfettiView: View {
                         )
                 }
             }
+            .onAppear {
+                guard !reduceMotion else { return }
+                generateConfetti(in: geometry.size.width)
+                animate = true
+            }
         }
         .drawingGroup()
-        .onAppear {
-            guard !reduceMotion else { return }
-            generateConfetti()
-            animate = true
-        }
     }
 
-    private func generateConfetti() {
+    private func generateConfetti(in availableWidth: CGFloat) {
         let colors: [Color] = [.red, .blue, .green, .yellow, .purple, .orange, .pink, .mint]
+        // Les fenêtres iPhone peuvent maintenant être redimensionnées. Les
+        // particules couvrent donc toute la largeur disponible, au lieu d'une
+        // zone fixe optimisée seulement pour les iPhone historiques.
+        let horizontalInset: CGFloat = 12
+        let upperBound = max(horizontalInset, availableWidth - horizontalInset)
         confetti = (0..<60).map { _ in
-            let startX = CGFloat.random(in: 50...350)
+            let startX = CGFloat.random(in: horizontalInset...upperBound)
             return ConfettiPiece(
                 color: colors.randomElement()!,
                 startX: startX,

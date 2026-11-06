@@ -206,7 +206,7 @@ struct ErrorToast: View {
         HStack(spacing: 12) {
             Image(systemName: error.icon)
                 .font(.title3)
-                .foregroundColor(error.color)
+                .foregroundStyle(error.color)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(error.errorDescription ?? "Erreur")
@@ -216,7 +216,7 @@ struct ErrorToast: View {
                 if let suggestion = error.recoverySuggestion {
                     Text(suggestion)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             
@@ -224,7 +224,7 @@ struct ErrorToast: View {
             
             Button(action: onDismiss) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding()

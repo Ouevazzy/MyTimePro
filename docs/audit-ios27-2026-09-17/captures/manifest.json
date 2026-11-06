@@ -1,0 +1,53 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "06F4225E-211B-4003-A3C5-FD19ED5780A3",
+        "deviceName" : "iPhone 18 Pro",
+        "exportedFileName" : "9625E3BC-9B0E-49CE-8A55-6352C3D1FA20.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Settings_0_8FB2CCD6-B7B2-49D1-ADAB-B7388F4D013E.png",
+        "timestamp" : 1789736126.021
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "06F4225E-211B-4003-A3C5-FD19ED5780A3",
+        "deviceName" : "iPhone 18 Pro",
+        "exportedFileName" : "8EEC7F6F-6662-4BA8-AAB0-AA6196A93527.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Stats_0_284744AE-729B-48FD-9C4E-85B0CB969E58.png",
+        "timestamp" : 1789736121.694
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "06F4225E-211B-4003-A3C5-FD19ED5780A3",
+        "deviceName" : "iPhone 18 Pro",
+        "exportedFileName" : "CBB0CF68-0BD0-4864-9E0C-36A1E066B85F.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Calendar_0_E8CA37D4-F0E1-4BC7-B9AB-8246B6003667.png",
+        "timestamp" : 1789736117.41
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "06F4225E-211B-4003-A3C5-FD19ED5780A3",
+        "deviceName" : "iPhone 18 Pro",
+        "exportedFileName" : "FD1E6E0A-F3A7-4F35-B1A8-2B4EDE651DC8.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "WorkDays_0_5F93BECA-66DF-49DE-BAAB-D6E308281CED.png",
+        "timestamp" : 1789736112.793
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "06F4225E-211B-4003-A3C5-FD19ED5780A3",
+        "deviceName" : "iPhone 18 Pro",
+        "exportedFileName" : "F0FF74DC-E7D4-4DE6-A315-1CD36156CB92.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Home_0_A812A54D-7E27-4BBB-9E60-603776C58985.png",
+        "timestamp" : 1789736108.438
+      }
+    ],
+    "testIdentifier" : "WorkTimerUITests/testTakeScreenshots()",
+    "testIdentifierURL" : "test://com.apple.xcode/WorkTimer/WorkTimerUITests/WorkTimerUITests/testTakeScreenshots"
+  }
+]

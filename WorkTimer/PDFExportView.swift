@@ -13,45 +13,60 @@ struct PDFExportView: View {
     // Environnement et état
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \WorkDay.date) private var workDays: [WorkDay]
-    
+    // ✅ Plus de @Query global : la base complète n'est chargée qu'au moment
+    // de la génération (le @Query observait tous les WorkDay et ré-évaluait
+    // la vue à chaque frappe dans le champ entreprise).
+
     @State private var isGenerating = false
-    @State private var generatedPDFData: Data?
-    @State private var showingShareSheet = false
+    @State private var generatedDocumentData: Data?
     @State private var shareURL: URL?
     @State private var errorMessage: String?
     @State private var showingErrorAlert = false
     @State private var includeCharts = true
     @State private var useDecimalHoursForExport: Bool = UserSettings.shared.useDecimalHours
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case company
+    }
     
     // Date actuelle basée sur la sélection
     private var currentDate: Date {
         let components = DateComponents(year: selectedYear, month: selectedMonth, day: 1)
         return Calendar.current.date(from: components) ?? Date()
     }
+
+    private var exportConfigurationSignature: String {
+        [
+            type.id,
+            format == .pdf ? 0 : 1,
+            selectedYear,
+            selectedMonth,
+            includeCharts ? 1 : 0,
+            useDecimalHoursForExport ? 1 : 0,
+            userCompany.hashValue
+        ]
+        .map(String.init)
+        .joined(separator: ":")
+    }
     
-    // WorkDays filtrés pour la période sélectionnée
-    private var filteredWorkDays: [WorkDay] {
+    // ✅ Bornes de la période sélectionnée (le fetch se fait dans ExportDataActor,
+    // hors du main thread).
+    private func periodRange() -> (start: Date, end: Date)? {
         let calendar = Calendar.current
-        
+
         if type == .monthly {
             guard let startOfMonth = calendar.date(from: DateComponents(year: selectedYear, month: selectedMonth)),
                   let startOfNextMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) else {
-                return []
+                return nil
             }
-            
-            return workDays.filter {
-                $0.date >= startOfMonth && $0.date < startOfNextMonth
-            }
+            return (startOfMonth, startOfNextMonth)
         } else { // Annual
             guard let startOfYear = calendar.date(from: DateComponents(year: selectedYear)),
                   let startOfNextYear = calendar.date(byAdding: .year, value: 1, to: startOfYear) else {
-                return []
+                return nil
             }
-            
-            return workDays.filter {
-                $0.date >= startOfYear && $0.date < startOfNextYear
-            }
+            return (startOfYear, startOfNextYear)
         }
     }
     
@@ -61,38 +76,38 @@ struct PDFExportView: View {
                 // Options section
                 Form {
                     // Format et période
-                    Section(header: Text("OPTIONS")) {
+                    Section(header: Text("export.section.options".localized)) {
                         // Choix du format des heures pour l'export
-                        Picker("Format des heures", selection: $useDecimalHoursForExport) {
-                            Text("Standard (8h30)").tag(false)
-                            Text("Décimal (8.50 h)").tag(true)
+                        Picker("export.hourFormat.label".localized, selection: $useDecimalHoursForExport) {
+                            Text("export.hourFormat.standard".localized).tag(false)
+                            Text("export.hourFormat.decimal".localized).tag(true)
                         }
                         
                         if format == .pdf {
-                            Toggle("Inclure les graphiques", isOn: $includeCharts)
+                            Toggle("export.includeCharts".localized, isOn: $includeCharts)
                                 .disabled(type == .monthly)
                         }
                     }
                     
                     // Période
-                    Section(header: Text("PÉRIODE")) {
+                    Section(header: Text("export.section.period".localized)) {
                         if type == .annual {
-                            Picker("Année", selection: $selectedYear) {
-                                ForEach((Calendar.current.component(.year, from: Date())-5)...(Calendar.current.component(.year, from: Date())), id: \.self) { year in
+                            Picker("export.year.label".localized, selection: $selectedYear) {
+                                ForEach(availableYears, id: \.self) { year in
                                     Text(String(year)).tag(year)
                                 }
                             }
                             .pickerStyle(.wheel)
                         } else {
                             // Year picker
-                            Picker("Année", selection: $selectedYear) {
-                                ForEach((Calendar.current.component(.year, from: Date())-5)...(Calendar.current.component(.year, from: Date())), id: \.self) { year in
+                            Picker("export.year.label".localized, selection: $selectedYear) {
+                                ForEach(availableYears, id: \.self) { year in
                                     Text(String(year)).tag(year)
                                 }
                             }
                             
                             // Month picker
-                            Picker("Mois", selection: $selectedMonth) {
+                            Picker("export.month.label".localized, selection: $selectedMonth) {
                                 ForEach(1...12, id: \.self) { month in
                                     Text(monthName(month)).tag(month)
                                 }
@@ -101,13 +116,19 @@ struct PDFExportView: View {
                     }
                     
                     // Entreprise
-                    Section(header: Text("INFORMATIONS")) {
-                        TextField("Nom de l'entreprise", text: $userCompany)
+                    Section(header: Text("export.section.info".localized)) {
+                        TextField("export.company.placeholder".localized, text: $userCompany)
+                            .focused($focusedField, equals: .company)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                focusedField = nil
+                            }
                     }
                     
                     // Génération
                     Section {
                         Button(action: {
+                            focusedField = nil
                             Haptic.impact(.medium)
                             generateDocument()
                         }) {
@@ -117,23 +138,23 @@ struct PDFExportView: View {
                                     ProgressView()
                                         .tint(.white)
                                 } else {
-                                    Image(systemName: generatedPDFData == nil ? "doc.badge.plus" : "arrow.clockwise")
+                                    Image(systemName: generatedDocumentData == nil ? "doc.badge.plus" : "arrow.clockwise")
                                         .font(.system(size: 16, weight: .semibold))
                                 }
-                                Text(generatedPDFData == nil ? "Générer le document" : "Regénérer")
+                                Text(generatedDocumentData == nil ? "export.generate.button".localized : "export.regenerate.button".localized)
                                     .fontWeight(.semibold)
                                 Spacer()
                             }
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.vertical, 14)
                             .background(
                                 LinearGradient(
                                     colors: isGenerating ? [.gray, .gray.opacity(0.8)] : [.green, .green.opacity(0.8)],
                                     startPoint: .leading,
                                     endPoint: .trailing
-                                )
+                                ),
+                                in: RoundedRectangle(cornerRadius: DS.Radius.medium)
                             )
-                            .cornerRadius(12)
                         }
                         .disabled(isGenerating)
                         .listRowInsets(EdgeInsets())
@@ -141,9 +162,10 @@ struct PDFExportView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                .scrollDismissesKeyboard(.interactively)
                 
                 // Aperçu du PDF
-                if let pdfData = generatedPDFData, format == .pdf {
+                if let pdfData = generatedDocumentData, format == .pdf {
                     Divider()
                     
                     PDFKitView(data: pdfData)
@@ -152,7 +174,7 @@ struct PDFExportView: View {
                 }
                 
                 // Message si format CSV
-                if format == .csv && generatedPDFData != nil {
+                if format == .csv && generatedDocumentData != nil {
                     Divider()
                     
                     VStack(spacing: 24) {
@@ -180,166 +202,127 @@ struct PDFExportView: View {
                         }
 
                         VStack(spacing: 8) {
-                        Text("Fichier CSV généré")
+                        Text("export.csv.generated.title".localized)
                                 .font(.title2)
                                 .fontWeight(.bold)
 
-                        Text("Utilisez le bouton Partager pour enregistrer ou envoyer le fichier")
+                        Text("export.csv.generated.help".localized)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                                 .padding(.horizontal, 40)
                         }
                         
-                        Button(action: {
-                            Haptic.impact(.medium)
-                            prepareShare()
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "square.and.arrow.up")
-                                Text("Partager")
-                            }
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 32)
-                            .padding(.vertical, 14)
-                            .background(
-                                LinearGradient(
-                                    colors: [.green, .mint],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                        if let shareURL {
+                            ShareLink(item: shareURL) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "square.and.arrow.up")
+                                    Text("export.share.button".localized)
+                                }
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 14)
+                                .background(
+                                    LinearGradient(
+                                        colors: [.green, .mint],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    ),
+                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium)
                                 )
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: .green.opacity(0.15), radius: 4, x: 0, y: 2)
+                                .shadow(color: .green.opacity(0.15), radius: 4, x: 0, y: 2)
+                            }
+                            .buttonStyle(.pressable)
                         }
-                        .buttonStyle(.pressable)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle(type == .monthly ? "Export Mensuel" : "Export Annuel")
+            .navigationTitle(type == .monthly ? "export.monthly.title".localized : "export.annual.title".localized)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") {
+                    Button("action.cancel".localized) {
+                        focusedField = nil
                         dismiss()
                     }
                 }
                 
-                if generatedPDFData != nil {
+                if let shareURL {
                     ToolbarItem(placement: .primaryAction) {
-                        Button(action: {
-                            prepareShare()
-                        }) {
-                            Label("Partager", systemImage: "square.and.arrow.up")
+                        ShareLink(item: shareURL) {
+                            Label("export.share.button".localized, systemImage: "square.and.arrow.up")
                         }
                     }
                 }
-            }
-            .sheet(isPresented: $showingShareSheet) {
-                if let url = shareURL {
-                    ShareSheet(items: [url])
-                } else if let data = generatedPDFData {
-                    ShareSheet(items: [data])
-                } else {
-                    Text("Aucun document à partager")
+
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("action.done".localized) {
+                        focusedField = nil
+                    }
                 }
             }
             .onDisappear {
-                generatedPDFData = nil
+                resetGeneratedDocument()
             }
-            .alert("Erreur", isPresented: $showingErrorAlert) {
+            .onChange(of: exportConfigurationSignature) { _, _ in
+                resetGeneratedDocument()
+            }
+            .alert("error.title".localized, isPresented: $showingErrorAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text(errorMessage ?? "Une erreur est survenue")
+                Text(errorMessage ?? "error.generic".localized)
             }
         }
+    }
+
+    private var availableYears: [Int] {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        return Array((currentYear - 5)...currentYear)
     }
     
     // Générer document (PDF ou CSV)
+    // ✅ Fetch + rendu délégués à ExportDataActor (arrière-plan) : l'UI ne gèle
+    // plus pendant la génération d'un rapport annuel avec graphiques.
     private func generateDocument() {
         isGenerating = true
-        
-        // Configurer le thème PDF
-        var theme = PDFService.PDFTheme()
-        theme.companyName = userCompany
-        theme.includeSummaryCharts = includeCharts
-        theme.useDecimalHours = useDecimalHoursForExport
-        
+
+        let exporter = ExportDataActor(modelContainer: modelContext.container)
+        let exportDate = currentDate
+        let isAnnual = type == .annual
+        let company = userCompany
+        let charts = includeCharts
+        let decimalHours = useDecimalHoursForExport
+
         Task {
             // Générer PDF
             if format == .pdf {
-                // Passer tous les workDays pour permettre le calcul correct du report des vacances
-                // PDFService fait son propre filtrage par année/mois pour les entrées du rapport
-                if let data = PDFService.shared.generateReport(
-                    for: currentDate,
-                    workDays: workDays,
-                    annual: type == .annual,
-                    theme: theme
+                if let data = await exporter.generatePDFReport(
+                    for: exportDate,
+                    annual: isAnnual,
+                    companyName: company,
+                    includeCharts: charts,
+                    useDecimalHours: decimalHours
                 ) {
-                    await MainActor.run {
-                        self.generatedPDFData = data
-                        self.isGenerating = false
-                    }
+                    finishGeneratedDocument(data)
                 } else {
-                    await showError("Impossible de générer le PDF")
+                    await showError("export.error.pdf".localized)
                 }
             } else {
                 // Générer CSV
-                if let csvData = generateCSV() {
-                    await MainActor.run {
-                        self.generatedPDFData = csvData
-                        self.isGenerating = false
-                    }
+                if let range = periodRange(),
+                   let csvData = await exporter.generateCSVExport(
+                    start: range.start,
+                    end: range.end,
+                    useDecimalHours: decimalHours
+                   ) {
+                    finishGeneratedDocument(csvData)
                 } else {
-                    await showError("Impossible de générer le CSV")
+                    await showError("export.error.csv".localized)
                 }
             }
         }
-    }
-    
-    // Générer données CSV
-    private func generateCSV() -> Data? {
-        var csvString = "Date,Type,Début,Fin,Pause,Heures Totales,Heures Supp.,Bonus,Note\n"
-        
-        // Trier les workdays par date
-        let sortedWorkDays = filteredWorkDays.sorted { $0.date < $1.date }
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .none
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateStyle = .none
-        timeFormatter.timeStyle = .short
-        
-        for workDay in sortedWorkDays {
-            let date = dateFormatter.string(from: workDay.date)
-            let type = workDay.type.localizedName
-            
-            let startTime = workDay.startTime != nil ? timeFormatter.string(from: workDay.startTime!) : ""
-            let endTime = workDay.endTime != nil ? timeFormatter.string(from: workDay.endTime!) : ""
-            
-            let breakDuration = WorkTimeCalculations.formattedTimeInterval(workDay.breakDuration)
-            
-            // Utiliser le format choisi pour l'export
-            let totalHours: String
-            let overtimeHours: String
-            if useDecimalHoursForExport {
-                totalHours = String(format: "%.2f", workDay.totalHours)
-                overtimeHours = String(format: "%.2f", Double(workDay.overtimeSeconds) / 3600.0)
-            } else {
-                totalHours = WorkTimeCalculations.formattedTimeInterval(workDay.totalHours * 3600)
-                overtimeHours = WorkTimeCalculations.formattedTimeInterval(Double(workDay.overtimeSeconds))
-            }
-            
-            let bonus = String(format: "%.2f", workDay.bonusAmount)
-            let note = workDay.note?.replacingOccurrences(of: ",", with: ";") ?? ""
-            
-            csvString.append("\(date),\(type),\(startTime),\(endTime),\(breakDuration),\(totalHours),\(overtimeHours),\(bonus),\(note)\n")
-        }
-        
-        return csvString.data(using: .utf8)
     }
     
     // Afficher message d'erreur
@@ -354,39 +337,57 @@ struct PDFExportView: View {
     // Obtenir le nom du mois à partir du numéro
     private func monthName(_ month: Int) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "fr_FR")
+        dateFormatter.locale = .autoupdatingCurrent
         return dateFormatter.monthSymbols[month - 1].capitalized
     }
     
     private func exportFileName() -> String {
         let year = selectedYear
+        let fileExtension = format == .csv ? "csv" : "pdf"
         if type == .monthly {
             let m = String(format: "%02d", selectedMonth)
-            return "WorkTimer-\(year)-\(m).pdf"
+            return "WorkTimer-\(year)-\(m).\(fileExtension)"
         } else {
-            return "WorkTimer-\(year).pdf"
+            return "WorkTimer-\(year).\(fileExtension)"
         }
     }
 
-    private func prepareShare() {
-        guard let data = generatedPDFData else { return }
+    private func finishGeneratedDocument(_ data: Data) {
+        generatedDocumentData = data
+        shareURL = writeGeneratedDocument(data)
+        isGenerating = false
+    }
+
+    private func resetGeneratedDocument() {
+        generatedDocumentData = nil
+        shareURL = nil
+    }
+
+    private func writeGeneratedDocument(_ data: Data) -> URL? {
         let fileName = exportFileName()
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         do {
             try data.write(to: tempURL)
-            self.shareURL = tempURL
+            return tempURL
         } catch {
             AppLogger.error("Failed to write PDF to temp file", category: AppLogger.general, error: error)
             ErrorManager.shared.handleExportError(error.localizedDescription)
-            self.shareURL = nil
+            return nil
         }
-        self.showingShareSheet = true
     }
 }
 
 // Vue pour afficher le PDF
 struct PDFKitView: UIViewRepresentable {
     let data: Data
+
+    final class Coordinator {
+        var loadedData: Data?
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
     
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()
@@ -396,14 +397,72 @@ struct PDFKitView: UIViewRepresentable {
         
         if let document = PDFDocument(data: data) {
             pdfView.document = document
+            context.coordinator.loadedData = data
         }
         
         return pdfView
     }
     
     func updateUIView(_ uiView: PDFView, context: Context) {
+        guard context.coordinator.loadedData != data else { return }
+
         if let document = PDFDocument(data: data) {
             uiView.document = document
+            context.coordinator.loadedData = data
         }
+    }
+}
+
+// MARK: - Acteur d'export en arrière-plan
+
+/// ✅ Fetch et rendu PDF/CSV hors du MainActor.
+/// @ModelActor fournit un ModelContext dédié sur un executor d'arrière-plan :
+/// les WorkDay ne traversent jamais de frontière d'acteur (fetch et rendu
+/// dans le même contexte), et UIGraphicsPDFRenderer est utilisable hors main.
+@ModelActor
+actor ExportDataActor {
+
+    func generatePDFReport(
+        for date: Date,
+        annual: Bool,
+        companyName: String,
+        includeCharts: Bool,
+        useDecimalHours: Bool
+    ) -> Data? {
+        // Base complète (hors supprimés) : nécessaire au calcul multi-année
+        // du report des vacances. PDFService filtre ensuite par période.
+        let descriptor = FetchDescriptor<WorkDay>(
+            predicate: #Predicate<WorkDay> { !$0.isDeleted },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        guard let workDays = try? modelContext.fetch(descriptor) else { return nil }
+
+        var theme = PDFService.PDFTheme()
+        theme.companyName = companyName
+        theme.includeSummaryCharts = includeCharts
+        theme.useDecimalHours = useDecimalHours
+
+        return PDFService.shared.generateReport(
+            for: date,
+            workDays: workDays,
+            annual: annual,
+            theme: theme
+        )
+    }
+
+    func generateCSVExport(start: Date, end: Date, useDecimalHours: Bool) -> Data? {
+        let descriptor = FetchDescriptor<WorkDay>(
+            predicate: #Predicate<WorkDay> {
+                $0.date >= start && $0.date < end && !$0.isDeleted
+            },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        guard let workDays = try? modelContext.fetch(descriptor) else { return nil }
+
+        let csvString = CSVService.shared.generateDetailedExport(
+            workDays: workDays,
+            useDecimalHours: useDecimalHours
+        )
+        return CSVService.shared.csvData(content: csvString)
     }
 }

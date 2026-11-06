@@ -13,7 +13,7 @@ struct HomeTabView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// Taille du chiffre héro : part de 40pt mais suit Dynamic Type (plafonné).
+    /// Le solde suit la taille de texte choisie par l'utilisateur.
     @ScaledMetric(relativeTo: .largeTitle) private var heroFontSize: CGFloat = DS.Font.statDisplay
 
     // MARK: - State Properties
@@ -45,32 +45,28 @@ struct HomeTabView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: DS.Spacing.lg) {
+                if settings.showLiveTimer {
+                    LiveTimerCard()
+                        .cardAppear(index: 0, animate: animateCards, reduceMotion: reduceMotion)
+                }
+
                 heroCard
-                    .cardAppear(index: 0, animate: animateCards, reduceMotion: reduceMotion)
+                    .cardAppear(index: 1, animate: animateCards, reduceMotion: reduceMotion)
 
                 statsCard(
-                    title: "stats.year".localized(selectedYear),
-                    icon: "calendar",
+                    title: "stats.currentWeek".localized,
+                    icon: "briefcase",
                     color: .blue,
-                    stats: yearlyStats,
-                    showMissing: false
-                )
-                .cardAppear(index: 1, animate: animateCards, reduceMotion: reduceMotion)
-
-                statsCard(
-                    title: "stats.currentMonth".localized,
-                    icon: "calendar.badge.clock",
-                    color: .orange,
-                    stats: monthlyStats,
+                    stats: weeklyStats,
                     showMissing: true
                 )
                 .cardAppear(index: 2, animate: animateCards, reduceMotion: reduceMotion)
 
                 statsCard(
-                    title: "stats.currentWeek".localized,
-                    icon: "briefcase.fill",
-                    color: .green,
-                    stats: weeklyStats,
+                    title: "stats.currentMonth".localized,
+                    icon: "calendar.badge.clock",
+                    color: .blue,
+                    stats: monthlyStats,
                     showMissing: true
                 )
                 .cardAppear(index: 3, animate: animateCards, reduceMotion: reduceMotion)
@@ -80,14 +76,23 @@ struct HomeTabView: View {
                     isStartYear: isCurrentYearStartYear
                 )
                 .cardAppear(index: 4, animate: animateCards, reduceMotion: reduceMotion)
+
+                statsCard(
+                    title: "stats.year".localized(selectedYear),
+                    icon: "calendar",
+                    color: .blue,
+                    stats: yearlyStats,
+                    showMissing: false
+                )
+                .cardAppear(index: 5, animate: animateCards, reduceMotion: reduceMotion)
             }
             .padding(.horizontal)
             .padding(.top, DS.Spacing.sm)
             .padding(.bottom, DS.Spacing.xl)
-            .dsGlassEffectGroup()
         }
+        .accessibilityIdentifier("home.content")
         .dsScreenBackground(.blue)
-        .quickAddOverlay()
+        .quickAddToolbar()
         .navigationTitle("navigation.home".localized)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
@@ -117,31 +122,39 @@ struct HomeTabView: View {
     /// la plus consultée, en très grand.
     private var heroCard: some View {
         let isPositive = yearlyStats.overtimeSeconds >= 0
-        let balanceColor = isPositive ? DS.Colors.positive : DS.Colors.negative
+        let balanceColor = DS.Colors.balance(Double(yearlyStats.overtimeSeconds))
 
         return VStack(spacing: DS.Spacing.xs) {
             Text(isPositive
                  ? "stats.overtimeHours".localized
                  : "stats.missingHours".localized)
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
 
-            Text(WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds))
-                .font(.system(size: heroFontSize, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .foregroundStyle(balanceColor)
-                .contentTransition(.numericText(countsDown: !isPositive))
+            HStack(spacing: DS.Spacing.sm) {
+                Image(systemName: yearlyStats.overtimeSeconds == 0
+                      ? "equal.circle"
+                      : isPositive ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(balanceColor)
+                    .accessibilityHidden(true)
+                Text(WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds))
+                    .font(.system(size: heroFontSize, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .foregroundStyle(balanceColor)
+                    .contentTransition(.numericText(countsDown: !isPositive))
+            }
 
             Text("stats.year".localized(selectedYear))
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DS.Colors.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, DS.Spacing.xl)
         .padding(.horizontal)
-        .dsGlassSurface(cornerRadius: DS.Radius.large, tint: balanceColor)
+        .dsContentSurface(cornerRadius: DS.Radius.large)
         .accessibilityElement(children: .combine)
     }
 
@@ -158,7 +171,7 @@ struct HomeTabView: View {
                 .equatable()
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     // MARK: - Stats Loading
@@ -180,7 +193,7 @@ struct HomeTabView: View {
         let newMonthlyStats = WorkTimeCalculations.activePeriodStats(from: days, startDate: startOfMonth, endDate: endOfMonth)
         let newWeeklyStats = WorkTimeCalculations.activePeriodStats(from: days, startDate: startOfWeek, endDate: endOfWeek)
 
-        withAnimation(DS.Animation.navigation) {
+        withAnimation(reduceMotion ? nil : DS.Animation.navigation) {
             yearlyStats = newYearlyStats
             monthlyStats = newMonthlyStats
             weeklyStats = newWeeklyStats
@@ -235,15 +248,15 @@ private struct SectionHeader: View {
     var body: some View {
         HStack(spacing: DS.Spacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: DS.IconSize.sectionHeader, height: DS.IconSize.sectionHeader)
-                .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.sectionHeader))
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(color)
+                .frame(width: DS.Spacing.xl)
+                .accessibilityHidden(true)
 
             Text(title)
-                .font(.callout)
+                .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
                 .textCase(nil)
         }
         .padding(.bottom, DS.Spacing.xs)
@@ -257,6 +270,7 @@ private struct SectionHeader: View {
 private struct StatsRow: View, Equatable {
     let stats: (totalHours: Double, overtimeSeconds: Int)
     let showMissing: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     static func == (lhs: StatsRow, rhs: StatsRow) -> Bool {
         lhs.stats.totalHours == rhs.stats.totalHours &&
@@ -265,32 +279,46 @@ private struct StatsRow: View, Equatable {
     }
 
     var body: some View {
-        HStack {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DS.Spacing.md))
+            : AnyLayout(HStackLayout())
+
+        layout {
             VStack(alignment: .leading, spacing: 3) {
                 Text("stats.workedHours".localized)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.Colors.secondaryText)
                 Text(WorkTimeCalculations.formattedHoursRounded(stats.totalHours))
-                    .font(.system(.title3, design: .rounded))
+                    .font(.system(.title2, design: .rounded))
                     .fontWeight(.semibold)
                     .monospacedDigit()
                     .contentTransition(.numericText())
             }
 
-            Spacer()
+            if !dynamicTypeSize.isAccessibilitySize {
+                Spacer()
+            }
 
-            VStack(alignment: .trailing, spacing: 3) {
+            VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: 3) {
                 Text(stats.overtimeSeconds >= 0
                      ? "stats.overtimeHours".localized
                      : "stats.missingHours".localized)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(WorkTimeCalculations.formattedSecondsRounded(stats.overtimeSeconds))
-                    .font(.system(.title3, design: .rounded))
-                    .fontWeight(.semibold)
-                    .monospacedDigit()
-                    .foregroundStyle(stats.overtimeSeconds >= 0 ? Color.green : Color.red)
-                    .contentTransition(.numericText(countsDown: stats.overtimeSeconds < 0))
+                    .foregroundStyle(DS.Colors.secondaryText)
+                HStack(spacing: 4) {
+                    if stats.overtimeSeconds != 0 {
+                        Image(systemName: stats.overtimeSeconds > 0 ? "arrow.up" : "arrow.down")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(DS.Colors.balance(Double(stats.overtimeSeconds)))
+                            .accessibilityHidden(true)
+                    }
+                    Text(WorkTimeCalculations.formattedSecondsRounded(stats.overtimeSeconds))
+                        .font(.system(.title2, design: .rounded))
+                        .fontWeight(.semibold)
+                        .monospacedDigit()
+                        .foregroundStyle(DS.Colors.balance(Double(stats.overtimeSeconds)))
+                        .contentTransition(.numericText(countsDown: stats.overtimeSeconds < 0))
+                }
             }
         }
         .padding(.vertical, DS.Spacing.xs)
@@ -328,11 +356,11 @@ private struct VacationSection: View {
                 HStack {
                     Text(String(format: "vacation.daysUsed".localized, stats.used))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DS.Colors.secondaryText)
                     Spacer()
                     Text(String(format: "vacation.daysOfTotal".localized, stats.used, stats.annual + stats.carryIn))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DS.Colors.secondaryText)
                 }
             }
 
@@ -346,7 +374,7 @@ private struct VacationSection: View {
                 Text(formatDaysAsHours(stats.remaining))
                     .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.semibold)
-                    .foregroundStyle(stats.remaining > 0 ? .green : .red)
+                    .foregroundStyle(DS.Colors.balance(stats.remaining))
             }
 
             // Stats détaillées
@@ -359,7 +387,7 @@ private struct VacationSection: View {
             statRow("vacation.used".localized, value: stats.used, color: .orange)
             statRow("vacation.remaining".localized,
                     value: stats.remaining,
-                    color: stats.remaining > 0 ? .green : .red,
+                    color: DS.Colors.balance(stats.remaining),
                     bold: true)
 
             Divider()
@@ -380,7 +408,7 @@ private struct VacationSection: View {
             .buttonStyle(.plain)
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card, tint: .orange)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
         .sheet(isPresented: $showVacationsView) {
             VacationsView()
         }
@@ -429,7 +457,7 @@ struct CardView<Content: View>: View {
     var body: some View {
         content
             .padding()
-            .dsGlassSurface(cornerRadius: DS.Radius.card)
+            .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 }
 
@@ -444,7 +472,7 @@ struct StatsComponent: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.Colors.secondaryText)
             Text(value)
                 .font(.system(.title3, design: .rounded))
                 .foregroundStyle(valueColor)
@@ -464,7 +492,7 @@ struct VacationStatsComponent: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DS.Colors.secondaryText)
             Text(String(format: "%.1f %@", value, "time.days.short".localized))
                 .font(.system(.title3, design: .rounded))
                 .foregroundStyle(valueColor)
@@ -482,3 +510,27 @@ struct VacationStatsComponent: View {
             .modelContainer(for: WorkDay.self, inMemory: true)
     }
 }
+
+#if DEBUG
+#Preview("Données d'exemple") {
+    NavigationStack {
+        HomeTabView()
+            .modelContainer(try! DisplayPreviewData.makeContainer())
+    }
+    .transaction { transaction in
+        transaction.animation = nil
+        transaction.disablesAnimations = true
+    }
+}
+
+#Preview("Solde négatif") {
+    NavigationStack {
+        HomeTabView()
+            .modelContainer(try! DisplayPreviewData.makeContainer(negativeBalance: true))
+    }
+    .transaction { transaction in
+        transaction.animation = nil
+        transaction.disablesAnimations = true
+    }
+}
+#endif

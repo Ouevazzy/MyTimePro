@@ -14,7 +14,7 @@ final class WorkTimerUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments = ["UI_TESTING"]
+        app.launchArguments = ["UI_TESTING", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
         app.launch()
     }
     
@@ -29,17 +29,17 @@ final class WorkTimerUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Accueil"].exists)
         XCTAssertTrue(app.tabBars.buttons["Journées"].exists)
         XCTAssertTrue(app.tabBars.buttons["Calendrier"].exists)
-        XCTAssertTrue(app.tabBars.buttons["Stats"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Statistiques"].exists)
         XCTAssertTrue(app.tabBars.buttons["Réglages"].exists)
         
         // Naviguer vers chaque onglet
         app.tabBars.buttons["Journées"].tap()
-        XCTAssertTrue(app.navigationBars["Journées"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["workdays.content"].waitForExistence(timeout: 3))
         
         app.tabBars.buttons["Calendrier"].tap()
-        XCTAssertTrue(app.navigationBars["Calendrier"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["calendar.add"].waitForExistence(timeout: 3))
         
-        app.tabBars.buttons["Stats"].tap()
+        app.tabBars.buttons["Statistiques"].tap()
         XCTAssertTrue(app.navigationBars["Statistiques"].waitForExistence(timeout: 3))
         
         app.tabBars.buttons["Réglages"].tap()
@@ -56,9 +56,7 @@ final class WorkTimerUITests: XCTestCase {
         let homeNav = app.navigationBars.firstMatch
         XCTAssertTrue(homeNav.waitForExistence(timeout: 5))
         
-        // Vérifier la présence des sections
-        XCTAssertTrue(app.staticTexts["Cette année"].waitForExistence(timeout: 3) ||
-                     app.staticTexts["Annuel"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["home.content"].waitForExistence(timeout: 3))
     }
     
     // MARK: - Work Days List Tests
@@ -67,8 +65,7 @@ final class WorkTimerUITests: XCTestCase {
         app.tabBars.buttons["Journées"].tap()
         
         // Attendre le chargement
-        let navBar = app.navigationBars["Journées"]
-        XCTAssertTrue(navBar.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["workdays.content"].waitForExistence(timeout: 5))
         
         // Vérifier le bouton d'ajout
         let addButton = app.navigationBars.buttons["plus"]
@@ -104,27 +101,146 @@ final class WorkTimerUITests: XCTestCase {
     func testCalendarNavigation() throws {
         app.tabBars.buttons["Calendrier"].tap()
         
-        let navBar = app.navigationBars["Calendrier"]
-        XCTAssertTrue(navBar.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["calendar.add"].waitForExistence(timeout: 5))
         
-        // Vérifier la navigation entre les mois
-        let nextButton = app.buttons["chevron.right"]
-        let prevButton = app.buttons["chevron.left"]
-        
-        if nextButton.waitForExistence(timeout: 3) {
-            nextButton.tap()
-            sleep(1)
-            
-            if prevButton.exists {
-                prevButton.tap()
-            }
+        XCTAssertTrue(app.buttons["calendar.today"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["calendar.add"].exists)
+
+        let monthAttachment = XCTAttachment(screenshot: app.screenshot())
+        monthAttachment.name = "CalendarMonth"
+        monthAttachment.lifetime = .keepAlways
+        add(monthAttachment)
+
+        let yearButton = app.buttons["calendar.year-overview"]
+        XCTAssertTrue(yearButton.waitForExistence(timeout: 3))
+        yearButton.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["calendar.year-view"].waitForExistence(timeout: 3))
+
+        let yearAttachment = XCTAttachment(screenshot: app.screenshot())
+        yearAttachment.name = "CalendarYear"
+        yearAttachment.lifetime = .keepAlways
+        add(yearAttachment)
+
+        let components = Calendar.current.dateComponents([.year, .month], from: Date())
+        let currentMonth = String(
+            format: "calendar-month-%04d-%02d",
+            components.year ?? 0,
+            components.month ?? 0
+        )
+        XCTAssertTrue(app.buttons[currentMonth].waitForExistence(timeout: 3))
+        app.buttons[currentMonth].tap()
+
+        XCTAssertTrue(app.buttons["calendar.year-overview"].waitForExistence(timeout: 3))
+    }
+
+    func testCalendarDateSelectionStaysInMonth() throws {
+        app.tabBars.buttons["Calendrier"].tap()
+        XCTAssertTrue(app.buttons["calendar.add"].waitForExistence(timeout: 5))
+
+        let today = Date()
+        let dayOffset = Calendar.current.component(.day, from: today) == 1 ? 1 : -1
+        let date = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: dayOffset, to: today))
+        let dateCell = app.buttons[calendarDayIdentifier(for: date)]
+        XCTAssertTrue(dateCell.waitForExistence(timeout: 3))
+        dateCell.tap()
+
+        let selectedCell = app.buttons
+            .containing(.button, identifier: calendarDayIdentifier(for: date))
+            .matching(NSPredicate(format: "isSelected == true"))
+            .firstMatch
+        XCTAssertTrue(selectedCell.waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["calendar.day-view"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["calendar.timeline"].exists)
+        XCTAssertTrue(app.buttons["calendar.year-overview"].exists)
+        XCTAssertTrue(app.buttons["calendar.today"].exists)
+        XCTAssertFalse(app.buttons["Enregistrer"].exists)
+
+        let preview = app.descendants(matching: .any)["calendar.selection-preview"].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 3))
+        let previewDate = app.staticTexts["calendar.preview.date"]
+        let dateStyle = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.wide)
+            .locale(Locale(identifier: "fr_FR"))
+        XCTAssertEqual(previewDate.label, date.formatted(dateStyle))
+        XCTAssertTrue(app.staticTexts["calendar.preview.empty"].exists)
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "CalendarDateSelection"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+
+        app.buttons["calendar.today"].tap()
+        XCTAssertEqual(previewDate.label, today.formatted(dateStyle))
+    }
+
+    func testCalendarVisibleViewModes() throws {
+        app.tabBars.buttons["Calendrier"].tap()
+        let modes = app.segmentedControls["calendar.view-selector"]
+        XCTAssertTrue(modes.waitForExistence(timeout: 5))
+
+        modes.buttons["Jour"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["calendar.day-view"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["calendar.selection-preview"].exists)
+
+        modes.buttons["Année"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["calendar.year-view"].waitForExistence(timeout: 3))
+
+        modes.buttons["Mois"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["calendar.selection-preview"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.descendants(matching: .any)["calendar.day-view"].exists)
+    }
+
+    func testCalendarPreviewForMultipleEntries() throws {
+        app.tabBars.buttons["Calendrier"].tap()
+        XCTAssertTrue(app.buttons["calendar.add"].waitForExistence(timeout: 5))
+
+        for _ in 0..<2 {
+            app.buttons["calendar.add"].tap()
+            let save = app.buttons["Enregistrer"]
+            XCTAssertTrue(save.waitForExistence(timeout: 3))
+            XCTAssertTrue(save.isEnabled)
+            save.tap()
+            XCTAssertTrue(save.waitForNonExistence(timeout: 3))
         }
+
+        XCTAssertTrue(app.staticTexts["2 entrées"].waitForExistence(timeout: 3))
+        let balance = app.staticTexts["calendar.preview.balance"]
+        XCTAssertTrue(balance.exists)
+        let initialBalance = balance.label
+
+        let today = Date()
+        let offset = Calendar.current.component(.day, from: today) == 1 ? 1 : -1
+        let otherDate = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: offset, to: today))
+        app.buttons[calendarDayIdentifier(for: otherDate)].tap()
+        XCTAssertTrue(app.staticTexts["calendar.preview.empty"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Enregistrer"].exists)
+
+        app.buttons[calendarDayIdentifier(for: today)].tap()
+        XCTAssertTrue(app.staticTexts["2 entrées"].waitForExistence(timeout: 3))
+        XCTAssertEqual(balance.label, initialBalance)
+        XCTAssertFalse(app.buttons["Enregistrer"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["calendar.day-view"].exists)
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "CalendarMultipleEntriesSelection"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    private func calendarDayIdentifier(for date: Date) -> String {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return String(
+            format: "calendar-day-%04d-%02d-%02d",
+            components.year ?? 0,
+            components.month ?? 0,
+            components.day ?? 0
+        )
     }
     
     // MARK: - Stats View Tests
     
     func testStatsViewContent() throws {
-        app.tabBars.buttons["Stats"].tap()
+        app.tabBars.buttons["Statistiques"].tap()
         
         let navBar = app.navigationBars["Statistiques"]
         XCTAssertTrue(navBar.waitForExistence(timeout: 5))
@@ -219,7 +335,9 @@ final class WorkTimerUITests: XCTestCase {
     func testLaunchPerformance() throws {
         if #available(iOS 13.0, *) {
             measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
+                let measuredApp = XCUIApplication()
+                measuredApp.launchArguments = ["UI_TESTING", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
+                measuredApp.launch()
             }
         }
     }
@@ -228,7 +346,7 @@ final class WorkTimerUITests: XCTestCase {
         measure {
             app.tabBars.buttons["Journées"].tap()
             app.tabBars.buttons["Calendrier"].tap()
-            app.tabBars.buttons["Stats"].tap()
+            app.tabBars.buttons["Statistiques"].tap()
             app.tabBars.buttons["Réglages"].tap()
             app.tabBars.buttons["Accueil"].tap()
         }
@@ -308,7 +426,7 @@ extension WorkTimerUITests {
         add(calendarAttachment)
         
         // Stats
-        app.tabBars.buttons["Stats"].tap()
+        app.tabBars.buttons["Statistiques"].tap()
         sleep(2)
         let statsScreenshot = app.screenshot()
         let statsAttachment = XCTAttachment(screenshot: statsScreenshot)
@@ -326,14 +444,3 @@ extension WorkTimerUITests {
         add(settingsAttachment)
     }
 }
-
-
-
-
-
-
-
-
-
-
-

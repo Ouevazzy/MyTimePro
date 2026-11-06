@@ -1152,7 +1152,11 @@ class PDFService {
         
         let yearWorkDays = workDays.filter { calendar.component(.year, from: $0.date) == year }
         
-        let workDaysCount = yearWorkDays.filter { $0.type == .work }.count
+        let workDaysCount = Set(
+            yearWorkDays
+                .filter { $0.type == .work }
+                .map { calendar.startOfDay(for: $0.date) }
+        ).count
         let vacationDays = yearWorkDays.reduce(0.0) { total, day in
             if day.type == .vacation {
                 return total + 1

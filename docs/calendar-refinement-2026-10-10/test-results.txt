@@ -1,0 +1,83 @@
+================================================================================
+TEST RESULTS SUMMARY
+================================================================================
+Generated: 2026-10-10T13:29:03Z
+Total Results: 6
+================================================================================
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 1/6
+TEST_TARGET: WorkTimerUITests
+TEST_IDENTIFIER: WorkTimerUITests/testCalendarNavigation()
+TEST_DISPLAY_NAME: testCalendarNavigation()
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerUITests/WorkTimerUITests.swift
+TEST_LINE_NUMBER: 100
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 2/6
+TEST_TARGET: WorkTimerUITests
+TEST_IDENTIFIER: WorkTimerUITests/testCalendarDateSelectionStaysInMonth()
+TEST_DISPLAY_NAME: testCalendarDateSelectionStaysInMonth()
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerUITests/WorkTimerUITests.swift
+TEST_LINE_NUMBER: 136
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 3/6
+TEST_TARGET: WorkTimerUITests
+TEST_IDENTIFIER: WorkTimerUITests/testCalendarVisibleViewModes()
+TEST_DISPLAY_NAME: testCalendarVisibleViewModes()
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerUITests/WorkTimerUITests.swift
+TEST_LINE_NUMBER: 175
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 4/6
+TEST_TARGET: WorkTimerUITests
+TEST_IDENTIFIER: WorkTimerUITests/testCalendarPreviewForMultipleEntries()
+TEST_DISPLAY_NAME: testCalendarPreviewForMultipleEntries()
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerUITests/WorkTimerUITests.swift
+TEST_LINE_NUMBER: 192
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 5/6
+TEST_TARGET: WorkTimerTests
+TEST_IDENTIFIER: MultipleEntriesPerDayTests/insertedEntriesAreReconciledBeforeSave()
+TEST_DISPLAY_NAME: la réconciliation SwiftData inclut les nouvelles entrées avant la sauvegarde
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerTests/MultipleEntriesPerDayTests.swift
+TEST_LINE_NUMBER: 45
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+--------------------------------------------------------------------------------
+TEST_RESULT_INDEX: 6/6
+TEST_TARGET: WorkTimerTests
+TEST_IDENTIFIER: MultipleEntriesPerDayTests/deletionRecalculatesRemainingEntry()
+TEST_DISPLAY_NAME: supprimer une entrée recalcule le solde des entrées restantes
+TEST_STATE: Passed
+TEST_FILE_PATH: WorkTimer/WorkTimerTests/MultipleEntriesPerDayTests.swift
+TEST_LINE_NUMBER: 76
+TEST_TAGS: (none)
+
+TEST_ISSUE_COUNT: 0
+
+
+================================================================================
+END OF TEST RESULTS SUMMARY
+================================================================================

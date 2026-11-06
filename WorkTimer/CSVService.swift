@@ -10,9 +10,10 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 class CSVService {
-    
+
     // MARK: - Singleton
     static let shared = CSVService()
+    private let delimiter = ";"
     private init() {}
     
     // MARK: - Export Types
@@ -25,35 +26,52 @@ class CSVService {
     }
     
     // MARK: - CSV Generation
-    
+
+    func generateDetailedExport(workDays: [WorkDay], useDecimalHours: Bool) -> String {
+        var rows: [[String]] = [
+            "export.csv.header".localized
+                .split(separator: ",")
+                .map { String($0) }
+        ]
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .none
+
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
+
+        for day in workDays.sorted(by: { $0.date < $1.date }) {
+            let totalHours: String
+            let overtimeHours: String
+            if useDecimalHours {
+                totalHours = decimal(day.totalHours)
+                overtimeHours = decimal(Double(day.overtimeSeconds) / 3600.0)
+            } else {
+                totalHours = WorkTimeCalculations.formattedTimeInterval(day.totalHours * 3600)
+                overtimeHours = WorkTimeCalculations.formattedTimeInterval(Double(day.overtimeSeconds))
+            }
+
+            rows.append([
+                dateFormatter.string(from: day.date),
+                day.type.localizedName,
+                day.startTime.map { timeFormatter.string(from: $0) } ?? "",
+                day.endTime.map { timeFormatter.string(from: $0) } ?? "",
+                WorkTimeCalculations.formattedTimeInterval(day.breakDuration),
+                totalHours,
+                overtimeHours,
+                decimal(day.bonusAmount),
+                day.note ?? ""
+            ])
+        }
+
+        return csv(rows)
+    }
+
     /// Génère un fichier CSV avec toutes les journées de travail
     func generateFullExport(workDays: [WorkDay]) -> String {
-        var csv = "Date;Type;Début;Fin;Pause (min);Heures totales;Heures sup. (s);Bonus;Note\n"
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        
-        let sortedDays = workDays
-            .sorted { $0.date < $1.date }
-        
-        for day in sortedDays {
-            let date = dateFormatter.string(from: day.date)
-            let type = day.type.csvName
-            let start = day.startTime.map { timeFormatter.string(from: $0) } ?? ""
-            let end = day.endTime.map { timeFormatter.string(from: $0) } ?? ""
-            let breakMin = Int(day.breakDuration / 60)
-            let hours = String(format: "%.2f", day.totalHours)
-            let overtime = day.overtimeSeconds
-            let bonus = String(format: "%.2f", day.bonusAmount)
-            let note = day.note?.replacingOccurrences(of: ";", with: ",") ?? ""
-            
-            csv += "\(date);\(type);\(start);\(end);\(breakMin);\(hours);\(overtime);\(bonus);\(note)\n"
-        }
-        
-        return csv
+        generateDetailedExport(workDays: workDays, useDecimalHours: UserSettings.shared.useDecimalHours)
     }
     
     /// Génère un rapport annuel
@@ -84,7 +102,11 @@ class CSVService {
                 calendar.component(.month, from: $0.date) == month
             }
 
-            let workDaysCount = monthDays.filter { $0.type == .work }.count
+            let workDaysCount = Set(
+                monthDays
+                    .filter { $0.type == .work }
+                    .map { calendar.startOfDay(for: $0.date) }
+            ).count
             let totalHours = monthDays.filter { $0.type == .work }.reduce(0.0) { $0 + $1.totalHours }
             let overtime = monthDays.reduce(0) { $0 + $1.overtimeSeconds }
             let vacation = monthDays.filter { $0.type == .vacation || $0.type == .halfDayVacation }.count
@@ -97,8 +119,16 @@ class CSVService {
             let monthName = monthFormatter.string(from: monthDate).capitalized
             
             let overtimeFormatted = formatOvertime(overtime)
-            
-            csv += "\(monthName);\(workDaysCount);\(String(format: "%.2f", totalHours));\(overtimeFormatted);\(vacation);\(sick);\(holiday)\n"
+
+            csv += csvLine([
+                monthName,
+                String(workDaysCount),
+                decimal(totalHours),
+                overtimeFormatted,
+                String(vacation),
+                String(sick),
+                String(holiday)
+            ]) + "\n"
             
             yearTotalHours += totalHours
             yearTotalOvertime += overtime
@@ -109,13 +139,21 @@ class CSVService {
         }
         
         csv += "\n"
-        csv += "TOTAL;\(yearWorkDays);\(String(format: "%.2f", yearTotalHours));\(formatOvertime(yearTotalOvertime));\(yearVacation);\(yearSick);\(yearHoliday)\n"
+        csv += csvLine([
+            "TOTAL",
+            String(yearWorkDays),
+            decimal(yearTotalHours),
+            formatOvertime(yearTotalOvertime),
+            String(yearVacation),
+            String(yearSick),
+            String(yearHoliday)
+        ]) + "\n"
         
         // Statistiques supplémentaires
         csv += "\n\nStatistiques\n"
-        csv += "Moyenne heures/jour;\(String(format: "%.2f", yearWorkDays > 0 ? yearTotalHours / Double(yearWorkDays) : 0))\n"
-        csv += "Heures standard/semaine;\(settings.weeklyHours)\n"
-        csv += "Jours de congés annuels;\(settings.annualVacationDays)\n"
+        csv += csvLine(["Moyenne heures/jour", decimal(yearWorkDays > 0 ? yearTotalHours / Double(yearWorkDays) : 0)]) + "\n"
+        csv += csvLine(["Heures standard/semaine", decimal(settings.weeklyHours)]) + "\n"
+        csv += csvLine(["Jours de congés annuels", String(settings.annualVacationDays)]) + "\n"
         
         return csv
     }
@@ -162,10 +200,10 @@ class CSVService {
             let start = day.startTime.map { timeFormatter.string(from: $0) } ?? "-"
             let end = day.endTime.map { timeFormatter.string(from: $0) } ?? "-"
             let breakMin = day.type == .work ? "\(Int(day.breakDuration / 60))min" : "-"
-            let hours = day.type == .work ? String(format: "%.2f", day.totalHours) : "-"
+            let hours = day.type == .work ? decimal(day.totalHours) : "-"
             let overtime = day.type == .work ? formatOvertime(day.overtimeSeconds) : "-"
             
-            csv += "\(date);\(dayName);\(type);\(start);\(end);\(breakMin);\(hours);\(overtime)\n"
+            csv += csvLine([date, dayName, type, start, end, breakMin, hours, overtime]) + "\n"
             
             if day.type == .work {
                 totalHours += day.totalHours
@@ -174,7 +212,7 @@ class CSVService {
         }
         
         csv += "\n"
-        csv += "TOTAL;;;;\(String(format: "%.2f", totalHours));\(formatOvertime(totalOvertime))\n"
+        csv += csvLine(["TOTAL", "", "", "", "", "", decimal(totalHours), formatOvertime(totalOvertime)]) + "\n"
         
         return csv
     }
@@ -204,13 +242,19 @@ class CSVService {
             let entitlement = year == startYear ? 0.0 : Double(settings.annualVacationDays)
             let balance = max(0, carryIn + entitlement - used)
             
-            csv += "\(year);\(String(format: "%.1f", carryIn));\(String(format: "%.1f", entitlement));\(String(format: "%.1f", used));\(String(format: "%.1f", balance))\n"
+            csv += csvLine([
+                String(year),
+                decimal(carryIn, fractionDigits: 1),
+                decimal(entitlement, fractionDigits: 1),
+                decimal(used, fractionDigits: 1),
+                decimal(balance, fractionDigits: 1)
+            ]) + "\n"
             
             carryIn = balance
         }
         
         csv += "\n"
-        csv += "Solde actuel;\(String(format: "%.1f", carryIn)) jours\n"
+        csv += csvLine(["Solde actuel", "\(decimal(carryIn, fractionDigits: 1)) jours"]) + "\n"
         
         // Liste détaillée des congés
         csv += "\n\nDétail des congés\n"
@@ -227,7 +271,7 @@ class CSVService {
             let date = dateFormatter.string(from: day.date)
             let type = day.type == .vacation ? "Journée complète" : "Demi-journée"
             let year = calendar.component(.year, from: day.date)
-            csv += "\(date);\(type);\(year)\n"
+            csv += csvLine([date, type, String(year)]) + "\n"
         }
         
         return csv
@@ -239,7 +283,10 @@ class CSVService {
         
         let workOnlyDays = workDays.filter {
             $0.type == .work
-        }.sorted { $0.date < $1.date }
+        }
+        let dailyGroups = Dictionary(grouping: workOnlyDays) {
+            calendar.startOfDay(for: $0.date)
+        }.sorted { $0.key < $1.key }
         
         var csv = "Rapport des heures supplémentaires\n\n"
         csv += "Date;Heures travaillées;Heures sup.;Cumul\n"
@@ -249,17 +296,17 @@ class CSVService {
         
         var cumulative = 0
         
-        for day in workOnlyDays {
-            let date = dateFormatter.string(from: day.date)
-            let hours = String(format: "%.2f", day.totalHours)
-            let overtime = day.overtimeSeconds
+        for (dayDate, entries) in dailyGroups {
+            let date = dateFormatter.string(from: dayDate)
+            let hours = decimal(entries.reduce(0) { $0 + $1.totalHours })
+            let overtime = entries.reduce(0) { $0 + $1.overtimeSeconds }
             cumulative += overtime
             
-            csv += "\(date);\(hours);\(formatOvertime(overtime));\(formatOvertime(cumulative))\n"
+            csv += csvLine([date, hours, formatOvertime(overtime), formatOvertime(cumulative)]) + "\n"
         }
         
         csv += "\n"
-        csv += "Total heures supplémentaires;\(formatOvertime(cumulative))\n"
+        csv += csvLine(["Total heures supplémentaires", formatOvertime(cumulative)]) + "\n"
         
         // Résumé par année
         csv += "\n\nRésumé par année\n"
@@ -271,24 +318,25 @@ class CSVService {
             let yearOvertime = workOnlyDays
                 .filter { calendar.component(.year, from: $0.date) == year }
                 .reduce(0) { $0 + $1.overtimeSeconds }
-            csv += "\(year);\(formatOvertime(yearOvertime))\n"
+            csv += csvLine([String(year), formatOvertime(yearOvertime)]) + "\n"
         }
         
         return csv
     }
     
     // MARK: - File Creation
+
+    func csvData(content: String) -> Data? {
+        ("\u{FEFF}" + content).data(using: .utf8)
+    }
     
     func createCSVFile(content: String, filename: String) -> URL? {
         let tempDir = FileManager.default.temporaryDirectory
         let fileURL = tempDir.appendingPathComponent("\(filename).csv")
-        
-        // Ajouter BOM UTF-8 pour Excel
-        let bom = "\u{FEFF}"
-        let contentWithBom = bom + content
-        
+
         do {
-            try contentWithBom.write(to: fileURL, atomically: true, encoding: .utf8)
+            guard let data = csvData(content: content) else { return nil }
+            try data.write(to: fileURL, options: .atomic)
             return fileURL
         } catch {
             AppLogger.error("Failed to create CSV file", category: AppLogger.general, error: error)
@@ -303,6 +351,31 @@ class CSVService {
         let minutes = (abs(seconds) % 3600) / 60
         let sign = seconds >= 0 ? "+" : "-"
         return "\(sign)\(hours)h\(String(format: "%02d", minutes))"
+    }
+
+    private func csv(_ rows: [[String]]) -> String {
+        rows.map(csvLine).joined(separator: "\n") + "\n"
+    }
+
+    private func csvLine(_ fields: [String]) -> String {
+        fields.map(escapedField).joined(separator: delimiter)
+    }
+
+    private func escapedField(_ field: String) -> String {
+        var normalized = field
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+
+        let requiresQuotes = normalized.contains(delimiter)
+            || normalized.contains("\"")
+            || normalized.contains("\n")
+
+        normalized = normalized.replacingOccurrences(of: "\"", with: "\"\"")
+        return requiresQuotes ? "\"\(normalized)\"" : normalized
+    }
+
+    private func decimal(_ value: Double, fractionDigits: Int = 2) -> String {
+        String(format: "%.\(fractionDigits)f", locale: Locale(identifier: "en_US_POSIX"), value)
     }
 }
 
@@ -326,7 +399,6 @@ extension WorkDayType {
 
 struct CSVExportView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
     
     let workDays: [WorkDay]
     
@@ -473,4 +545,3 @@ struct CSVExportView: View {
 #Preview {
     CSVExportView(workDays: [])
 }
-
