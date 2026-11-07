@@ -2,8 +2,7 @@
 //  QuickAddButton.swift
 //  WorkTimer
 //
-//  Bouton flottant en verre interactif pour la saisie rapide d'une journée.
-//  Posé au-dessus de la tab bar sur Accueil, Journées et Calendrier.
+//  Commande de saisie rapide dans la barre de navigation.
 //
 
 import SwiftUI
@@ -20,7 +19,7 @@ struct QuickAddButton: View {
         } label: {
             Image(systemName: "plus")
                 .font(.system(size: 22, weight: .semibold))
-                .frame(width: 56, height: 56)
+                .frame(width: DS.Touch.minSize, height: DS.Touch.minSize)
                 .contentShape(Circle())
                 .symbolEffect(.bounce, value: bounce)
         }
@@ -39,19 +38,20 @@ struct QuickAddButton: View {
 }
 
 extension View {
-    /// Superpose le bouton flottant de saisie rapide en bas à droite,
-    /// au-dessus de la tab bar.
-    func quickAddOverlay() -> some View {
-        overlay(alignment: .bottomTrailing) {
-            QuickAddButton()
-                .padding(.trailing, DS.Spacing.xl)
-                .padding(.bottom, DS.Spacing.sm)
+    /// Une commande de navigation ne recouvre pas les données des cartes.
+    func quickAddToolbar() -> some View {
+        toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                QuickAddButton()
+            }
         }
     }
 }
 
 #Preview {
-    Color.clear
-        .quickAddOverlay()
-        .modelContainer(for: WorkDay.self, inMemory: true)
+    NavigationStack {
+        Color.clear
+            .quickAddToolbar()
+            .modelContainer(for: WorkDay.self, inMemory: true)
+    }
 }

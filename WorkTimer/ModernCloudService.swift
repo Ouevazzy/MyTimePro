@@ -2,7 +2,6 @@ import Foundation
 import CloudKit
 import SwiftUI
 import SwiftData
-import Combine
 import Network
 
 @MainActor
@@ -15,7 +14,7 @@ final class ModernCloudService {
     private(set) var userMessage: String?
 
     private let containerIdentifier = "iCloud.jordan-payez.MyTimePro"
-    private var cancellables = Set<AnyCancellable>()
+    private var accountChangedTask: Task<Void, Never>?
     private var modelContext: ModelContext?
     private var isInitialized = false
     private let networkMonitor = NWPathMonitor()
@@ -79,6 +78,30 @@ final class ModernCloudService {
         modelContext = context
     }
 
+    // MARK: - Diagnostic (TestFlight / App Store)
+
+    /// Identifiant du conteneur CloudKit utilisé pour la synchronisation.
+    var cloudKitContainerID: String { containerIdentifier }
+
+    /// Environnement CloudKit ciblé par la build courante.
+    /// Debug (Xcode) → Development ; TestFlight & App Store → Production.
+    var cloudKitEnvironment: String {
+        #if DEBUG
+        return "Development"
+        #else
+        return "Production"
+        #endif
+    }
+
+    /// CloudKit est-il réellement actif sur cette build ? (désactivé en Debug)
+    var isCloudKitActive: Bool {
+        #if DEBUG
+        return false
+        #else
+        return true
+        #endif
+    }
+
     func initialize() {
         guard !isInitialized else {
             Task { await refreshICloudStatus() }
@@ -91,11 +114,11 @@ final class ModernCloudService {
     }
 
     private func setupCloudKitNotifications() {
-        NotificationCenter.default.publisher(for: NSNotification.Name.CKAccountChanged)
-            .sink { [weak self] _ in
-                Task { await self?.refreshICloudStatus() }
+        accountChangedTask = Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .CKAccountChanged) {
+                await self?.refreshICloudStatus()
             }
-            .store(in: &cancellables)
+        }
     }
 
     func refreshICloudStatus() async {
@@ -138,6 +161,14 @@ final class ModernCloudService {
     func restoreFromCloud() async {
         await refreshICloudStatus()
         userMessage = "La restauration est gérée automatiquement par iCloud."
+    }
+
+    func cleanupGhostEntries() async throws {
+        guard let ctx = modelContext else { return }
+        let count = try WorkDay.deleteGhostEntries(in: ctx)
+        if count > 0 {
+            AppLogger.info("\(count) entrée(s) fantôme(s) supprimée(s) en background", category: AppLogger.data)
+        }
     }
 
     func stopSync() {

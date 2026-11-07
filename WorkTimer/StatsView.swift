@@ -8,6 +8,8 @@ private struct StatsLoadIdentity: Hashable {
 
 struct StatsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var selectedYear: Int
     @State private var statsRevision = 0
@@ -26,70 +28,22 @@ struct StatsView: View {
     }
 
     private var summaryColumns: [GridItem] {
-        [GridItem(.adaptive(minimum: 104), spacing: DS.Spacing.sm)]
+        dynamicTypeSize.isAccessibilitySize
+            ? [GridItem(.flexible())]
+            : [GridItem(.adaptive(minimum: 150), spacing: DS.Spacing.md)]
     }
 
     var body: some View {
         VStack(spacing: 0) {
             yearSelector
                 .padding(.horizontal)
-                .padding(.top, DS.Spacing.sm)
+                .padding(.vertical, DS.Spacing.sm)
 
-            // Grille des statistiques annuelles
-            LazyVGrid(columns: summaryColumns, spacing: DS.Spacing.sm) {
-                StatCard(
-                    icon: "briefcase.fill",
-                    iconColor: .blue,
-                    value: "\(yearlyStats.workDays)",
-                    title: "stats.workDays".localized
-                )
-                .equatable()
-                StatCard(
-                    icon: "umbrella.fill",
-                    iconColor: .orange,
-                    value: formatDaysValue(yearlyStats.vacationDays),
-                    title: "stats.vacationDays".localized,
-                    subtitle: formatDaysAsHours(yearlyStats.vacationDays)
-                )
-                .equatable()
-                StatCard(
-                    icon: "cross.fill",
-                    iconColor: .red,
-                    value: "\(yearlyStats.sickDays)",
-                    title: "stats.sickDays".localized
-                )
-                .equatable()
-                StatCard(
-                    icon: "clock.fill",
-                    iconColor: .blue,
-                    value: WorkTimeCalculations.formattedHoursRounded(yearlyStats.totalHours),
-                    title: "stats.totalHours".localized
-                )
-                .equatable()
-                StatCard(
-                    icon: "clock.badge.exclamationmark.fill",
-                    iconColor: yearlyStats.overtimeSeconds >= 0 ? .green : .red,
-                    value: WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds),
-                    title: "stats.overtimeHours".localized
-                )
-                .equatable()
-                StatCard(
-                    icon: "dollarsign.circle.fill",
-                    iconColor: .orange,
-                    value: String(format: "%.0f CHF", yearlyStats.totalBonus),
-                    title: "stats.bonus".localized
-                )
-                .equatable()
-            }
-            .padding(DS.Spacing.md)
-            .dsGlassSurface(cornerRadius: DS.Radius.card)
-            .padding(.horizontal)
-            .padding(.vertical, DS.Spacing.sm)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: DS.Spacing.lg) {
+                    annualSummary
 
-            // Liste des mois
-            List {
-                if activeMonthlyStats.isEmpty {
-                    Section {
+                    if activeMonthlyStats.isEmpty {
                         EmptyStateView(
                             icon: "chart.bar.xaxis",
                             title: String(format: "stats.noData".localized, selectedYear),
@@ -97,46 +51,45 @@ struct StatsView: View {
                             iconColors: [.blue, .cyan]
                         )
                         .frame(maxWidth: .infinity)
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                        .padding(.vertical, DS.Spacing.xl)
                     }
-                }
-                ForEach(activeMonthlyStats) { monthStat in
-                    Section {
-                        MonthStatContent(
-                            monthStat: monthStat,
-                            formattedHours: WorkTimeCalculations.formattedHoursRounded(monthStat.totalHours),
-                            formattedOvertime: WorkTimeCalculations.formattedSecondsRounded(monthStat.overtimeSeconds),
-                            formattedVacation: formatVacationWithHours(monthStat.vacationDays),
-                            formattedSickDays: formatWholeDays(monthStat.sickDays),
-                            formattedBonus: String(format: "%.2f CHF", monthStat.totalBonus),
-                            isOvertimePositive: monthStat.overtimeSeconds >= 0
-                        )
-                        .equatable()
-                        .padding(DS.Spacing.md)
-                        .dsGlassSurface(cornerRadius: DS.Radius.card)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
-                        .listRowBackground(Color.clear)
-                    } header: {
-                        HStack {
-                            Text(monthStat.monthName)
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            if monthStat.workDays > 0 {
-                                Text(formatWholeDays(monthStat.workDays))
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+
+                    ForEach(activeMonthlyStats) { monthStat in
+                        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                            HStack {
+                                Text(monthStat.monthName)
+                                    .font(.headline)
+                                Spacer()
+                                if monthStat.workDays > 0 {
+                                    Text(formatWholeDays(monthStat.workDays))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
+                            .accessibilityAddTraits(.isHeader)
+
+                            MonthStatContent(
+                                monthStat: monthStat,
+                                formattedHours: WorkTimeCalculations.formattedHoursRounded(monthStat.totalHours),
+                                formattedOvertime: WorkTimeCalculations.formattedSecondsRounded(monthStat.overtimeSeconds),
+                                formattedVacation: formatVacationWithHours(monthStat.vacationDays),
+                                formattedSickDays: formatWholeDays(monthStat.sickDays),
+                                formattedBonus: settings.formatCurrency(monthStat.totalBonus),
+                                formattedEarnings: settings.isHourlyRateEnabled
+                                    ? settings.formatCurrency(monthStat.totalHours * settings.hourlyRate + monthStat.totalBonus)
+                                    : nil,
+                                overtimeSeconds: monthStat.overtimeSeconds
+                            )
+                            .equatable()
+                            .padding(DS.Spacing.lg)
+                            .dsContentSurface()
                         }
-                        .textCase(nil)
-                        .padding(.top, DS.Spacing.xs)
                     }
                 }
+                .padding(.horizontal)
+                .padding(.top, DS.Spacing.sm)
+                .padding(.bottom, DS.Spacing.xl)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
             .refreshable {
                 StatsCache.shared.invalidateYear(selectedYear)
                 statsRevision += 1
@@ -152,11 +105,58 @@ struct StatsView: View {
         }
     }
 
+    private var annualSummary: some View {
+        VStack(spacing: DS.Spacing.md) {
+            LazyVGrid(columns: summaryColumns, spacing: DS.Spacing.md) {
+                StatCard(
+                    icon: "clock",
+                    iconColor: .blue,
+                    value: WorkTimeCalculations.formattedHoursRounded(yearlyStats.totalHours),
+                    title: "stats.totalHours".localized
+                )
+                .equatable()
+                .padding(DS.Spacing.lg)
+                .dsContentSurface()
+
+                StatCard(
+                    icon: yearlyStats.overtimeSeconds == 0 ? "equal.circle" : yearlyStats.overtimeSeconds > 0 ? "arrow.up.circle" : "arrow.down.circle",
+                    iconColor: DS.Colors.balance(Double(yearlyStats.overtimeSeconds)),
+                    value: WorkTimeCalculations.formattedSecondsRounded(yearlyStats.overtimeSeconds),
+                    title: yearlyStats.overtimeSeconds < 0 ? "stats.missingHours".localized : "stats.overtimeHours".localized,
+                    valueColor: DS.Colors.balance(Double(yearlyStats.overtimeSeconds))
+                )
+                .equatable()
+                .padding(DS.Spacing.lg)
+                .dsContentSurface()
+            }
+
+            VStack(spacing: DS.Spacing.md) {
+                StatSummaryRow(icon: "briefcase", title: "stats.workDays".localized, value: formatWholeDays(yearlyStats.workDays))
+                Divider()
+                StatSummaryRow(icon: "umbrella", title: "stats.vacationDays".localized, value: formatDaysValue(yearlyStats.vacationDays), subtitle: formatDaysAsHours(yearlyStats.vacationDays))
+                Divider()
+                StatSummaryRow(icon: "cross", title: "stats.sickDays".localized, value: formatWholeDays(yearlyStats.sickDays))
+                Divider()
+                StatSummaryRow(icon: "banknote", title: "stats.bonus".localized, value: settings.formatCurrency(yearlyStats.totalBonus))
+                if settings.isHourlyRateEnabled {
+                    Divider()
+                    StatSummaryRow(
+                        icon: "banknote",
+                        title: "stats.earnings".localized,
+                        value: settings.formatCurrency(yearlyStats.totalHours * settings.hourlyRate + yearlyStats.totalBonus)
+                    )
+                }
+            }
+            .padding(DS.Spacing.lg)
+            .dsContentSurface()
+        }
+    }
+
     private var yearSelector: some View {
         HStack(spacing: DS.Spacing.md) {
             Button {
                 guard selectedYear > 2000 else { return }
-                withAnimation(DS.Animation.navigation) { selectedYear -= 1 }
+                withAnimation(reduceMotion ? nil : DS.Animation.navigation) { selectedYear -= 1 }
             } label: {
                 Image(systemName: "chevron.left")
                     .fontWeight(.semibold)
@@ -179,7 +179,7 @@ struct StatsView: View {
 
             Button {
                 guard selectedYear < 2100 else { return }
-                withAnimation(DS.Animation.navigation) { selectedYear += 1 }
+                withAnimation(reduceMotion ? nil : DS.Animation.navigation) { selectedYear += 1 }
             } label: {
                 Image(systemName: "chevron.right")
                     .fontWeight(.semibold)
@@ -227,7 +227,7 @@ struct StatsView: View {
             fetchWorkDays(from: start, to: end, order: .forward)
         }
 
-        withAnimation(DS.Animation.appear) {
+        withAnimation(reduceMotion ? nil : DS.Animation.appear) {
             yearlyStats = calculated.year
             monthlyStats = calculated.months
         }
@@ -260,3 +260,16 @@ struct StatsView: View {
             .modelContainer(for: WorkDay.self, inMemory: true)
     }
 }
+
+#if DEBUG
+#Preview("Données d'exemple") {
+    NavigationStack {
+        StatsView()
+            .modelContainer(try! DisplayPreviewData.makeContainer())
+    }
+    .transaction { transaction in
+        transaction.animation = nil
+        transaction.disablesAnimations = true
+    }
+}
+#endif

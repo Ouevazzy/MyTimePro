@@ -1,0 +1,19 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project WorkTimer.xcodeproj -scheme WorkTimer -configuration Debug -destination "platform=iOS Simulator,id=06F4225E-211B-4003-A3C5-FD19ED5780A3" -derivedDataPath /tmp/worktimer-audit-derived -resultBundlePath /tmp/worktimer-audit-unit-serial.xcresult -parallel-testing-enabled NO "-only-testing:WorkTimerTests" test-without-building CODE_SIGNING_ALLOWED=NO
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+Writing result bundle at path:
+	/tmp/worktimer-audit-unit-serial.xcresult
+
+2026-09-17 18:23:22.740136+0200 WorkTimer[8166:314649] [Data] ModelContainer initialisé avec succès
+2026-09-17 18:23:22.763413+0200 WorkTimer[8166:314649] [General] Background tasks registered sync=true cleanup=true
+2026-09-17 18:23:22.765543+0200 WorkTimer[8166:314649] [General] Keychain save error: -34018
+2026-09-17 18:23:22.872248+0200 WorkTimer[8166:314649] [Connection] Unable to find entitlement for KVS store
+2026-09-17 18:23:22.872681+0200 WorkTimer[8166:314649] [Connection] BUG IN CLIENT OF KVS: Trying to initialize NSUbiquitousKeyValueStore without a store identifier. Please specify your store identifier in the 'com.apple.developer.ubiquity-kvstore-identifier' entitlement.
+2026-09-17 18:23:22.944234+0200 WorkTimer[8166:314649] [CloudKit] Configuration initiale du service cloud
+2026-09-17 18:23:23.118937+0200 WorkTimer[8166:315233] [General] Failed to send CA Event for app launch measurements for ca_event_type: 0 event_name: com.apple.app_launch_measurement.FirstFramePresentationMetric
+2026-09-17 18:23:23.196401+0200 WorkTimer[8166:314649] [XPCErrors] non-launching port is incompatible with service identifier "com.apple.PointerUI.pointeruid.default-service"
+2026-09-17 18:23:23.205038+0200 WorkTimer[8166:314649] [CK] Significant issue at CKContainer.m:760: In order to use CloudKit, your process must have a com.apple.developer.icloud-services entitlement. The value of this entitlement must be an array that includes the string "CloudKit" or "CloudKit-Anonymous".
+** BUILD INTERRUPTED **

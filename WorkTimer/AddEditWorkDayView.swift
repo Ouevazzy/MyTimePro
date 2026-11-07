@@ -2,6 +2,147 @@ import SwiftUI
 import SwiftData
 import UIKit
 
+enum WorkDayFormValidationIssue: Equatable {
+    case dateTooFarInFuture
+    case dateTooFarInPast
+    case noteTooLong
+    case negativeBonus
+    case missingTimes
+    case invalidDuration
+    case breakTooLong
+    case noNetHours
+
+    var localizedMessage: String {
+        switch self {
+        case .dateTooFarInFuture:
+            return "workDay.validation.dateTooFarInFuture".localized
+        case .dateTooFarInPast:
+            return "workDay.validation.dateTooFarInPast".localized
+        case .noteTooLong:
+            return "workDay.validation.noteTooLong".localized
+        case .negativeBonus:
+            return "workDay.validation.negativeBonus".localized
+        case .missingTimes:
+            return "workDay.validation.missingTimes".localized
+        case .invalidDuration:
+            return "workDay.validation.invalidDuration".localized
+        case .breakTooLong:
+            return "workDay.validation.breakTooLong".localized
+        case .noNetHours:
+            return "workDay.validation.noNetHours".localized
+        }
+    }
+}
+
+struct WorkDayFormDraft {
+    let date: Date
+    let type: WorkDayType
+    let startTime: Date
+    let endTime: Date
+    let breakDuration: Date
+    let bonusAmount: Double
+    let note: String
+    /// La fin tombe le lendemain de `date` (session de nuit).
+    var endsNextDay = false
+    var calendar = Calendar.current
+
+    var normalizedDate: Date {
+        calendar.startOfDay(for: date)
+    }
+
+    var trimmedNote: String? {
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    var breakSeconds: TimeInterval {
+        breakDuration.timeIntervalSince(calendar.startOfDay(for: breakDuration))
+    }
+
+    var normalizedStartTime: Date? {
+        guard type.isWorkDay else { return nil }
+        return Self.time(startTime, on: normalizedDate, calendar: calendar)
+    }
+
+    var normalizedEndTime: Date? {
+        guard type.isWorkDay else { return nil }
+        let endDay = endsNextDay
+            ? calendar.date(byAdding: .day, value: 1, to: normalizedDate) ?? normalizedDate
+            : normalizedDate
+        return Self.time(endTime, on: endDay, calendar: calendar)
+    }
+
+    var netWorkedSeconds: TimeInterval? {
+        guard let start = normalizedStartTime, let end = normalizedEndTime else { return nil }
+        return max(0, end.timeIntervalSince(start) - breakSeconds)
+    }
+
+    var isValid: Bool {
+        validationIssue == nil
+    }
+
+    var validationIssue: WorkDayFormValidationIssue? {
+        let maxFutureDate = calendar.date(byAdding: .year, value: 1, to: Date()) ?? Date.distantFuture
+        guard normalizedDate <= maxFutureDate else { return .dateTooFarInFuture }
+
+        let minPastDate = calendar.date(byAdding: .year, value: -10, to: Date()) ?? Date.distantPast
+        guard normalizedDate >= minPastDate else { return .dateTooFarInPast }
+
+        guard note.count <= 500 else { return .noteTooLong }
+
+        if type.isWorkDay {
+            guard bonusAmount >= 0 else { return .negativeBonus }
+            guard let start = normalizedStartTime, let end = normalizedEndTime else { return .missingTimes }
+
+            let duration = end.timeIntervalSince(start)
+            guard duration > 0 && duration <= 24 * 3600 else { return .invalidDuration }
+            guard breakSeconds >= 0 && breakSeconds <= duration else { return .breakTooLong }
+            guard let netWorkedSeconds, netWorkedSeconds > 0 else { return .noNetHours }
+        }
+
+        return nil
+    }
+
+    func makeValidatedWorkDay() -> WorkDay? {
+        guard isValid else { return nil }
+
+        let candidate = WorkDay(date: normalizedDate, type: type)
+        apply(to: candidate)
+
+        guard candidate.isValid else { return nil }
+        guard !candidate.type.isWorkDay || candidate.totalHours > 0 else { return nil }
+        return candidate
+    }
+
+    func apply(to workDay: WorkDay) {
+        workDay.date = normalizedDate
+        workDay.type = type
+        workDay.note = trimmedNote
+
+        if type.isWorkDay {
+            workDay.updateData(
+                startTime: normalizedStartTime,
+                endTime: normalizedEndTime,
+                breakDuration: breakSeconds
+            )
+            workDay.bonusAmount = bonusAmount
+        } else {
+            workDay.updateData(startTime: nil, endTime: nil, breakDuration: 0)
+            workDay.bonusAmount = 0
+        }
+    }
+
+    static func time(_ time: Date, on date: Date, calendar: Calendar = .current) -> Date? {
+        let components = calendar.dateComponents([.hour, .minute, .second], from: time)
+        return calendar.date(
+            bySettingHour: components.hour ?? 0,
+            minute: components.minute ?? 0,
+            second: components.second ?? 0,
+            of: date
+        )
+    }
+}
+
 struct AddEditWorkDayView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -12,6 +153,7 @@ struct AddEditWorkDayView: View {
     @State private var date: Date
     @State private var startTime: Date
     @State private var endTime: Date
+    @State private var endsNextDay: Bool
     @State private var breakDuration: Date
     @State private var bonusAmount: Double = 0.0
     @State private var note: String = ""
@@ -38,9 +180,12 @@ struct AddEditWorkDayView: View {
         _isNewWorkDay = State(initialValue: workDay.startTime == nil && workDay.totalHours == 0 && workDay.type == .work)
         
         // Utiliser les heures sauvegardées ou les heures existantes du workDay
-        _startTime = State(initialValue: workDay.startTime ?? UserSettings.shared.lastStartTime)
-        _endTime = State(initialValue: workDay.endTime ?? UserSettings.shared.lastEndTime)
-        
+        let startTime = workDay.startTime ?? UserSettings.shared.lastStartTime
+        let endTime = workDay.endTime ?? UserSettings.shared.lastEndTime
+        _startTime = State(initialValue: WorkDayFormDraft.time(startTime, on: workDay.date) ?? startTime)
+        _endTime = State(initialValue: WorkDayFormDraft.time(endTime, on: workDay.date) ?? endTime)
+        _endsNextDay = State(initialValue: Self.endsOnLaterDay(workDay))
+
         // Initialiser breakDuration : utiliser la valeur existante ou la dernière pause sauvegardée
         let calendar = Calendar.current
         let midnight = calendar.startOfDay(for: Date())
@@ -74,8 +219,9 @@ struct AddEditWorkDayView: View {
                         bonusAmount = 0
                     } else if oldValue != .work && newValue == .work {
                         // Restore last used times when switching back to work
-                        startTime = settings.lastStartTime
-                        endTime = settings.lastEndTime
+                        startTime = WorkDayFormDraft.time(settings.lastStartTime, on: date) ?? settings.lastStartTime
+                        endTime = WorkDayFormDraft.time(settings.lastEndTime, on: date) ?? settings.lastEndTime
+                        endsNextDay = false
                         let calendar = Calendar.current
                         let midnight = calendar.startOfDay(for: Date())
                         breakDuration = calendar.date(byAdding: .second, value: Int(settings.lastBreakDuration), to: midnight) ?? Date()
@@ -89,28 +235,28 @@ struct AddEditWorkDayView: View {
                 if selectedType == .work {
                     // Heures de travail avec animations
                     Group {
-                    DatePicker("workDay.startTime".localized, selection: $startTime, displayedComponents: .hourAndMinute)
-                        .onChange(of: startTime) { _, newValue in
-                            if newValue > endTime {
+                        DatePicker("workDay.startTime".localized, selection: $startTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: startTime) { _, newValue in
+                                if !endsNextDay && newValue > endTime {
                                     withAnimation {
-                                endTime = newValue.addingTimeInterval(3600)
-                            }
+                                        endTime = newValue.addingTimeInterval(3600)
+                                    }
                                 }
-                            settings.updateLastUsedTimes(start: newValue, end: nil)
-                        }
-                    
-                    DatePicker("workDay.endTime".localized, selection: $endTime, displayedComponents: .hourAndMinute)
-                        .onChange(of: endTime) { _, newValue in
-                            if newValue < startTime {
+                            }
+
+                        DatePicker("workDay.endTime".localized, selection: $endTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: endTime) { _, newValue in
+                                if !endsNextDay && newValue < startTime {
                                     withAnimation {
-                                startTime = newValue.addingTimeInterval(-3600)
-                            }
+                                        startTime = newValue.addingTimeInterval(-3600)
+                                    }
                                 }
-                            settings.updateLastUsedTimes(start: nil, end: newValue)
-                        }
-                    
-                    DatePicker("workDay.breakDuration".localized, selection: $breakDuration, displayedComponents: .hourAndMinute)
-                        .datePickerStyle(.compact)
+                            }
+
+                        Toggle("workDay.endsNextDay".localized, isOn: $endsNextDay)
+
+                        DatePicker("workDay.breakDuration".localized, selection: $breakDuration, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(.compact)
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -140,11 +286,10 @@ struct AddEditWorkDayView: View {
                                         }
                                     }
                                     .font(.caption)
-                                    .foregroundColor(.orange)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.orange.opacity(0.15))
-                                    .cornerRadius(8)
+                                    .foregroundStyle(.orange)
+                                    .padding(.horizontal, DS.Spacing.sm)
+                                    .padding(.vertical, DS.Spacing.xs)
+                                    .background(Color.orange.opacity(0.15), in: RoundedRectangle(cornerRadius: DS.Radius.small))
                                 }
                             }
                         }
@@ -167,17 +312,38 @@ struct AddEditWorkDayView: View {
             } header: {
                 Label("workDay.note".localized, systemImage: "note.text")
             }
+
+            if let validationIssue = currentDraft.validationIssue {
+                Section {
+                    Label(validationIssue.localizedMessage, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                        .accessibilityIdentifier("workDay.validationMessage")
+                } header: {
+                    Label("workDay.validation.title".localized, systemImage: "checklist")
+                }
+            }
             
             // Section résumé (pour journée de travail)
-            if selectedType == .work && startTime < endTime {
+            if selectedType == .work && (endsNextDay || startTime < endTime) {
                 Section {
                     HStack {
                         Label("workDay.totalDuration".localized, systemImage: "clock")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Spacer()
                         Text(calculatedDuration)
                             .fontWeight(.medium)
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
+                    }
+                    if settings.isHourlyRateEnabled {
+                        HStack {
+                            Label("stats.earnings".localized, systemImage: "banknote")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(settings.formatCurrency(calculatedEarnings))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.green)
+                        }
                     }
                 } header: {
                     Label("workDay.summary".localized, systemImage: "chart.bar")
@@ -185,18 +351,20 @@ struct AddEditWorkDayView: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
         .navigationTitle(isNewWorkDay ? "workDay.new".localized : "workDay.edit".localized)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 Button("action.cancel".localized) {
+                    focusedField = nil
                     dismiss()
                 }
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button("action.save".localized) {
-                    Haptic.notification(.success)
+                    focusedField = nil
                     saveWorkDay()
                 }
                 .fontWeight(.semibold)
@@ -214,19 +382,44 @@ struct AddEditWorkDayView: View {
         .onAppear {
             loadWorkDay()
         }
+        .onChange(of: date) { _, newDate in
+            alignDisplayedTimes(with: newDate)
+        }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedType)
         .withErrorHandling()
     }
     
     // MARK: - Computed Properties
     private var calculatedDuration: String {
-        let duration = endTime.timeIntervalSince(startTime)
-        let breakSeconds = breakDuration.timeIntervalSince(Calendar.current.startOfDay(for: breakDuration))
-        let netDuration = max(0, duration - breakSeconds)
+        let netDuration = currentDraft.netWorkedSeconds ?? 0
         
         let hours = Int(netDuration) / 3600
         let minutes = (Int(netDuration) % 3600) / 60
         return String(format: "%dh%02d", hours, minutes)
+    }
+
+    /// Rémunération estimée du brouillon courant : heures nettes × taux horaire + bonus.
+    private var calculatedEarnings: Double {
+        let hours = (currentDraft.netWorkedSeconds ?? 0) / 3600.0
+        return hours * settings.hourlyRate + bonusAmount
+    }
+
+    private var currentDraft: WorkDayFormDraft {
+        WorkDayFormDraft(
+            date: date,
+            type: selectedType,
+            startTime: startTime,
+            endTime: endTime,
+            breakDuration: breakDuration,
+            bonusAmount: bonusAmount,
+            note: note,
+            endsNextDay: endsNextDay
+        )
+    }
+
+    private static func endsOnLaterDay(_ workDay: WorkDay) -> Bool {
+        guard let end = workDay.endTime else { return false }
+        return !Calendar.current.isDate(end, inSameDayAs: workDay.date)
     }
     
     // MARK: - Private Methods
@@ -249,8 +442,11 @@ struct AddEditWorkDayView: View {
         date = workDay.date
         
         if workDay.type == .work {
-            startTime = workDay.startTime ?? UserSettings.shared.lastStartTime
-            endTime = workDay.endTime ?? UserSettings.shared.lastEndTime
+            let loadedStart = workDay.startTime ?? UserSettings.shared.lastStartTime
+            let loadedEnd = workDay.endTime ?? UserSettings.shared.lastEndTime
+            startTime = WorkDayFormDraft.time(loadedStart, on: date) ?? loadedStart
+            endTime = WorkDayFormDraft.time(loadedEnd, on: date) ?? loadedEnd
+            endsNextDay = Self.endsOnLaterDay(workDay)
 
             let calendar = Calendar.current
             let midnight = calendar.startOfDay(for: Date())
@@ -262,8 +458,8 @@ struct AddEditWorkDayView: View {
         } else {
             // Pour les types non-travail, utiliser des valeurs par défaut
             let calendar = Calendar.current
-            startTime = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
-            endTime = calendar.date(bySettingHour: 17, minute: 0, second: 0, of: Date()) ?? Date()
+            startTime = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: date) ?? Date()
+            endTime = calendar.date(bySettingHour: 17, minute: 0, second: 0, of: date) ?? Date()
             breakDuration = calendar.date(byAdding: .hour, value: 1, to: calendar.startOfDay(for: Date())) ?? Date()
             bonusAmount = 0
         }
@@ -272,55 +468,43 @@ struct AddEditWorkDayView: View {
     }
     
     private func saveWorkDay() {
-        // Validation avant sauvegarde
-        guard isFormValid() else {
+        let draft = currentDraft
+        let previousDate = workDay.date
+        let previousType = workDay.type
+
+        guard draft.makeValidatedWorkDay() != nil else {
             ErrorManager.shared.handleValidationError("Les données saisies ne sont pas valides")
             return
         }
 
-        // Appliquer toutes les valeurs locales au workDay uniquement maintenant
-        workDay.date = date
-        workDay.type = selectedType
-        workDay.note = note.isEmpty ? nil : note
-
-        if selectedType == .work {
-            let breakSeconds = breakDuration.timeIntervalSince(Calendar.current.startOfDay(for: breakDuration))
-            workDay.updateData(
-                startTime: startTime,
-                endTime: endTime,
-                breakDuration: breakSeconds
-            )
-            workDay.bonusAmount = bonusAmount
-        } else {
-            workDay.updateData(startTime: nil, endTime: nil, breakDuration: 0)
-            workDay.bonusAmount = 0
-        }
-
-        // Validation finale de l'objet
-        guard workDay.isValid else {
-            ErrorManager.shared.handleValidationError("Les données de la journée ne sont pas valides")
-            return
-        }
-
-        // ⚠️ Sécurité anti-entrées fantômes : ne jamais sauvegarder une entrée travail avec 0h
-        if workDay.type.isWorkDay && workDay.totalHours == 0 {
-            AppLogger.warning("Tentative de sauvegarde d'une entrée travail avec 0h — annulée", category: AppLogger.data)
-            ErrorManager.shared.handleValidationError("Impossible de sauvegarder une entrée avec 0h de travail")
-            return
-        }
+        // Appliquer toutes les valeurs locales au workDay uniquement après validation.
+        draft.apply(to: workDay)
 
         do {
             if isNewWorkDay {
                 modelContext.insert(workDay)
             }
 
-            let breakSeconds = breakDuration.timeIntervalSince(Calendar.current.startOfDay(for: breakDuration))
-            settings.updateLastUsedTimes(start: startTime, end: endTime, breakDuration: breakSeconds)
+            _ = try WorkDay.reconcileDailyOvertime(
+                in: modelContext,
+                for: [previousDate, workDay.date]
+            )
 
-            StatsCache.shared.onWorkDayChanged(workDay)
             try modelContext.save()
+
+            if selectedType.isWorkDay {
+                settings.updateLastUsedTimes(
+                    start: draft.normalizedStartTime,
+                    end: draft.normalizedEndTime,
+                    breakDuration: draft.breakSeconds
+                )
+            }
+
+            StatsCache.shared.onWorkDayChanged(workDay, previousDate: previousDate, previousType: previousType)
+            SiriSummaryCacheService().refresh(using: modelContext)
             Haptic.notification(.success)
         } catch {
+            modelContext.rollback()
             ErrorManager.shared.handle(error, context: "SaveWorkDay")
             return
         }
@@ -329,36 +513,12 @@ struct AddEditWorkDayView: View {
     }
     
     private func isFormValid() -> Bool {
-        if selectedType == .work {
-            // Validation des heures : fin > début
-            guard endTime > startTime else { return false }
-            
-            // Validation du montant bonus : positif
-            guard bonusAmount >= 0 else { return false }
-            
-            // Validation des heures raisonnables (max 24h de travail)
-            let duration = endTime.timeIntervalSince(startTime)
-            guard duration <= 24 * 3600 else { return false }
-            
-            // Validation de la pause : positive et <= durée travaillée
-            let breakSeconds = breakDuration.timeIntervalSince(Calendar.current.startOfDay(for: breakDuration))
-            guard breakSeconds >= 0 && breakSeconds <= duration else { return false }
-        }
-        
-        // Validation de la date : pas trop dans le futur (max 1 an)
-        let maxFutureDate = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date.distantFuture
-        guard date <= maxFutureDate else { return false }
-        
-        // Validation de la date : pas trop dans le passé (max 10 ans)
-        let minPastDate = Calendar.current.date(byAdding: .year, value: -10, to: Date()) ?? Date.distantPast
-        guard date >= minPastDate else { return false }
-        
-        // Validation de la note : longueur raisonnable (max 500 caractères)
-        if note.count > 500 {
-            return false
-        }
-        
-        return true
+        currentDraft.isValid
+    }
+
+    private func alignDisplayedTimes(with selectedDate: Date) {
+        startTime = WorkDayFormDraft.time(startTime, on: selectedDate) ?? startTime
+        endTime = WorkDayFormDraft.time(endTime, on: selectedDate) ?? endTime
     }
 }
 

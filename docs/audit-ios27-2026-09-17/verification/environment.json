@@ -1,0 +1,23 @@
+{
+  "xcode": {
+    "exit_code": 0,
+    "value": "Xcode 27.0\nBuild version 27A266a"
+  },
+  "developer_directory": {
+    "exit_code": 0,
+    "value": "/Applications/Xcode.app/Contents/Developer"
+  },
+  "ios_sdk_version": {
+    "exit_code": 0,
+    "value": "27.0"
+  },
+  "ios_sdk_path": {
+    "exit_code": 0,
+    "value": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk"
+  },
+  "simulator_sdk_version": {
+    "exit_code": 0,
+    "value": "27.0"
+  },
+  "checked_at": "2026-09-17T16:17:55.670845+00:00"
+}

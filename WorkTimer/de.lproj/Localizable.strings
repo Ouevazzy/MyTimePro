@@ -61,13 +61,11 @@
 
 // MARK: - Calendar
 "calendar.title" = "Kalender";
-"calendar.today" = "Heute";
 "calendar.view.month" = "Monat";
 "calendar.view.week" = "Woche";
 
 // MARK: - Stats
 "stats.title" = "Statistik";
-"stats.year" = "Jahr";
 "stats.month" = "Monat";
 "stats.total.hours" = "Gesamtstunden";
 "stats.total.overtime" = "Gesamte Überstunden";
@@ -110,8 +108,6 @@
 "settings.subscription.upgrade" = "Auf Pro upgraden";
 "settings.subscription.terms" = "Nutzungsbedingungen";
 "settings.subscription.privacy" = "Datenschutz";
-"settings.support" = "Support";
-"settings.diagnostics" = "Diagnose";
 "settings.siri" = "Siri-Kurzbefehle";
 "settings.siri.subtitle" = "Sprachsteuerung";
 
@@ -439,6 +435,20 @@
 "calendar.selectDate" = "Datum auswählen";
 "calendar.weekNumbers" = "Kalenderwochen";
 "calendar.noEvents" = "Keine Ereignisse diese Woche";
+"calendar.day.noEntry" = "Kein Tag erfasst";
+"calendar.day.noEntry.detail" = "Fügen Sie für dieses Datum Arbeitszeit, Urlaub oder Abwesenheit hinzu.";
+"calendar.day.add" = "Tag hinzufügen";
+"calendar.view.compact" = "Kompakt";
+"calendar.view.stack" = "Stapel";
+"calendar.view.details" = "Details";
+"calendar.view.label" = "Tagesanzeige";
+"calendar.bonus" = "Bonus: %.0f";
+"calendar.delete.title" = "Diesen Tag löschen?";
+"calendar.delete.message" = "Diese Aktion kann nicht rückgängig gemacht werden.";
+"calendar.yearOverview" = "Jahr anzeigen";
+"calendar.backToMonth" = "Zurück zum Monat";
+"calendar.year.monthHint" = "Öffnet diesen Monat";
+"calendar.timeline.break" = "Pause %@";
 "loading" = "Laden...";
 "empty.noWorkDays.title" = "Keine Einträge für diesen Monat";
 "empty.noWorkDays.message" = "Fügen Sie Ihren ersten Arbeitstag hinzu";
@@ -461,6 +471,20 @@
 "settings.workTime.weeklyHours" = "Stunden pro Woche";
 "settings.workTime.workingDays" = "Arbeitstage";
 "settings.workTime.dailyHours" = "Stunden pro Tag";
+"settings.workTime.scheduleMode" = "Arbeitszeit";
+"settings.workTime.mode.uniform" = "Einheitlich";
+"settings.workTime.mode.perDay" = "Pro Tag";
+"settings.workTime.perDayHours" = "Stunden pro Tag";
+"settings.workTime.restDay" = "Frei";
+"settings.workTime.weeklyTotal" = "Wochengesamt";
+"settings.workTime.hours" = "Stunden";
+"settings.workTime.minutes" = "Minuten";
+"settings.workTime.recalculate" = "Überstunden neu berechnen";
+"settings.workTime.recalculate.help" = "Wendet deine aktuellen Arbeitszeiten auf alle bereits erfassten Tage an.";
+"settings.workTime.recalculate.confirmTitle" = "Verlauf neu berechnen?";
+"settings.workTime.recalculate.confirmMessage" = "Die Überstunden aller Einträge werden anhand deiner aktuellen Arbeitszeiten neu berechnet. Dies kann nicht rückgängig gemacht werden.";
+"settings.workTime.recalculate.doneTitle" = "Neuberechnung abgeschlossen";
+"settings.workTime.recalculate.done" = "%d Tag(e) aktualisiert.";
 "settings.vacation.annualDays" = "Jährliche Urlaubstage";
 "settings.vacation.total" = "Gesamt";
 "settings.vacation.used" = "Verwendet: ";
@@ -539,11 +563,31 @@
 "paywall.error.purchase" = "Kauf fehlgeschlagen. Bitte erneut versuchen.";
 "paywall.error.redeemCode" = "Der Code konnte nicht validiert werden. Prüfen Sie den Code oder versuchen Sie es später erneut.";
 "paywall.loading" = "Angebote werden geladen…";
+"paywall.error.loadFailed" = "Angebote konnten nicht geladen werden. Prüfen Sie Ihre Internetverbindung.";
+"paywall.retry" = "Erneut versuchen";
+"paywall.purchase.pending.title" = "Kauf ausstehend";
+"paywall.purchase.pending.message" = "Ihr Kauf wartet auf eine Genehmigung (z. B. Kaufanfrage). Pro wird automatisch freigeschaltet, sobald der Kauf genehmigt wurde.";
 "siri.dialog.proRequired" = "Siri-Kurzbefehle sind Teil von WorkTimer Pro. Öffnen Sie die App, um auf Pro zu wechseln oder einen Promo-Code einzulösen.";
 
 // MARK: - Tips
 "tips.calendar.add.title" = "Tag hinzufügen";
-"tips.calendar.add.message" = "Tippen Sie auf +, um schnell einen Arbeitstag, Urlaubstag oder Ausgleichstag zu erfassen.";
+"tips.calendar.add.message" = "Tippen Sie auf +, um Arbeit, Urlaub oder Abwesenheit hinzuzufügen.";
+"accessibility.previousWeek" = "Vorherige Woche";
+"accessibility.nextWeek" = "Nächste Woche";
+"paywall.error.verification" = "Der Kauf konnte nicht überprüft werden. Versuchen Sie es erneut oder stellen Sie Ihre Käufe wieder her.";
+"intent.arrival.description" = "Erfasst Ihre Ankunftszeit bei der Arbeit.";
+"intent.departure.description" = "Erfasst Ihre Feierabendzeit.";
+"intent.overtime.description" = "Zeigt Ihren Überstundensaldo.";
+"intent.vacation.description" = "Zeigt Ihren Urlaubssaldo.";
+"intent.weeklySummary.description" = "Zeigt die Zusammenfassung Ihrer Arbeitswoche.";
+"intent.quickAdd.description" = "Fügt schnell einen Arbeitstag hinzu.";
+"siri.intent.quickAdd.summary %@" = "Tag vom Typ %@ hinzufügen";
+"intent.openDestination.description" = "Öffnet einen Bereich von WorkTimer.";
+"siri.intent.openDestination.summary %@" = "%@ öffnen";
+"intent.openDate.description" = "Öffnet den Kalender an einem bestimmten Datum.";
+"siri.intent.openDate.summary %@" = "Kalender am %@ öffnen";
+"intent.openPresetDate.description" = "Öffnet den Kalender für heute, morgen oder gestern.";
+"siri.intent.openPresetDate.summary %@" = "Kalender für %@ öffnen";
 
 "accessibility.previousMonth" = "Vorheriger Monat";
 "accessibility.nextMonth" = "Nächster Monat";
@@ -569,6 +613,12 @@
 // MARK: - Calendar mode
 "calendar.mode.month" = "Monat";
 "calendar.mode.week" = "Woche";
+"calendar.mode.year" = "Jahr";
+"calendar.mode.day" = "Tag";
+"calendar.mode.label" = "Ansicht";
+"calendar.options" = "Kalenderoptionen";
+"calendar.preview.hours" = "Arbeitszeit gesamt: %@";
+"calendar.preview.balance" = "Saldo %@";
 
 // MARK: - Cloud / Sync
 "cloud.about.description" = "Ihre Daten werden automatisch über iCloud auf allen Ihren Geräten synchronisiert.";
@@ -702,6 +752,13 @@
 
 // MARK: - Sync
 "sync.about.description" = "Die Synchronisierung verwendet iCloud, um Ihre Daten auf allen Ihren Apple-Geräten aktuell zu halten.";
+"sync.diagnostic.section" = "CloudKit-Diagnose";
+"sync.diagnostic.cloudkit" = "CloudKit";
+"sync.diagnostic.enabled" = "Aktiviert";
+"sync.diagnostic.disabled" = "Deaktiviert (Debug)";
+"sync.diagnostic.environment" = "Umgebung";
+"sync.diagnostic.container" = "Container";
+"sync.diagnostic.note" = "Im Debug-Modus ist CloudKit deaktiviert. TestFlight und der App Store verwenden die Produktionsumgebung: Das CloudKit-Schema muss dort über das Dashboard bereitgestellt werden, damit die Synchronisierung funktioniert.";
 "sync.action" = "Synchronisieren";
 "sync.details" = "Details";
 "sync.error.account" = "Problem mit Ihrem iCloud-Konto";
@@ -733,3 +790,39 @@
 "vacation.daysUsed" = "%.1f T verbraucht";
 "vacation.type.full" = "Urlaub";
 "vacation.type.halfDay" = "Halber Tag";
+"workDays.entries.count" = "%d Einträge";
+
+/* State of expandable settings sections */
+"accessibility.expanded" = "Erweitert";
+"accessibility.collapsed" = "Reduziert";
+
+/* Live-Timer / Stoppuhr */
+"timer.title" = "Stoppuhr";
+"timer.running" = "Läuft";
+"timer.paused" = "Pausiert";
+"timer.idle.subtitle" = "Starte deinen Tag mit einem Tipp.";
+"timer.clockIn" = "Einstempeln";
+"timer.clockOut" = "Ausstempeln";
+"timer.pause" = "Pause";
+"timer.resume" = "Fortsetzen";
+"timer.startedAt" = "Seit %@";
+"timer.breakLabel" = "Pause %@";
+"timer.accessibility.elapsed" = "Gearbeitete Zeit: %@";
+
+/* Hourly rate / earnings */
+"stats.earnings" = "Verdienst";
+"settings.workTime.hourlyRate" = "Stundensatz";
+"settings.workTime.hourlyRate.help" = "Zur Schätzung deines Verdienstes (Stunden × Satz + Bonus). 0 zum Deaktivieren.";
+
+/* Live timer display toggle */
+"settings.display.showTimer" = "Stoppuhr anzeigen";
+"settings.display.showTimer.help" = "Blende die Stoppuhr-Karte auf dem Start aus, wenn du Stunden manuell einträgst.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Endet am nächsten Tag";
+"timer.longSession.title" = "Sitzung zu lang";
+"timer.longSession.message" = "Diese Sitzung dauert über 24 Stunden. Gib deine tatsächliche Endzeit ein, um sie zu speichern.";
+"timer.longSession.warning" = "Über 24 Stunden: Ausstempeln vergessen?";
+"timer.longSession.endTime" = "Ende";
+"timer.longSession.discard" = "Sitzung löschen";
+"timer.longSession.discardConfirm" = "Diese Sitzung löschen, ohne sie zu speichern?";

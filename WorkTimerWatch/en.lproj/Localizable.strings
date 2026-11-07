@@ -1,0 +1,29 @@
+"watch.tab.timer" = "Timer";
+"watch.tab.summary" = "Summary";
+"watch.tab.add" = "Add";
+
+"watch.timer.clockIn" = "Clock in";
+"watch.timer.pause" = "Pause";
+"watch.timer.break" = "Break %@";
+"watch.timer.offline" = "iPhone out of reach — saved on reconnect";
+
+"watch.summary.overtime" = "Overtime balance";
+"watch.summary.week" = "This week";
+"watch.summary.vacation" = "Vacation left";
+
+"watch.add.type" = "Type";
+"watch.add.date" = "Date";
+"watch.add.start" = "Start";
+"watch.add.end" = "End";
+"watch.add.break" = "Break %d min";
+"watch.add.bonus" = "Bonus %d";
+"watch.add.invalid" = "End must be after start";
+"watch.add.save" = "Save";
+"watch.add.saved" = "Saved ✓";
+
+"watch.daytype.work" = "Work";
+"watch.daytype.vacation" = "Vacation";
+"watch.daytype.halfVacation" = "½ day off";
+"watch.daytype.sick" = "Sick";
+"watch.daytype.holiday" = "Holiday";
+"watch.daytype.comp" = "Comp";

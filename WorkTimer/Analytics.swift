@@ -73,7 +73,7 @@ struct AnalyticsParameters {
 final class Analytics {
     static let shared = Analytics()
     
-    private var isEnabled = true // Activé par défaut
+    private var isEnabled = false
     private var events: [(event: AnalyticsEvent, parameters: AnalyticsParameters, timestamp: Date)] = []
     private let maxEvents = 1000 // Limiter le buffer
     

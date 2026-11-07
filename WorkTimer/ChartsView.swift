@@ -140,7 +140,7 @@ struct ChartsView: View {
             .padding(.horizontal)
         }
         .padding(DS.Spacing.md)
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     // MARK: - Data Loading
@@ -152,12 +152,14 @@ struct ChartsView: View {
 
         guard let yearStart = calendar.date(from: DateComponents(year: selectedYear)),
               let yearEnd = calendar.date(byAdding: .year, value: 1, to: yearStart),
-              let dailyStart = calendar.date(byAdding: .day, value: -30, to: Date()),
-              let dailyEnd = calendar.date(byAdding: .day, value: 1, to: Date())
-        else { return }
+              let dailyRange = ChartsDateRange.last30Days(
+                in: selectedYear,
+                relativeTo: Date(),
+                calendar: calendar
+              ) else { return }
 
         let yearWorkDays = fetchWorkDays(from: yearStart, to: yearEnd, order: .forward)
-        let dailyWorkDays = fetchWorkDays(from: dailyStart, to: dailyEnd, order: .forward)
+        let dailyWorkDays = fetchWorkDays(from: dailyRange.start, to: dailyRange.end, order: .forward)
 
         cachedWeeklyData = ChartsDataService.weeklyData(from: yearWorkDays)
         cachedMonthlyData = ChartsDataService.monthlyData(from: yearWorkDays)
@@ -216,6 +218,38 @@ struct ChartsView: View {
                 animateCharts = true
             }
         }
+    }
+}
+
+enum ChartsDateRange {
+    /// Retourne une fenêtre de 30 jours entièrement contenue dans l'année choisie.
+    /// Pour l'année courante elle se termine demain afin d'inclure aujourd'hui ;
+    /// pour une année passée elle se termine au premier janvier suivant.
+    static func last30Days(
+        in year: Int,
+        relativeTo now: Date,
+        calendar: Calendar
+    ) -> DateInterval? {
+        guard let yearStart = calendar.date(from: DateComponents(year: year)),
+              let yearEnd = calendar.date(byAdding: .year, value: 1, to: yearStart) else {
+            return nil
+        }
+
+        let currentYear = calendar.component(.year, from: now)
+        let end: Date
+        if year == currentYear {
+            guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) else {
+                return nil
+            }
+            end = min(tomorrow, yearEnd)
+        } else {
+            end = yearEnd
+        }
+
+        guard let candidateStart = calendar.date(byAdding: .day, value: -30, to: end) else {
+            return nil
+        }
+        return DateInterval(start: max(yearStart, candidateStart), end: end)
     }
 }
 

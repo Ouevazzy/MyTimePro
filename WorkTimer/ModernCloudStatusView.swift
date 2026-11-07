@@ -18,7 +18,7 @@ struct ModernCloudStatusView: View {
             HStack {
                 Image(systemName: cloudService.syncStatus.iconName)
                     .font(.title3)
-                    .foregroundColor(cloudService.syncStatus.color)
+                    .foregroundStyle(cloudService.syncStatus.color)
                     .symbolEffect(.pulse,
                                  options: .repeating,
                                  isActive: isSyncing)
@@ -30,7 +30,7 @@ struct ModernCloudStatusView: View {
                 
                 Text(cloudService.syncStatus.description)
                     .font(.subheadline)
-                    .foregroundColor(cloudService.syncStatus.color)
+                    .foregroundStyle(cloudService.syncStatus.color)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(cloudService.syncStatus.color.opacity(0.1))
@@ -49,7 +49,7 @@ struct ModernCloudStatusView: View {
             if let message = cloudService.userMessage {
                 Text(message)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .animation(DS.Animation.micro, value: message)
             }
@@ -59,13 +59,13 @@ struct ModernCloudStatusView: View {
                 HStack {
                     Text("cloud.lastSync.label".localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
 
                     Spacer()
 
                     Text(timeAgo(lastSync))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -91,11 +91,7 @@ struct ModernCloudStatusView: View {
             .padding(.top, 8)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        )
+        .dsContentSurface(cornerRadius: DS.Radius.card)
         .sheet(isPresented: $showDetails) {
             CloudStatusDetailsView()
         }
@@ -181,7 +177,7 @@ struct CloudStatusDetailsView: View {
                         Label("État actuel", systemImage: "info.circle")
                         Spacer()
                         Text(cloudService.syncStatus.description)
-                            .foregroundColor(cloudService.syncStatus.color)
+                            .foregroundStyle(cloudService.syncStatus.color)
                     }
 
                     if let lastSync = cloudService.lastSyncDate {
@@ -189,7 +185,7 @@ struct CloudStatusDetailsView: View {
                             Label("Dernière synchronisation", systemImage: "clock")
                             Spacer()
                             Text(formatDate(lastSync))
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -218,7 +214,7 @@ struct CloudStatusDetailsView: View {
                         showResetConfirmation = true
                     } label: {
                         Label("cloud.reset".localized, systemImage: "exclamationmark.arrow.triangle.2.circlepath")
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                     }
                     .confirmationDialog(
                         "cloud.reset.title".localized,
@@ -243,14 +239,14 @@ struct CloudStatusDetailsView: View {
 
                         Text("cloud.about.description".localized)
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 8)
                 }
             }
             .navigationTitle("cloud.icloud.title".localized)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("action.close".localized) {
                         dismiss()
                     }
@@ -293,14 +289,16 @@ struct CloudStatusDetailsView: View {
 struct FirstSyncInfoView: View {
     @Binding var isPresented: Bool
     var cloudService = ModernCloudService.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animateIcon = false
     
     var body: some View {
         VStack(spacing: 20) {
             // En-tête
             Image(systemName: "arrow.clockwise.icloud")
                 .font(.system(size: 60))
-                .foregroundColor(.blue)
-                .symbolEffect(.bounce, options: .repeating)
+                .foregroundStyle(.blue)
+                .symbolEffect(.bounce, value: animateIcon)
             
             Text("cloud.firstSync.title".localized)
                 .font(.title)
@@ -327,21 +325,19 @@ struct FirstSyncInfoView: View {
                 )
             }
             .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .dsContentSurface(cornerRadius: DS.Radius.medium)
 
             // Statut actuel
             HStack {
                 Image(systemName: cloudService.syncStatus.iconName)
-                    .foregroundColor(cloudService.syncStatus.color)
+                    .foregroundStyle(cloudService.syncStatus.color)
 
                 Text(cloudService.syncStatus.description)
-                    .foregroundColor(cloudService.syncStatus.color)
+                    .foregroundStyle(cloudService.syncStatus.color)
             }
             .padding()
             .frame(maxWidth: .infinity)
-            .background(cloudService.syncStatus.color.opacity(0.1))
-            .cornerRadius(12)
+            .dsContentSurface(cornerRadius: DS.Radius.medium)
 
             // Bouton de fermeture
             Button {
@@ -358,6 +354,7 @@ struct FirstSyncInfoView: View {
         .padding()
         .onAppear {
             // Demander une synchronisation dès l'affichage
+            animateIcon = !reduceMotion
             cloudService.requestSync()
         }
     }
@@ -372,7 +369,7 @@ struct InfoRow: View {
         HStack(alignment: .top, spacing: 15) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.blue)
+                .foregroundStyle(.blue)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -381,7 +378,7 @@ struct InfoRow: View {
                 
                 Text(text)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

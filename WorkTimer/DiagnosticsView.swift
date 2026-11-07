@@ -6,7 +6,7 @@ struct DiagnosticsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
-    
+
     @State private var selectedYear: Int
     @State private var showingExportAlert = false
     @State private var diagnosticReport = ""
@@ -115,7 +115,7 @@ struct DiagnosticsView: View {
                                     .font(.headline)
                                 Spacer()
                                 Text(String(format: "%.1f j restants", entry.remaining))
-                                    .foregroundColor(entry.remaining > 0 ? .green : .red)
+                                    .foregroundStyle(entry.remaining > 0 ? .green : .red)
                             }
                             
                             HStack {
@@ -127,7 +127,7 @@ struct DiagnosticsView: View {
                                 Text("- Utilisés: \(String(format: "%.1f", entry.used))")
                             }
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
                     }
@@ -147,9 +147,9 @@ struct DiagnosticsView: View {
                     
                     HStack {
                         Image(systemName: isMatching ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .foregroundColor(isMatching ? .green : .orange)
+                            .foregroundStyle(isMatching ? .green : .orange)
                         Text(isMatching ? "Les calculs correspondent ✓" : "Différence: \(formatHours(difference))")
-                            .foregroundColor(isMatching ? .green : .orange)
+                            .foregroundStyle(isMatching ? .green : .orange)
                     }
                     
                 } header: {
@@ -163,9 +163,9 @@ struct DiagnosticsView: View {
                     if duplicates.isEmpty {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundStyle(.green)
                             Text("Aucun doublon détecté ✓")
-                                .foregroundColor(.green)
+                                .foregroundStyle(.green)
                         }
                     } else {
                         diagnosticRow("Dates avec doublons", value: "\(duplicates.count)", icon: "exclamationmark.triangle.fill", color: .orange)
@@ -175,13 +175,13 @@ struct DiagnosticsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Image(systemName: "calendar.badge.exclamationmark")
-                                        .foregroundColor(.orange)
+                                        .foregroundStyle(.orange)
                                     Text(duplicate.dateString)
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Text("\(duplicate.entries.count) entrées")
                                         .font(.caption)
-                                        .foregroundColor(.orange)
+                                        .foregroundStyle(.orange)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 2)
                                         .background(Color.orange.opacity(0.2))
@@ -192,11 +192,11 @@ struct DiagnosticsView: View {
                                     HStack {
                                         Text("• \(entry.type.displayName)")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                         if entry.type.isWorkDay, let start = entry.startTime, let end = entry.endTime {
                                             Text("\(formatTime(start)) - \(formatTime(end))")
                                                 .font(.caption)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                         Spacer()
                                     }
@@ -215,11 +215,11 @@ struct DiagnosticsView: View {
                     Button(action: { showingRecalculateAlert = true }) {
                         Label("Recalculer toutes les heures (\(selectedYear))", systemImage: "arrow.triangle.2.circlepath")
                     }
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     
                     Text("Recalcule les heures travaillées et supplémentaires de chaque entrée en fonction des paramètres actuels.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 } header: {
                     Label("OUTILS DE CORRECTION", systemImage: "wrench.and.screwdriver")
                 }
@@ -267,21 +267,31 @@ struct DiagnosticsView: View {
     }
     
     // MARK: - Computed Properties
-    
-    private var yearStats: YearStatistics {
+
+    private var selectedYearWorkDays: [WorkDay] {
         let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
+        return workDays.filter {
             calendar.component(.year, from: $0.date) == selectedYear
         }
-        
-        let activeWorkDays = yearWorkDays
+    }
+
+    private var activeSelectedYearWorkDays: [WorkDay] {
+        selectedYearWorkDays.filter { !$0.isDeleted }
+    }
+
+    private var yearStats: YearStatistics {
+        let yearWorkDays = selectedYearWorkDays
+        let activeWorkDays = activeSelectedYearWorkDays
         
         return YearStatistics(
             totalEntries: yearWorkDays.count,
-            deletedEntries: 0,
+            deletedEntries: yearWorkDays.count - activeWorkDays.count,
             activeEntries: activeWorkDays.count,
-            workDays: activeWorkDays.filter { $0.type == .work }.count,
+            workDays: Set(
+                activeWorkDays
+                    .filter { $0.type == .work }
+                    .map { Calendar.current.startOfDay(for: $0.date) }
+            ).count,
             totalHours: activeWorkDays.filter { $0.type == .work }.reduce(0) { $0 + $1.totalHours },
             overtimeSeconds: activeWorkDays.reduce(0) { $0 + $1.overtimeSeconds },
             vacationDays: activeWorkDays.filter { $0.type == .vacation }.count,
@@ -354,12 +364,7 @@ struct DiagnosticsView: View {
     }
     
     private var hoursVerification: HoursCheck {
-        let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear &&
-            $0.type == .work
-        }
+        let yearWorkDays = activeSelectedYearWorkDays.filter { $0.type == .work }
 
         // Heures stockées dans les WorkDay
         let storedHours = yearWorkDays.reduce(0.0) { $0 + $1.totalHours }
@@ -378,20 +383,12 @@ struct DiagnosticsView: View {
     
     /// Détecte les entrées en double pour la même date
     private var duplicateEntries: [DuplicateGroup] {
-        let calendar = Calendar.current
-        
-        // Filtrer par année sélectionnée
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear
-        }
+        let yearWorkDays = activeSelectedYearWorkDays
         
         // Grouper par date et type (jour uniquement, sans l'heure)
         var grouped: [String: [WorkDay]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-
         for workDay in yearWorkDays {
-            let key = "\(dateFormatter.string(from: workDay.date)):\(workDay.type.rawValue)"
+            let key = "\(Self.duplicateKeyFormatter.string(from: workDay.date)):\(workDay.type.rawValue)"
             grouped[key, default: []].append(workDay)
         }
         
@@ -399,12 +396,10 @@ struct DiagnosticsView: View {
         let duplicates = grouped
             .filter { $0.value.count > 1 }
             .map { (key, entries) -> DuplicateGroup in
-                let displayFormatter = DateFormatter()
-                displayFormatter.dateStyle = .medium
-                displayFormatter.locale = Locale(identifier: "fr_FR")
-                let displayDate = dateFormatter.date(from: key) ?? Date()
+                let dateKey = key.split(separator: ":", maxSplits: 1).first.map(String.init) ?? ""
+                let displayDate = Self.duplicateKeyFormatter.date(from: dateKey) ?? Date()
                 return DuplicateGroup(
-                    dateString: displayFormatter.string(from: displayDate),
+                    dateString: Self.mediumDateFormatter.string(from: displayDate),
                     entries: entries.sorted { $0.createdAt < $1.createdAt }
                 )
             }
@@ -418,7 +413,7 @@ struct DiagnosticsView: View {
     private func configurationRow(_ title: String, value: String) -> some View {
         HStack {
             Text(title)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
@@ -428,23 +423,23 @@ struct DiagnosticsView: View {
     private func diagnosticRow(_ title: String, value: String, icon: String, color: Color) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .frame(width: 24)
             Text(title)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
-                .foregroundColor(color)
+                .foregroundStyle(color)
         }
     }
     
     private func calculationStep(_ label: String, value: Double, color: Color, bold: Bool = false) -> some View {
         HStack {
             Text(label)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Spacer()
             Text(String(format: "%.2f j", value))
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .fontWeight(bold ? .bold : .regular)
         }
     }
@@ -452,10 +447,7 @@ struct DiagnosticsView: View {
     // MARK: - Helper Methods
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+        Self.mediumDateFormatter.string(from: date)
     }
     
     private func formatHours(_ hours: Double) -> String {
@@ -469,18 +461,14 @@ struct DiagnosticsView: View {
     }
     
     private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+        Self.shortTimeFormatter.string(from: date)
     }
     
     private func recalculateAllHours() {
-        let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear
-        }
+        let yearWorkDays = activeSelectedYearWorkDays
+        let previousValues = Dictionary(uniqueKeysWithValues: yearWorkDays.map {
+            ($0.id, ($0.totalHours, $0.overtimeSeconds))
+        })
         
         var modifiedCount = 0
         var unchangedCount = 0
@@ -488,17 +476,18 @@ struct DiagnosticsView: View {
         var totalOvertimeAfter: Int = 0
         
         for workDay in yearWorkDays {
-            let oldOvertime = workDay.overtimeSeconds
-            let oldTotalHours = workDay.totalHours
-            totalOvertimeBefore += oldOvertime
+            totalOvertimeBefore += workDay.overtimeSeconds
             
             // Recalculer les heures
             workDay.calculateHours()
-            
+        }
+
+        _ = WorkDay.reconcileDailyOvertime(for: yearWorkDays)
+
+        for workDay in yearWorkDays {
             totalOvertimeAfter += workDay.overtimeSeconds
-            
-            // Vérifier si quelque chose a changé
-            if workDay.overtimeSeconds != oldOvertime || abs(workDay.totalHours - oldTotalHours) > 0.001 {
+            guard let previous = previousValues[workDay.id] else { continue }
+            if workDay.overtimeSeconds != previous.1 || abs(workDay.totalHours - previous.0) > 0.001 {
                 modifiedCount += 1
             } else {
                 unchangedCount += 1
@@ -529,6 +518,28 @@ struct DiagnosticsView: View {
         
         showingRecalculateResult = true
     }
+
+    private static let mediumDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+
+    private static let shortTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+
+    private static let duplicateKeyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
     
     private func generateReport() {
         var report = """
@@ -636,9 +647,4 @@ private struct DuplicateGroup {
     DiagnosticsView()
         .modelContainer(for: WorkDay.self, inMemory: true)
 }
-
-
-
-
-
 

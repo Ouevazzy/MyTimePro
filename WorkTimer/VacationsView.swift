@@ -1,6 +1,16 @@
 import SwiftUI
 import SwiftData
 
+private enum VacationFormatters {
+    static let mediumDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+}
+
 struct StatsBox: View {
     let title: String
     let value: String
@@ -8,6 +18,7 @@ struct StatsBox: View {
     let color: Color
     var hoursValue: String? = nil
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animate = false
 
     var body: some View {
@@ -15,27 +26,27 @@ struct StatsBox: View {
             // Icône style Apple Settings
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .frame(width: DS.IconSize.inline, height: DS.IconSize.inline)
                 .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
-                .scaleEffect(animate ? 1 : 0.8)
-                .opacity(animate ? 1 : 0)
+                .scaleEffect(reduceMotion ? 1 : (animate ? 1 : 0.8))
+                .opacity(reduceMotion ? 1 : (animate ? 1 : 0))
                 .accessibilityHidden(true)
 
             Text(value)
                 .font(.system(.title3, design: .rounded))
                 .fontWeight(.semibold)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
 
             if let hoursValue {
                 Text(hoursValue)
                     .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.8))
+                    .foregroundStyle(.secondary.opacity(0.8))
             }
 
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -46,7 +57,7 @@ struct StatsBox: View {
         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title), \(value)")
-        .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.1), value: animate)
+        .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.7).delay(0.1), value: animate)
         .onAppear {
             animate = true
         }
@@ -56,7 +67,10 @@ struct StatsBox: View {
 struct VacationsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
+    @Query(filter: #Predicate<WorkDay> {
+        !$0.isDeleted &&
+        ($0.typeRawValue == "workDayType.vacation" || $0.typeRawValue == "workDayType.halfDayVacation")
+    }, sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
     @State private var selectedYear: Int
     
     let settings = UserSettings.shared
@@ -73,14 +87,26 @@ struct VacationsView: View {
     }
     
     // MARK: - Computed Properties
+    private var selectedYearWorkDays: [WorkDay] {
+        let calendar = Calendar.current
+        return workDays.filter {
+            calendar.component(.year, from: $0.date) == selectedYear
+        }
+    }
+
+    private var startYear: Int {
+        Calendar.current.component(.year, from: settings.vacationStartDate)
+    }
+
+    private var isStartYear: Bool {
+        selectedYear == startYear
+    }
+
     private var yearlyStats: YearlyVacationStats {
         let entitlement = Double(settings.annualVacationDays)
         let stats = VacationCalculations.remainingStats(for: selectedYear, workDays: workDays, annualEntitlement: entitlement)
         
         // Calculer les droits pour l'année sélectionnée
-        let calendar = Calendar.current
-        let startYear = calendar.component(.year, from: settings.vacationStartDate)
-        
         let currentYearEntitlement: Double
         if selectedYear == startYear {
             // Pour l'année de début : le solde initial contient DÉJÀ tout ce qui était disponible
@@ -140,7 +166,7 @@ struct VacationsView: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundStyle(.blue)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
@@ -163,9 +189,9 @@ struct VacationsView: View {
                         .fontWeight(.semibold)
                     Image(systemName: "chevron.down.circle.fill")
                         .font(.caption)
-                        .foregroundColor(.blue.opacity(0.7))
+                        .foregroundStyle(.blue.opacity(0.7))
                 }
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
@@ -183,7 +209,7 @@ struct VacationsView: View {
             }) {
                 Image(systemName: "chevron.right")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundStyle(.blue)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
@@ -197,15 +223,11 @@ struct VacationsView: View {
         VStack(spacing: 16) {
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
-                    let calendar = Calendar.current
-                    let startYear = calendar.component(.year, from: settings.vacationStartDate)
-                    let isStartYear = selectedYear == startYear
-                    
                     if isStartYear {
                         // Pour l'année de début : afficher le solde initial
                         StatsBox(
                             title: "vacation.initialBalance".localized,
-                            value: String(format: "%.1f j", yearlyStats.carryIn),
+                            value: formatDaysValue(yearlyStats.carryIn),
                             icon: "star.fill",
                             color: Color.purple,
                             hoursValue: formatDaysAsHours(yearlyStats.carryIn)
@@ -214,7 +236,7 @@ struct VacationsView: View {
                         // Pour les années suivantes : afficher droits + report
                         StatsBox(
                             title: "vacation.annualEntitlement".localized,
-                            value: String(format: "%.1f j", yearlyStats.annualEntitlement),
+                            value: formatDaysValue(yearlyStats.annualEntitlement),
                             icon: "calendar.badge.plus",
                             color: Color.blue,
                             hoursValue: formatDaysAsHours(yearlyStats.annualEntitlement)
@@ -222,7 +244,7 @@ struct VacationsView: View {
 
                         StatsBox(
                             title: "vacation.carryIn".localized,
-                            value: String(format: "%.1f j", yearlyStats.carryIn),
+                            value: formatDaysValue(yearlyStats.carryIn),
                             icon: "arrowshape.turn.up.right.fill",
                             color: Color.purple,
                             hoursValue: formatDaysAsHours(yearlyStats.carryIn)
@@ -233,7 +255,7 @@ struct VacationsView: View {
                 HStack(spacing: 12) {
                     StatsBox(
                         title: "vacation.used".localized,
-                        value: String(format: "%.1f j", yearlyStats.totalDays),
+                        value: formatDaysValue(yearlyStats.totalDays),
                         icon: "checkmark.circle",
                         color: Color.green,
                         hoursValue: formatDaysAsHours(yearlyStats.totalDays)
@@ -241,7 +263,7 @@ struct VacationsView: View {
 
                     StatsBox(
                         title: "vacation.remaining".localized,
-                        value: String(format: "%.1f j", yearlyStats.remainingDays),
+                        value: formatDaysValue(yearlyStats.remainingDays),
                         icon: "calendar.badge.clock",
                         color: yearlyStats.remainingDays > 0 ? Color.orange : Color.red,
                         hoursValue: formatDaysAsHours(yearlyStats.remainingDays)
@@ -258,39 +280,35 @@ struct VacationsView: View {
     }
     
     private var vacationExplanationView: some View {
-        let calendar = Calendar.current
-        let startYear = calendar.component(.year, from: settings.vacationStartDate)
-        let isStartYear = selectedYear == startYear
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.locale = Locale(identifier: "fr_FR")
-        
-        return VStack(spacing: 4) {
+        VStack(spacing: 4) {
             if isStartYear {
-                Text("Solde restant = Solde initial - Utilisés")
+                Text("vacation.calculation.initial".localized)
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("Solde initial saisi pour le \(dateFormatter.string(from: settings.vacationStartDate))")
+                    .foregroundStyle(.secondary)
+                Text("vacation.initialDate.label".localized(VacationFormatters.mediumDate.string(from: settings.vacationStartDate)))
                     .font(.caption2)
-                    .foregroundColor(.blue)
+                    .foregroundStyle(.blue)
             } else {
-                Text("Solde restant = Droits annuels + Report - Utilisés")
+                Text("vacation.calculation.standard".localized)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             
-            Text("Le solde restant est reporté à l'année suivante")
+            Text("vacation.carryover.note".localized)
                 .font(.caption2)
-                .foregroundColor(.secondary.opacity(0.8))
+                .foregroundStyle(.secondary.opacity(0.8))
         }
     }
     
     /// Convertit un nombre de jours en heures formatées
+    private func formatDaysValue(_ days: Double) -> String {
+        String(format: "%.1f %@", days, "time.days.short".localized)
+    }
+
     private func formatDaysAsHours(_ days: Double) -> String {
         let hours = days * settings.standardDailyHours
         if settings.useDecimalHours {
-            return String(format: "%.1fh", hours)
+            return String(format: "%.1f%@", hours, "time.hours.short".localized)
         } else {
             let totalMinutes = Int(round(hours * 60))
             let h = abs(totalMinutes / 60)
@@ -302,10 +320,7 @@ struct VacationsView: View {
 
     private var vacationsList: some View {
         List {
-            let filteredWorkDays = workDays.filter {
-                Calendar.current.component(.year, from: $0.date) == selectedYear &&
-                ($0.type == .vacation || $0.type == .halfDayVacation)
-            }.sorted(by: { $0.date > $1.date })
+            let filteredWorkDays = selectedYearWorkDays
             
             if filteredWorkDays.isEmpty {
                 EmptyStateView(
@@ -318,7 +333,7 @@ struct VacationsView: View {
                 .listRowInsets(EdgeInsets())
             } else {
                 ForEach(filteredWorkDays) { workDay in
-                    VacationRow(workDay: workDay)
+                    VacationRow(workDay: workDay, standardDailyHours: settings.standardDailyHours)
                         .listRowBackground(Color.clear)
                 }
             }
@@ -330,8 +345,18 @@ struct VacationsView: View {
 
 struct VacationRow: View {
     let workDay: WorkDay
+    let standardDailyHours: Double
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animate = false
+
+    private var days: Double {
+        workDay.type == .vacation ? 1.0 : 0.5
+    }
+
+    private var durationLabel: String {
+        workDay.type == .vacation ? "vacation.fullDay".localized : "vacation.halfDay".localized
+    }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -359,29 +384,28 @@ struct VacationRow: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(workDay.type == .vacation ? "Congé" : "Demi-journée")
+                Text(workDay.type.localizedName)
                     .font(.headline)
                 
                 HStack(spacing: 6) {
-                    Text(formatDate(workDay.date))
+                    Text(VacationFormatters.mediumDate.string(from: workDay.date))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
                     Text("•")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
-                    let days: Double = workDay.type == .vacation ? 1.0 : 0.5
-                    let hours = days * UserSettings.shared.standardDailyHours
-                    Text(String(format: workDay.type == .vacation ? "1 jour (%.1fh)" : "0.5 jour (%.1fh)", hours))
+                    let hours = days * standardDailyHours
+                    Text("\(durationLabel) (\(String(format: "%.1f%@", hours, "time.hours.short".localized)))")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
                 }
                 
                 if let note = workDay.note, !note.isEmpty {
                     Text(note)
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                         .lineLimit(2)
                         .padding(.top, 2)
                 }
@@ -392,7 +416,7 @@ struct VacationRow: View {
             // Chevron de navigation
             Image(systemName: "chevron.right")
                 .font(.caption)
-                .foregroundColor(.secondary.opacity(0.5))
+                .foregroundStyle(.secondary.opacity(0.5))
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -401,20 +425,12 @@ struct VacationRow: View {
                 .fill(Color(.secondarySystemGroupedBackground))
         }
         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
-        .opacity(animate ? 1 : 0)
-        .offset(x: animate ? 0 : -20)
-        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: animate)
+        .opacity(reduceMotion ? 1 : (animate ? 1 : 0))
+        .offset(x: reduceMotion ? 0 : (animate ? 0 : -20))
+        .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.7), value: animate)
         .onAppear {
             animate = true
         }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        dateFormatter.locale = Locale(identifier: "fr_FR")
-        return dateFormatter.string(from: date)
     }
 }
 

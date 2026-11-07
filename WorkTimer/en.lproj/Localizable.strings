@@ -142,10 +142,30 @@
 "calendar.title" = "Calendar";
 "calendar.mode.month" = "Month";
 "calendar.mode.week" = "Week";
+"calendar.mode.year" = "Year";
+"calendar.mode.day" = "Day";
+"calendar.mode.label" = "View";
+"calendar.options" = "Calendar Options";
+"calendar.preview.hours" = "Total worked: %@";
+"calendar.preview.balance" = "Balance %@";
 "calendar.today" = "Today";
 "calendar.selectDate" = "Select a Date";
 "calendar.weekNumbers" = "Week Numbers";
 "calendar.noEvents" = "No events this week";
+"calendar.day.noEntry" = "No day recorded";
+"calendar.day.noEntry.detail" = "Add your hours, leave, or an absence for this date.";
+"calendar.day.add" = "Add a Day";
+"calendar.view.compact" = "Compact";
+"calendar.view.stack" = "Stack";
+"calendar.view.details" = "Details";
+"calendar.view.label" = "Day Display";
+"calendar.bonus" = "Bonus: %.0f";
+"calendar.delete.title" = "Delete This Day?";
+"calendar.delete.message" = "This action cannot be undone.";
+"calendar.yearOverview" = "Show Year";
+"calendar.backToMonth" = "Back to Month";
+"calendar.year.monthHint" = "Opens this month";
+"calendar.timeline.break" = "Break %@";
 
 // MARK: - Months
 "month.january" = "January";
@@ -300,6 +320,13 @@
 "sync.reset" = "Reset Sync";
 "sync.section.about" = "About";
 "sync.about.description" = "Sync uses iCloud to keep your data up to date across all your Apple devices.";
+"sync.diagnostic.section" = "CloudKit Diagnostics";
+"sync.diagnostic.cloudkit" = "CloudKit";
+"sync.diagnostic.enabled" = "Enabled";
+"sync.diagnostic.disabled" = "Disabled (Debug)";
+"sync.diagnostic.environment" = "Environment";
+"sync.diagnostic.container" = "Container";
+"sync.diagnostic.note" = "CloudKit is disabled in Debug. TestFlight and the App Store use the Production environment: the CloudKit schema must be deployed there via the Dashboard for sync to work.";
 "sync.reset.title" = "Reset Sync";
 "sync.reset.confirm" = "Reset";
 "sync.reset.message" = "This will delete local sync data and force a full re-sync with iCloud.";
@@ -353,6 +380,20 @@
 "settings.workTime.weeklyHours" = "Hours per Week";
 "settings.workTime.workingDays" = "Working Days";
 "settings.workTime.dailyHours" = "Hours per Day";
+"settings.workTime.scheduleMode" = "Work Schedule";
+"settings.workTime.mode.uniform" = "Same daily";
+"settings.workTime.mode.perDay" = "Per day";
+"settings.workTime.perDayHours" = "Hours per day";
+"settings.workTime.restDay" = "Day off";
+"settings.workTime.weeklyTotal" = "Weekly total";
+"settings.workTime.hours" = "Hours";
+"settings.workTime.minutes" = "Minutes";
+"settings.workTime.recalculate" = "Recalculate overtime";
+"settings.workTime.recalculate.help" = "Reapplies your current schedule to every entry you've already saved.";
+"settings.workTime.recalculate.confirmTitle" = "Recalculate history?";
+"settings.workTime.recalculate.confirmMessage" = "Overtime for all your entries will be recalculated using your current schedule. This can't be undone.";
+"settings.workTime.recalculate.doneTitle" = "Recalculation complete";
+"settings.workTime.recalculate.done" = "%d entries updated.";
 "settings.vacation.annualDays" = "Annual Vacation Days";
 "settings.vacation.total" = "Total";
 "settings.vacation.used" = "Used: ";
@@ -607,11 +648,67 @@
 "paywall.error.purchase" = "Purchase failed. Please try again.";
 "paywall.error.redeemCode" = "The code could not be validated. Check the code or try again later.";
 "paywall.loading" = "Loading offers…";
+"paywall.error.loadFailed" = "Unable to load offers. Check your internet connection.";
+"paywall.retry" = "Retry";
+"paywall.purchase.pending.title" = "Purchase Pending";
+"paywall.purchase.pending.message" = "Your purchase is awaiting approval (for example Ask to Buy). Pro will unlock automatically once the purchase is approved.";
 "siri.dialog.proRequired" = "Siri Shortcuts are part of WorkTimer Pro. Open the app to upgrade or redeem a promo code.";
 
 // MARK: - Tips
 "tips.calendar.add.title" = "Add a day";
-"tips.calendar.add.message" = "Tap + to quickly record a work day, vacation day, or compensation day.";
+"tips.calendar.add.message" = "Tap + to add work, leave, or an absence.";
+"accessibility.previousWeek" = "Previous week";
+"accessibility.nextWeek" = "Next week";
+"paywall.error.verification" = "The purchase could not be verified. Try again or restore your purchases.";
+"intent.arrival.description" = "Records your arrival time at work.";
+"intent.departure.description" = "Records your departure time from work.";
+"intent.overtime.description" = "Shows your overtime balance.";
+"intent.vacation.description" = "Shows your vacation balance.";
+"intent.weeklySummary.description" = "Shows your work week summary.";
+"intent.quickAdd.description" = "Quickly adds a work day.";
+"siri.intent.quickAdd.summary %@" = "Add a day of type %@";
+"intent.openDestination.description" = "Opens a section of WorkTimer.";
+"siri.intent.openDestination.summary %@" = "Open %@";
+"intent.openDate.description" = "Opens the calendar on a specific date.";
+"siri.intent.openDate.summary %@" = "Open the calendar on %@";
+"intent.openPresetDate.description" = "Opens the calendar on today, tomorrow, or yesterday.";
+"siri.intent.openPresetDate.summary %@" = "Open the calendar on %@";
 
 "accessibility.previousMonth" = "Previous month";
 "accessibility.nextMonth" = "Next month";
+"workDays.entries.count" = "%d entries";
+
+/* State of expandable settings sections */
+"accessibility.expanded" = "Expanded";
+"accessibility.collapsed" = "Collapsed";
+
+/* Live timer */
+"timer.title" = "Timer";
+"timer.running" = "Running";
+"timer.paused" = "Paused";
+"timer.idle.subtitle" = "Start your day with one tap.";
+"timer.clockIn" = "Clock in";
+"timer.clockOut" = "Clock out";
+"timer.pause" = "Pause";
+"timer.resume" = "Resume";
+"timer.startedAt" = "Since %@";
+"timer.breakLabel" = "Break %@";
+"timer.accessibility.elapsed" = "Worked time: %@";
+
+/* Hourly rate / earnings */
+"stats.earnings" = "Earnings";
+"settings.workTime.hourlyRate" = "Hourly rate";
+"settings.workTime.hourlyRate.help" = "Used to estimate your earnings (hours × rate + bonus). Leave at 0 to disable.";
+
+/* Live timer display toggle */
+"settings.display.showTimer" = "Show the timer";
+"settings.display.showTimer.help" = "Hide the timer card from Home if you log your hours manually.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Ends the next day";
+"timer.longSession.title" = "Session too long";
+"timer.longSession.message" = "This session is over 24 hours. Enter your actual end time to save it.";
+"timer.longSession.warning" = "Over 24 hours: did you forget to clock out?";
+"timer.longSession.endTime" = "End";
+"timer.longSession.discard" = "Delete session";
+"timer.longSession.discardConfirm" = "Delete this session without saving it?";

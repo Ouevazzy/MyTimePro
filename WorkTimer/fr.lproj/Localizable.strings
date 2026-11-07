@@ -142,10 +142,30 @@
 "calendar.title" = "Calendrier";
 "calendar.mode.month" = "Mois";
 "calendar.mode.week" = "Semaine";
+"calendar.mode.year" = "Année";
+"calendar.mode.day" = "Jour";
+"calendar.mode.label" = "Présentation";
+"calendar.options" = "Options du calendrier";
+"calendar.preview.hours" = "Total travaillé : %@";
+"calendar.preview.balance" = "Solde %@";
 "calendar.today" = "Aujourd'hui";
 "calendar.selectDate" = "Choisir une date";
 "calendar.weekNumbers" = "Numéros de semaine";
 "calendar.noEvents" = "Aucun événement cette semaine";
+"calendar.day.noEntry" = "Aucune journée enregistrée";
+"calendar.day.noEntry.detail" = "Ajoutez vos heures, un congé ou une absence pour cette date.";
+"calendar.day.add" = "Ajouter une journée";
+"calendar.view.compact" = "Compact";
+"calendar.view.stack" = "Pile";
+"calendar.view.details" = "Détails";
+"calendar.view.label" = "Affichage des journées";
+"calendar.bonus" = "Bonus : %.0f";
+"calendar.delete.title" = "Supprimer cette journée ?";
+"calendar.delete.message" = "Cette action est définitive.";
+"calendar.yearOverview" = "Afficher l’année";
+"calendar.backToMonth" = "Revenir au mois";
+"calendar.year.monthHint" = "Ouvre ce mois";
+"calendar.timeline.break" = "Pause %@";
 
 // MARK: - Months
 "month.january" = "Janvier";
@@ -300,6 +320,13 @@
 "sync.reset" = "Réinitialiser la synchronisation";
 "sync.section.about" = "À propos";
 "sync.about.description" = "La synchronisation utilise iCloud pour garder vos données à jour sur tous vos appareils Apple.";
+"sync.diagnostic.section" = "Diagnostic CloudKit";
+"sync.diagnostic.cloudkit" = "CloudKit";
+"sync.diagnostic.enabled" = "Activé";
+"sync.diagnostic.disabled" = "Désactivé (mode Debug)";
+"sync.diagnostic.environment" = "Environnement";
+"sync.diagnostic.container" = "Conteneur";
+"sync.diagnostic.note" = "En Debug, CloudKit est désactivé. TestFlight et l'App Store utilisent l'environnement Production : le schéma CloudKit doit y être déployé via le Dashboard pour que la synchronisation fonctionne.";
 "sync.reset.title" = "Réinitialiser la synchronisation";
 "sync.reset.confirm" = "Réinitialiser";
 "sync.reset.message" = "Cette action supprimera les données de synchronisation locales et forcera une nouvelle synchronisation complète avec iCloud.";
@@ -353,6 +380,20 @@
 "settings.workTime.weeklyHours" = "Heures par semaine";
 "settings.workTime.workingDays" = "Jours travaillés";
 "settings.workTime.dailyHours" = "Heures par jour";
+"settings.workTime.scheduleMode" = "Horaires de travail";
+"settings.workTime.mode.uniform" = "Identique";
+"settings.workTime.mode.perDay" = "Par jour";
+"settings.workTime.perDayHours" = "Heures par jour";
+"settings.workTime.restDay" = "Repos";
+"settings.workTime.weeklyTotal" = "Total hebdomadaire";
+"settings.workTime.hours" = "Heures";
+"settings.workTime.minutes" = "Minutes";
+"settings.workTime.recalculate" = "Recalculer les heures supp.";
+"settings.workTime.recalculate.help" = "Réapplique tes horaires actuels à toutes les journées déjà enregistrées.";
+"settings.workTime.recalculate.confirmTitle" = "Recalculer l'historique ?";
+"settings.workTime.recalculate.confirmMessage" = "Les heures supplémentaires de toutes tes journées seront recalculées selon tes horaires actuels. Cette action est irréversible.";
+"settings.workTime.recalculate.doneTitle" = "Recalcul terminé";
+"settings.workTime.recalculate.done" = "%d journée(s) mise(s) à jour.";
 "settings.vacation.annualDays" = "Jours de congé annuels";
 "settings.vacation.total" = "Total";
 "settings.vacation.used" = "Utilisés: ";
@@ -607,11 +648,67 @@
 "paywall.error.purchase" = "L'achat a échoué. Veuillez réessayer.";
 "paywall.error.redeemCode" = "Le code n'a pas pu être validé. Vérifiez le code ou réessayez plus tard.";
 "paywall.loading" = "Chargement des offres…";
+"paywall.error.loadFailed" = "Impossible de charger les offres. Vérifiez votre connexion internet.";
+"paywall.retry" = "Réessayer";
+"paywall.purchase.pending.title" = "Achat en attente";
+"paywall.purchase.pending.message" = "Votre achat attend une approbation (par exemple « Demander à acheter »). Pro sera activé automatiquement une fois l'achat approuvé.";
 "siri.dialog.proRequired" = "Les raccourcis Siri font partie de WorkTimer Pro. Ouvrez l'app pour passer à Pro ou utiliser un code promo.";
 
 // MARK: - Tips
 "tips.calendar.add.title" = "Ajoutez une journée";
-"tips.calendar.add.message" = "Touchez + pour enregistrer rapidement un jour de travail, de congé ou de récupération.";
+"tips.calendar.add.message" = "Touchez + pour ajouter du travail, un congé ou une absence.";
+"accessibility.previousWeek" = "Semaine précédente";
+"accessibility.nextWeek" = "Semaine suivante";
+"paywall.error.verification" = "L’achat n’a pas pu être vérifié. Réessayez ou restaurez vos achats.";
+"intent.arrival.description" = "Enregistre l’heure d’arrivée au travail.";
+"intent.departure.description" = "Enregistre l’heure de départ du travail.";
+"intent.overtime.description" = "Affiche le solde d’heures supplémentaires.";
+"intent.vacation.description" = "Affiche le solde de jours de congés.";
+"intent.weeklySummary.description" = "Affiche le résumé de la semaine de travail.";
+"intent.quickAdd.description" = "Ajoute rapidement une journée de travail.";
+"siri.intent.quickAdd.summary %@" = "Ajouter une journée de type %@";
+"intent.openDestination.description" = "Ouvre une section de WorkTimer.";
+"siri.intent.openDestination.summary %@" = "Ouvrir %@";
+"intent.openDate.description" = "Ouvre le calendrier à une date précise.";
+"siri.intent.openDate.summary %@" = "Ouvrir le calendrier le %@";
+"intent.openPresetDate.description" = "Ouvre le calendrier sur aujourd’hui, demain ou hier.";
+"siri.intent.openPresetDate.summary %@" = "Ouvrir le calendrier sur %@";
 
 "accessibility.previousMonth" = "Mois précédent";
 "accessibility.nextMonth" = "Mois suivant";
+"workDays.entries.count" = "%d entrées";
+
+/* State of expandable settings sections */
+"accessibility.expanded" = "Développé";
+"accessibility.collapsed" = "Réduit";
+
+/* Live timer / Chronomètre */
+"timer.title" = "Chrono";
+"timer.running" = "En cours";
+"timer.paused" = "En pause";
+"timer.idle.subtitle" = "Démarrez votre journée en un geste.";
+"timer.clockIn" = "Pointer l'arrivée";
+"timer.clockOut" = "Pointer le départ";
+"timer.pause" = "Pause";
+"timer.resume" = "Reprendre";
+"timer.startedAt" = "Depuis %@";
+"timer.breakLabel" = "Pause %@";
+"timer.accessibility.elapsed" = "Temps travaillé : %@";
+
+/* Hourly rate / earnings */
+"stats.earnings" = "Rémunération";
+"settings.workTime.hourlyRate" = "Taux horaire";
+"settings.workTime.hourlyRate.help" = "Utilisé pour estimer votre rémunération (heures × taux + bonus). Laissez à 0 pour désactiver.";
+
+/* Live timer display toggle */
+"settings.display.showTimer" = "Afficher le chronomètre";
+"settings.display.showTimer.help" = "Masquez la carte chronomètre de l'accueil si vous saisissez vos heures à la main.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Fin le lendemain";
+"timer.longSession.title" = "Session trop longue";
+"timer.longSession.message" = "Cette session dépasse 24 h. Indiquez votre véritable heure de fin pour l'enregistrer.";
+"timer.longSession.warning" = "Plus de 24 h : avez-vous oublié de pointer ?";
+"timer.longSession.endTime" = "Fin";
+"timer.longSession.discard" = "Supprimer la session";
+"timer.longSession.discardConfirm" = "Supprimer cette session sans l'enregistrer ?";
