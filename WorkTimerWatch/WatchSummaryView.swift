@@ -12,19 +12,19 @@ struct WatchSummaryView: View {
         ScrollView {
             VStack(spacing: 8) {
                 summaryRow(
-                    title: "Solde heures sup",
+                    title: "watch.summary.overtime".loc,
                     value: WatchFormat.signedHours(seconds: link.overtimeSeconds, decimal: link.useDecimalHours),
                     color: link.overtimeSeconds < 0 ? .red : .green,
                     icon: "clock.arrow.circlepath"
                 )
                 summaryRow(
-                    title: "Cette semaine",
+                    title: "watch.summary.week".loc,
                     value: WatchFormat.hours(link.weeklyHours, decimal: link.useDecimalHours),
                     color: .blue,
                     icon: "briefcase.fill"
                 )
                 summaryRow(
-                    title: "Congés restants",
+                    title: "watch.summary.vacation".loc,
                     value: WatchFormat.days(link.vacationBalance),
                     color: .orange,
                     icon: "sun.max.fill"
@@ -32,7 +32,7 @@ struct WatchSummaryView: View {
             }
             .padding(.vertical, 4)
         }
-        .navigationTitle("Résumé")
+        .navigationTitle("watch.tab.summary".loc)
     }
 
     private func summaryRow(title: String, value: String, color: Color, icon: String) -> some View {

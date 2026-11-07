@@ -9,13 +9,13 @@ struct WatchHomeView: View {
     var body: some View {
         TabView {
             WatchTimerView()
-                .tabItem { Label("Chrono", systemImage: "timer") }
+                .tabItem { Label("watch.tab.timer".loc, systemImage: "timer") }
 
             WatchSummaryView()
-                .tabItem { Label("Résumé", systemImage: "chart.bar.fill") }
+                .tabItem { Label("watch.tab.summary".loc, systemImage: "chart.bar.fill") }
 
             WatchAddDayView()
-                .tabItem { Label("Ajouter", systemImage: "plus.circle.fill") }
+                .tabItem { Label("watch.tab.add".loc, systemImage: "plus.circle.fill") }
         }
         .tabViewStyle(.verticalPage)
     }

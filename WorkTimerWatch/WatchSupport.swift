@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+/// Raccourci de localisation pour l'app montre (clés dans WorkTimerWatch/*.lproj).
+extension String {
+    var loc: String { NSLocalizedString(self, comment: "") }
+}
+
 /// Types de journée proposés à la saisie sur la montre.
 /// `raw` doit correspondre à `WorkDayType.rawValue` côté iPhone.
 enum WatchDayType: String, CaseIterable, Identifiable {
@@ -22,12 +27,12 @@ enum WatchDayType: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .work: return "Travail"
-        case .vacation: return "Congé"
-        case .halfDayVacation: return "½ congé"
-        case .sickLeave: return "Maladie"
-        case .holiday: return "Férié"
-        case .compensatory: return "Récup"
+        case .work: return "watch.daytype.work".loc
+        case .vacation: return "watch.daytype.vacation".loc
+        case .halfDayVacation: return "watch.daytype.halfVacation".loc
+        case .sickLeave: return "watch.daytype.sick".loc
+        case .holiday: return "watch.daytype.holiday".loc
+        case .compensatory: return "watch.daytype.comp".loc
         }
     }
 

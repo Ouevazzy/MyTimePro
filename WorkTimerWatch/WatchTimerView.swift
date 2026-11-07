@@ -21,7 +21,7 @@ struct WatchTimerView: View {
             }
             .padding(.vertical, 4)
         }
-        .navigationTitle("Chrono")
+        .navigationTitle("watch.tab.timer".loc)
     }
 
     private var idleContent: some View {
@@ -32,7 +32,7 @@ struct WatchTimerView: View {
             Button {
                 link.startTimer()
             } label: {
-                Label("Pointer l'arrivée", systemImage: "play.fill")
+                Label("watch.timer.clockIn".loc, systemImage: "play.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -53,7 +53,7 @@ struct WatchTimerView: View {
                         .lineLimit(1)
                     let brk = link.breakSeconds(at: now)
                     if brk >= 60 || link.timerPaused {
-                        Text("Pause \(WatchFormat.elapsed(brk))")
+                        Text(String(format: "watch.timer.break".loc, WatchFormat.elapsed(brk)))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
@@ -81,7 +81,7 @@ struct WatchTimerView: View {
             }
 
             if !link.isReachable {
-                Text("iPhone hors de portée — enregistré à la reconnexion")
+                Text("watch.timer.offline".loc)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

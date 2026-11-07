@@ -1,0 +1,29 @@
+"watch.tab.timer" = "Stoppuhr";
+"watch.tab.summary" = "Übersicht";
+"watch.tab.add" = "Hinzufügen";
+
+"watch.timer.clockIn" = "Einstempeln";
+"watch.timer.pause" = "Pause";
+"watch.timer.break" = "Pause %@";
+"watch.timer.offline" = "iPhone nicht erreichbar — bei Verbindung gespeichert";
+
+"watch.summary.overtime" = "Überstundensaldo";
+"watch.summary.week" = "Diese Woche";
+"watch.summary.vacation" = "Resturlaub";
+
+"watch.add.type" = "Typ";
+"watch.add.date" = "Datum";
+"watch.add.start" = "Start";
+"watch.add.end" = "Ende";
+"watch.add.break" = "Pause %d Min";
+"watch.add.bonus" = "Bonus %d";
+"watch.add.invalid" = "Ende muss nach Start liegen";
+"watch.add.save" = "Speichern";
+"watch.add.saved" = "Gespeichert ✓";
+
+"watch.daytype.work" = "Arbeit";
+"watch.daytype.vacation" = "Urlaub";
+"watch.daytype.halfVacation" = "½ Urlaub";
+"watch.daytype.sick" = "Krank";
+"watch.daytype.holiday" = "Feiertag";
+"watch.daytype.comp" = "Zeitausgleich";

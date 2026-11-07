@@ -25,25 +25,25 @@ struct WatchAddDayView: View {
 
     var body: some View {
         Form {
-            Picker("Type", selection: $type) {
+            Picker("watch.add.type".loc, selection: $type) {
                 ForEach(WatchDayType.allCases) { t in
                     Label(t.label, systemImage: t.icon).tag(t)
                 }
             }
 
-            DatePicker("Date", selection: $date, displayedComponents: .date)
+            DatePicker("watch.add.date".loc, selection: $date, displayedComponents: .date)
 
             if type.isWork {
-                DatePicker("Début", selection: $startTime, displayedComponents: .hourAndMinute)
-                DatePicker("Fin", selection: $endTime, displayedComponents: .hourAndMinute)
+                DatePicker("watch.add.start".loc, selection: $startTime, displayedComponents: .hourAndMinute)
+                DatePicker("watch.add.end".loc, selection: $endTime, displayedComponents: .hourAndMinute)
                 Stepper(value: $breakMinutes, in: 0...480, step: 15) {
-                    Text("Pause \(breakMinutes) min")
+                    Text(String(format: "watch.add.break".loc, breakMinutes))
                 }
                 Stepper(value: $bonus, in: 0...500, step: 5) {
-                    Text("Bonus \(bonus)")
+                    Text(String(format: "watch.add.bonus".loc, bonus))
                 }
                 if !isValid {
-                    Text("La fin doit être après le début")
+                    Text("watch.add.invalid".loc)
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
@@ -52,7 +52,7 @@ struct WatchAddDayView: View {
             Button {
                 save()
             } label: {
-                Label(justSaved ? "Enregistré ✓" : "Enregistrer",
+                Label(justSaved ? "watch.add.saved".loc : "watch.add.save".loc,
                       systemImage: justSaved ? "checkmark.circle.fill" : "square.and.arrow.down")
                     .frame(maxWidth: .infinity)
             }
@@ -60,7 +60,7 @@ struct WatchAddDayView: View {
             .tint(justSaved ? .green : .blue)
             .disabled(!isValid)
         }
-        .navigationTitle("Ajouter")
+        .navigationTitle("watch.tab.add".loc)
     }
 
     private func save() {

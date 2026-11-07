@@ -1,0 +1,29 @@
+"watch.tab.timer" = "Chrono";
+"watch.tab.summary" = "Résumé";
+"watch.tab.add" = "Ajouter";
+
+"watch.timer.clockIn" = "Pointer l'arrivée";
+"watch.timer.pause" = "Pause";
+"watch.timer.break" = "Pause %@";
+"watch.timer.offline" = "iPhone hors de portée — enregistré à la reconnexion";
+
+"watch.summary.overtime" = "Solde heures sup";
+"watch.summary.week" = "Cette semaine";
+"watch.summary.vacation" = "Congés restants";
+
+"watch.add.type" = "Type";
+"watch.add.date" = "Date";
+"watch.add.start" = "Début";
+"watch.add.end" = "Fin";
+"watch.add.break" = "Pause %d min";
+"watch.add.bonus" = "Bonus %d";
+"watch.add.invalid" = "La fin doit être après le début";
+"watch.add.save" = "Enregistrer";
+"watch.add.saved" = "Enregistré ✓";
+
+"watch.daytype.work" = "Travail";
+"watch.daytype.vacation" = "Congé";
+"watch.daytype.halfVacation" = "½ congé";
+"watch.daytype.sick" = "Maladie";
+"watch.daytype.holiday" = "Férié";
+"watch.daytype.comp" = "Récup";
