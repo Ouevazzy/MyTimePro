@@ -703,3 +703,12 @@
 /* Live timer display toggle */
 "settings.display.showTimer" = "Afficher le chronomètre";
 "settings.display.showTimer.help" = "Masquez la carte chronomètre de l'accueil si vous saisissez vos heures à la main.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Fin le lendemain";
+"timer.longSession.title" = "Session trop longue";
+"timer.longSession.message" = "Cette session dépasse 24 h. Indiquez votre véritable heure de fin pour l'enregistrer.";
+"timer.longSession.warning" = "Plus de 24 h : avez-vous oublié de pointer ?";
+"timer.longSession.endTime" = "Fin";
+"timer.longSession.discard" = "Supprimer la session";
+"timer.longSession.discardConfirm" = "Supprimer cette session sans l'enregistrer ?";

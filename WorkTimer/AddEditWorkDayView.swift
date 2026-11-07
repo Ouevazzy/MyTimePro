@@ -42,6 +42,8 @@ struct WorkDayFormDraft {
     let breakDuration: Date
     let bonusAmount: Double
     let note: String
+    /// La fin tombe le lendemain de `date` (session de nuit).
+    var endsNextDay = false
     var calendar = Calendar.current
 
     var normalizedDate: Date {
@@ -64,7 +66,10 @@ struct WorkDayFormDraft {
 
     var normalizedEndTime: Date? {
         guard type.isWorkDay else { return nil }
-        return Self.time(endTime, on: normalizedDate, calendar: calendar)
+        let endDay = endsNextDay
+            ? calendar.date(byAdding: .day, value: 1, to: normalizedDate) ?? normalizedDate
+            : normalizedDate
+        return Self.time(endTime, on: endDay, calendar: calendar)
     }
 
     var netWorkedSeconds: TimeInterval? {
@@ -148,6 +153,7 @@ struct AddEditWorkDayView: View {
     @State private var date: Date
     @State private var startTime: Date
     @State private var endTime: Date
+    @State private var endsNextDay: Bool
     @State private var breakDuration: Date
     @State private var bonusAmount: Double = 0.0
     @State private var note: String = ""
@@ -178,7 +184,8 @@ struct AddEditWorkDayView: View {
         let endTime = workDay.endTime ?? UserSettings.shared.lastEndTime
         _startTime = State(initialValue: WorkDayFormDraft.time(startTime, on: workDay.date) ?? startTime)
         _endTime = State(initialValue: WorkDayFormDraft.time(endTime, on: workDay.date) ?? endTime)
-        
+        _endsNextDay = State(initialValue: Self.endsOnLaterDay(workDay))
+
         // Initialiser breakDuration : utiliser la valeur existante ou la dernière pause sauvegardée
         let calendar = Calendar.current
         let midnight = calendar.startOfDay(for: Date())
@@ -214,6 +221,7 @@ struct AddEditWorkDayView: View {
                         // Restore last used times when switching back to work
                         startTime = WorkDayFormDraft.time(settings.lastStartTime, on: date) ?? settings.lastStartTime
                         endTime = WorkDayFormDraft.time(settings.lastEndTime, on: date) ?? settings.lastEndTime
+                        endsNextDay = false
                         let calendar = Calendar.current
                         let midnight = calendar.startOfDay(for: Date())
                         breakDuration = calendar.date(byAdding: .second, value: Int(settings.lastBreakDuration), to: midnight) ?? Date()
@@ -229,7 +237,7 @@ struct AddEditWorkDayView: View {
                     Group {
                         DatePicker("workDay.startTime".localized, selection: $startTime, displayedComponents: .hourAndMinute)
                             .onChange(of: startTime) { _, newValue in
-                                if newValue > endTime {
+                                if !endsNextDay && newValue > endTime {
                                     withAnimation {
                                         endTime = newValue.addingTimeInterval(3600)
                                     }
@@ -238,12 +246,14 @@ struct AddEditWorkDayView: View {
 
                         DatePicker("workDay.endTime".localized, selection: $endTime, displayedComponents: .hourAndMinute)
                             .onChange(of: endTime) { _, newValue in
-                                if newValue < startTime {
+                                if !endsNextDay && newValue < startTime {
                                     withAnimation {
                                         startTime = newValue.addingTimeInterval(-3600)
                                     }
                                 }
                             }
+
+                        Toggle("workDay.endsNextDay".localized, isOn: $endsNextDay)
 
                         DatePicker("workDay.breakDuration".localized, selection: $breakDuration, displayedComponents: .hourAndMinute)
                             .datePickerStyle(.compact)
@@ -315,7 +325,7 @@ struct AddEditWorkDayView: View {
             }
             
             // Section résumé (pour journée de travail)
-            if selectedType == .work && startTime < endTime {
+            if selectedType == .work && (endsNextDay || startTime < endTime) {
                 Section {
                     HStack {
                         Label("workDay.totalDuration".localized, systemImage: "clock")
@@ -327,7 +337,7 @@ struct AddEditWorkDayView: View {
                     }
                     if settings.isHourlyRateEnabled {
                         HStack {
-                            Label("stats.earnings".localized, systemImage: "eurosign.circle")
+                            Label("stats.earnings".localized, systemImage: "banknote")
                                 .foregroundStyle(.secondary)
                             Spacer()
                             Text(settings.formatCurrency(calculatedEarnings))
@@ -402,8 +412,14 @@ struct AddEditWorkDayView: View {
             endTime: endTime,
             breakDuration: breakDuration,
             bonusAmount: bonusAmount,
-            note: note
+            note: note,
+            endsNextDay: endsNextDay
         )
+    }
+
+    private static func endsOnLaterDay(_ workDay: WorkDay) -> Bool {
+        guard let end = workDay.endTime else { return false }
+        return !Calendar.current.isDate(end, inSameDayAs: workDay.date)
     }
     
     // MARK: - Private Methods
@@ -430,6 +446,7 @@ struct AddEditWorkDayView: View {
             let loadedEnd = workDay.endTime ?? UserSettings.shared.lastEndTime
             startTime = WorkDayFormDraft.time(loadedStart, on: date) ?? loadedStart
             endTime = WorkDayFormDraft.time(loadedEnd, on: date) ?? loadedEnd
+            endsNextDay = Self.endsOnLaterDay(workDay)
 
             let calendar = Calendar.current
             let midnight = calendar.startOfDay(for: Date())

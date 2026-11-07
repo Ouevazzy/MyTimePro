@@ -16,7 +16,14 @@ struct LiveTimerCard: View {
 
     // Édition de l'entrée générée au départ.
     @State private var editingWorkDay: WorkDay?
+    @State private var showLongSessionSheet = false
     @State private var bounce = 0
+
+    /// Une session en cours reste visible même si la carte est masquée :
+    /// elle peut avoir été lancée par Siri ou depuis la montre.
+    static func isVisible(settingEnabled: Bool, sessionActive: Bool) -> Bool {
+        settingEnabled || sessionActive
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -35,6 +42,23 @@ struct LiveTimerCard: View {
         .sheet(item: $editingWorkDay) { day in
             NavigationStack {
                 AddEditWorkDayView(workDay: day)
+            }
+        }
+        .sheet(isPresented: $showLongSessionSheet) {
+            if let start = timer.startDate {
+                NavigationStack {
+                    LongSessionSheet(
+                        start: start,
+                        onSave: { endDate in
+                            let outcome = timer.stopAndSave(in: modelContext, at: endDate)
+                            if outcome.result != .saved { Haptic.notification(.warning) }
+                        },
+                        onDiscard: {
+                            timer.reset()
+                            Haptic.notification(.warning)
+                        }
+                    )
+                }
             }
         }
     }
@@ -118,6 +142,12 @@ struct LiveTimerCard: View {
                         .foregroundStyle(timer.state == .paused ? .orange : DS.Colors.secondaryText)
                         .contentTransition(.numericText())
                     }
+
+                    if timer.exceedsMaximumDuration(at: now) {
+                        Label("timer.longSession.warning".localized, systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .accessibilityElement(children: .combine)
@@ -166,6 +196,8 @@ struct LiveTimerCard: View {
             editingWorkDay = outcome.workDay
         case .tooShort:
             Haptic.notification(.warning)
+        case .tooLong:
+            showLongSessionSheet = true
         case .notRunning, .failed:
             Haptic.notification(.error)
         }
@@ -196,6 +228,77 @@ struct LiveTimerCard: View {
         let m = (total % 3600) / 60
         let s = total % 60
         return String(format: "%d:%02d:%02d", h, m, s)
+    }
+}
+
+// MARK: - Session de plus de 24 h
+
+/// Une session oubliée n'est jamais enregistrée telle quelle : l'utilisateur
+/// indique sa véritable heure de fin ou abandonne la session.
+private struct LongSessionSheet: View {
+    let start: Date
+    let onSave: (Date) -> Void
+    let onDiscard: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var endDate: Date
+    @State private var confirmDiscard = false
+
+    init(start: Date, onSave: @escaping (Date) -> Void, onDiscard: @escaping () -> Void) {
+        self.start = start
+        self.onSave = onSave
+        self.onDiscard = onDiscard
+        let expectedHours = UserSettings.shared.expectedDailyHours(for: start)
+        let defaultHours = expectedHours > 0 ? expectedHours : 8
+        _endDate = State(initialValue: start.addingTimeInterval(defaultHours * 3600))
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Text("timer.longSession.message".localized)
+                    .font(.subheadline)
+                    .foregroundStyle(DS.Colors.secondaryText)
+
+                DatePicker(
+                    "timer.longSession.endTime".localized,
+                    selection: $endDate,
+                    in: start.addingTimeInterval(60)...start.addingTimeInterval(TimerManager.maximumSessionSeconds),
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+            }
+
+            Section {
+                Button("timer.longSession.discard".localized, role: .destructive) {
+                    confirmDiscard = true
+                }
+            }
+        }
+        .navigationTitle("timer.longSession.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("action.cancel".localized) { dismiss() }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("action.save".localized) {
+                    onSave(endDate)
+                    dismiss()
+                }
+                .fontWeight(.semibold)
+            }
+        }
+        .confirmationDialog(
+            "timer.longSession.discardConfirm".localized,
+            isPresented: $confirmDiscard,
+            titleVisibility: .visible
+        ) {
+            Button("timer.longSession.discard".localized, role: .destructive) {
+                onDiscard()
+                dismiss()
+            }
+            Button("action.cancel".localized, role: .cancel) {}
+        }
     }
 }
 

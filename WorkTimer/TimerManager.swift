@@ -33,6 +33,9 @@ final class TimerManager {
 
     /// Durée minimale d'une session pour être enregistrée (évite les pointages accidentels).
     private let minimumSessionSeconds: TimeInterval = 60
+    /// Au-delà, la session est presque toujours un oubli : elle n'est pas
+    /// enregistrée telle quelle (limite identique à `WorkDay.isValid`).
+    static let maximumSessionSeconds: TimeInterval = 24 * 3600
 
     // MARK: - Persistence
     private enum Keys {
@@ -52,6 +55,12 @@ final class TimerManager {
     }
 
     var isActive: Bool { startDate != nil }
+
+    /// Vrai si la session dépasse la durée maximale enregistrable.
+    func exceedsMaximumDuration(at now: Date = Date()) -> Bool {
+        guard let start = startDate else { return false }
+        return now.timeIntervalSince(start) > Self.maximumSessionSeconds
+    }
 
     /// Secondes travaillées (brut − pauses) à l'instant donné.
     func workedSeconds(at now: Date = Date()) -> TimeInterval {
@@ -103,6 +112,7 @@ final class TimerManager {
     enum StopResult: Equatable {
         case saved          // Une entrée WorkDay a été créée
         case tooShort       // Session trop courte, ignorée
+        case tooLong        // Plus de 24 h : session conservée, heure de fin à corriger
         case notRunning     // Aucune session en cours
         case failed         // Erreur d'enregistrement
     }
@@ -117,6 +127,7 @@ final class TimerManager {
         calendar: Calendar = .current
     ) -> (workDay: WorkDay?, result: StopResult) {
         guard let start = startDate else { return (nil, .notRunning) }
+        guard !exceedsMaximumDuration(at: endDate) else { return (nil, .tooLong) }
 
         let end = max(endDate, start)
         let totalBreak = breakSeconds(at: end)

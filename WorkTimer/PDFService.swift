@@ -186,7 +186,7 @@ class PDFService {
         drawStatsBox(
             rect: CGRect(x: contentRect.minX + (boxSize.width + boxSpacing) * 2, y: yPosition, width: boxSize.width, height: boxSize.height),
             title: "Bonus",
-            value: String(format: "%.2f CHF", stats.totalBonus),
+            value: UserSettings.shared.formatCurrency(stats.totalBonus),
             icon: "💰",
             color: theme.secondaryColor
         )
@@ -229,7 +229,7 @@ class PDFService {
             color: stats.overtimeSeconds >= 0 ? theme.accentColor : theme.negativeColor, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Total bonus:", value: String(format: "%.2f CHF", stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
+        drawStatItem("Total bonus:", value: UserSettings.shared.formatCurrency(stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
         
         // Pied de page
         drawFooter(pageRect: pageRect, pageNumber: 1, totalPages: title.contains("Annuel") ? 13 : 2, theme: theme)

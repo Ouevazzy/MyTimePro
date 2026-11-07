@@ -141,7 +141,7 @@ struct StatsView: View {
                 if settings.isHourlyRateEnabled {
                     Divider()
                     StatSummaryRow(
-                        icon: "eurosign.circle",
+                        icon: "banknote",
                         title: "stats.earnings".localized,
                         value: settings.formatCurrency(yearlyStats.totalHours * settings.hourlyRate + yearlyStats.totalBonus)
                     )

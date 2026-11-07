@@ -45,7 +45,10 @@ struct HomeTabView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: DS.Spacing.lg) {
-                if settings.showLiveTimer {
+                if LiveTimerCard.isVisible(
+                    settingEnabled: settings.showLiveTimer,
+                    sessionActive: TimerManager.shared.isActive
+                ) {
                     LiveTimerCard()
                         .cardAppear(index: 0, animate: animateCards, reduceMotion: reduceMotion)
                 }

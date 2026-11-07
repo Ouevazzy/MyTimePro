@@ -79,6 +79,9 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
         ]
         payload[WatchKeys.timerStart] = timer.startDate?.timeIntervalSince1970 ?? 0
         payload[WatchKeys.timerPauseStartedAt] = timer.pauseStartedAt?.timeIntervalSince1970 ?? 0
+        // Rend chaque contexte unique : si un arrêt est refusé, la montre doit
+        // recevoir l'état inchangé pour annuler son affichage optimiste.
+        payload["sentAt"] = Date().timeIntervalSince1970
 
         try? session.updateApplicationContext(payload)
     }

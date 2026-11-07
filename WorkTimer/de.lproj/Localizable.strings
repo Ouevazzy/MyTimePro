@@ -817,3 +817,12 @@
 /* Live timer display toggle */
 "settings.display.showTimer" = "Stoppuhr anzeigen";
 "settings.display.showTimer.help" = "Blende die Stoppuhr-Karte auf dem Start aus, wenn du Stunden manuell einträgst.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Endet am nächsten Tag";
+"timer.longSession.title" = "Sitzung zu lang";
+"timer.longSession.message" = "Diese Sitzung dauert über 24 Stunden. Gib deine tatsächliche Endzeit ein, um sie zu speichern.";
+"timer.longSession.warning" = "Über 24 Stunden: Ausstempeln vergessen?";
+"timer.longSession.endTime" = "Ende";
+"timer.longSession.discard" = "Sitzung löschen";
+"timer.longSession.discardConfirm" = "Diese Sitzung löschen, ohne sie zu speichern?";

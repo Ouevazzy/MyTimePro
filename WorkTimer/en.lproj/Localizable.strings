@@ -703,3 +703,12 @@
 /* Live timer display toggle */
 "settings.display.showTimer" = "Show the timer";
 "settings.display.showTimer.help" = "Hide the timer card from Home if you log your hours manually.";
+
+/* Night and forgotten sessions */
+"workDay.endsNextDay" = "Ends the next day";
+"timer.longSession.title" = "Session too long";
+"timer.longSession.message" = "This session is over 24 hours. Enter your actual end time to save it.";
+"timer.longSession.warning" = "Over 24 hours: did you forget to clock out?";
+"timer.longSession.endTime" = "End";
+"timer.longSession.discard" = "Delete session";
+"timer.longSession.discardConfirm" = "Delete this session without saving it?";
