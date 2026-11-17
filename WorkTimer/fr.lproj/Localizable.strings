@@ -705,10 +705,15 @@
 "settings.display.showTimer.help" = "Masquez la carte chronomètre de l'accueil si vous saisissez vos heures à la main.";
 
 /* Night and forgotten sessions */
-"workDay.endsNextDay" = "Fin le lendemain";
 "timer.longSession.title" = "Session trop longue";
 "timer.longSession.message" = "Cette session dépasse 24 h. Indiquez votre véritable heure de fin pour l'enregistrer.";
 "timer.longSession.warning" = "Plus de 24 h : avez-vous oublié de pointer ?";
 "timer.longSession.endTime" = "Fin";
 "timer.longSession.discard" = "Supprimer la session";
 "timer.longSession.discardConfirm" = "Supprimer cette session sans l'enregistrer ?";
+
+/* Forgotten timer reminder */
+"notification.reminder.timer" = "Rappel de chrono oublié";
+"notification.reminder.timer.help" = "Vous prévient si une session tourne encore environ 2 h après votre horaire du jour.";
+"notification.timer.title" = "Chrono toujours en cours";
+"notification.timer.body" = "Avez-vous oublié de pointer votre départ ?";

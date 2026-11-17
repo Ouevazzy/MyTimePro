@@ -36,6 +36,10 @@ final class TimerManager {
     /// Au-delà, la session est presque toujours un oubli : elle n'est pas
     /// enregistrée telle quelle (limite identique à `WorkDay.isValid`).
     static let maximumSessionSeconds: TimeInterval = 24 * 3600
+    /// Marge après la fin théorique : couvre une pause de midi non pointée.
+    static let reminderGraceSeconds: TimeInterval = 2 * 3600
+    /// Durée retenue quand aucun horaire n'est prévu ce jour-là.
+    private static let fallbackReminderHours: Double = 8
 
     // MARK: - Persistence
     private enum Keys {
@@ -55,6 +59,26 @@ final class TimerManager {
     }
 
     var isActive: Bool { startDate != nil }
+
+    /// Moment où une session semble oubliée : horaire du jour + pauses + marge.
+    static func forgottenReminderDate(
+        start: Date,
+        expectedHours: Double,
+        pausedSeconds: TimeInterval
+    ) -> Date {
+        let workHours = expectedHours > 0 ? expectedHours : fallbackReminderHours
+        return start.addingTimeInterval(workHours * 3600 + pausedSeconds + reminderGraceSeconds)
+    }
+
+    /// Date du rappel pour la session en cours, `nil` sans session.
+    var forgottenReminderDate: Date? {
+        guard let start = startDate else { return nil }
+        return Self.forgottenReminderDate(
+            start: start,
+            expectedHours: UserSettings.shared.expectedDailyHours(for: start),
+            pausedSeconds: pausedAccumulated
+        )
+    }
 
     /// Vrai si la session dépasse la durée maximale enregistrable.
     func exceedsMaximumDuration(at now: Date = Date()) -> Bool {
@@ -148,7 +172,6 @@ final class TimerManager {
             _ = try WorkDay.reconcileDailyOvertime(in: context, for: [dayDate], calendar: calendar)
             try context.save()
 
-            UserSettings.shared.updateLastUsedTimes(start: start, end: end, breakDuration: totalBreak)
             StatsCache.shared.onWorkDayChanged(workDay, previousDate: dayDate, previousType: .work)
             SiriSummaryCacheService(calendar: calendar).refresh(using: context)
             Haptic.notification(.success)
@@ -177,7 +200,10 @@ final class TimerManager {
         }
 
         // Tient la montre informée de l'état du chrono.
-        Task { @MainActor in PhoneWatchConnectivity.shared.pushSummary() }
+        Task { @MainActor in
+            PhoneWatchConnectivity.shared.pushSummary()
+            NotificationService.shared.refreshForgottenTimerReminder()
+        }
     }
 
     private func load() {

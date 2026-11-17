@@ -44,6 +44,23 @@ struct OvernightDraftTests {
         #expect(draft(start: 22, end: 6, endsNextDay: false).validationIssue == .invalidDuration)
     }
 
+    @Test("Des dernières heures de nuit préremplissent une fin le lendemain")
+    func lastNightHoursCrossMidnight() {
+        let day = calendar.date(from: DateComponents(year: 2026, month: 3, day: 10))!
+        #expect(WorkDayFormDraft.crossesMidnight(start: time(22, on: day), end: time(6, on: day)))
+        #expect(!WorkDayFormDraft.crossesMidnight(start: time(8, on: day), end: time(17, on: day)))
+    }
+
+    @Test("La pause proposée laisse toujours du temps travaillé")
+    func suggestedBreakFitsRange() {
+        let day = calendar.date(from: DateComponents(year: 2026, month: 3, day: 10))!
+        let start = time(16, on: day)
+        let shortEnd = start.addingTimeInterval(60)
+        #expect(WorkDayFormDraft.fittingBreak(3600, start: start, end: shortEnd) == TimeInterval(0))
+        #expect(WorkDayFormDraft.fittingBreak(3600, start: time(8, on: day), end: time(17, on: day)) == TimeInterval(3600))
+        #expect(WorkDayFormDraft.fittingBreak(3600, start: time(22, on: day), end: time(6, on: day)) == TimeInterval(3600))
+    }
+
     @Test("Une plage de plus de 24 h est refusée")
     func moreThanOneDayIsRejected() {
         #expect(draft(start: 8, end: 9, endsNextDay: true).validationIssue == .invalidDuration)
@@ -84,6 +101,8 @@ struct TimerSessionTests {
     func overnightSessionIsSaved() throws {
         let context = try makeContext()
         let timer = TimerManager.shared
+        let settings = UserSettings.shared
+        let lastTimes = (settings.lastStartTime, settings.lastEndTime)
         timer.reset()
         defer { timer.reset() }
 
@@ -97,6 +116,25 @@ struct TimerSessionTests {
         #expect(!timer.isActive)
         #expect(outcome.workDay?.date == day)
         #expect(outcome.workDay?.totalHours == 8)
+        #expect(settings.lastStartTime == lastTimes.0)
+        #expect(settings.lastEndTime == lastTimes.1)
+    }
+}
+
+@Suite("Chrono — rappel de session oubliée")
+struct ForgottenReminderDateTests {
+    private let start = Date(timeIntervalSince1970: 1_770_000_000)
+
+    @Test("Le rappel suit l'horaire du jour, les pauses et la marge")
+    func usesScheduleBreaksAndGrace() {
+        let date = TimerManager.forgottenReminderDate(start: start, expectedHours: 8, pausedSeconds: 1800)
+        #expect(date.timeIntervalSince(start) == TimeInterval(8 * 3600 + 1800 + 2 * 3600))
+    }
+
+    @Test("Un jour sans horaire prévu retient 8 h")
+    func restDayUsesFallback() {
+        let date = TimerManager.forgottenReminderDate(start: start, expectedHours: 0, pausedSeconds: 0)
+        #expect(date.timeIntervalSince(start) == TimeInterval(10 * 3600))
     }
 }
 

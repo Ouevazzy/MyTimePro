@@ -21,7 +21,9 @@ struct DisplaySettingsSection: View {
                 Divider()
 
                 VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                    Toggle("settings.display.showTimer".localized, isOn: $settings.showLiveTimer).tint(.blue)
+                    Toggle("settings.display.showTimer".localized, isOn: $settings.showLiveTimer)
+                        .tint(.blue)
+                        .accessibilityIdentifier("settings.display.showTimer")
                     Text("settings.display.showTimer.help".localized)
                         .font(.caption).foregroundStyle(.secondary)
                 }

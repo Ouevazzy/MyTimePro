@@ -27,6 +27,7 @@ class NotificationService {
         static let morningReminderTime = "morningReminderTime"
         static let eveningReminderTime = "eveningReminderTime"
         static let reminderDays = "reminderDays" // Jours sélectionnés pour les rappels
+        static let timerReminderEnabled = "timerReminderEnabled"
     }
     
     // MARK: - Settings
@@ -46,6 +47,15 @@ class NotificationService {
         }
     }
     
+    /// Prévient quand une session de chrono semble oubliée. Activé par défaut.
+    var timerReminderEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.timerReminderEnabled) as? Bool ?? true }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.timerReminderEnabled)
+            refreshForgottenTimerReminder()
+        }
+    }
+
     var morningReminderTime: Date {
         get {
             if let interval = UserDefaults.standard.object(forKey: Keys.morningReminderTime) as? Double {
@@ -121,6 +131,7 @@ class NotificationService {
     private enum NotificationID {
         static let morningReminder = "com.worktimer.morning-reminder"
         static let eveningReminder = "com.worktimer.evening-reminder"
+        static let forgottenTimer = "com.worktimer.forgotten-timer"
     }
     
     // MARK: - Initialization
@@ -140,6 +151,7 @@ class NotificationService {
             
             if granted {
                 scheduleNotifications()
+                refreshForgottenTimerReminder()
             }
             
             return granted
@@ -241,6 +253,43 @@ class NotificationService {
         }
     }
     
+    // MARK: - Chrono oublié
+
+    /// Aligne l'unique rappel de chrono oublié sur la session en cours. L'état
+    /// est relu après l'attente : un arrêt survenu entre-temps ne laisse aucun rappel.
+    func refreshForgottenTimerReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [NotificationID.forgottenTimer])
+
+        Task {
+            let settings = await center.notificationSettings()
+            guard settings.authorizationStatus == .authorized,
+                  timerReminderEnabled,
+                  let fireDate = TimerManager.shared.forgottenReminderDate
+            else { return }
+
+            let delay = fireDate.timeIntervalSinceNow
+            guard delay > 0 else { return }
+
+            let content = UNMutableNotificationContent()
+            content.title = "notification.timer.title".localized
+            content.body = "notification.timer.body".localized
+            content.sound = .default
+
+            let request = UNNotificationRequest(
+                identifier: NotificationID.forgottenTimer,
+                content: content,
+                trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
+            )
+
+            do {
+                try await center.add(request)
+            } catch {
+                AppLogger.error("Forgotten timer reminder failed", category: AppLogger.general, error: error)
+            }
+        }
+    }
+
     // MARK: - Management
     func refreshPendingNotifications() {
         Task {
@@ -293,6 +342,7 @@ struct NotificationSettingsView: View {
     @State private var eveningEnabled = NotificationService.shared.eveningReminderEnabled
     @State private var morningTime = NotificationService.shared.morningReminderTime
     @State private var eveningTime = NotificationService.shared.eveningReminderTime
+    @State private var timerReminderEnabled = NotificationService.shared.timerReminderEnabled
 
     private var activeReminderDaysCount: Int {
         reminderDays.filter { $0 }.count
@@ -425,6 +475,19 @@ struct NotificationSettingsView: View {
             }
             .animation(.easeInOut(duration: 0.2), value: eveningEnabled)
             
+            // Section chrono oublié
+            Section {
+                Toggle(isOn: $timerReminderEnabled) {
+                    Label("notification.reminder.timer".localized, systemImage: "timer")
+                }
+                .disabled(!notificationService.isAuthorized)
+                .onChange(of: timerReminderEnabled) { _, newValue in
+                    notificationService.timerReminderEnabled = newValue
+                }
+            } footer: {
+                Text("notification.reminder.timer.help".localized)
+            }
+
             // Section test
             Section {
                 Button {
@@ -468,6 +531,7 @@ struct NotificationSettingsView: View {
             eveningEnabled = notificationService.eveningReminderEnabled
             morningTime = notificationService.morningReminderTime
             eveningTime = notificationService.eveningReminderTime
+            timerReminderEnabled = notificationService.timerReminderEnabled
         }
     }
 

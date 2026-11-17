@@ -103,6 +103,10 @@ struct LiveTimerCard: View {
                 Haptic.impact(.medium)
                 bounce += 1
                 timer.start()
+                // Demande l'autorisation au moment où le rappel devient utile.
+                if NotificationService.shared.timerReminderEnabled {
+                    Task { _ = await NotificationService.shared.requestAuthorization() }
+                }
             } label: {
                 Label("timer.clockIn".localized, systemImage: "play.fill")
                     .font(.headline)

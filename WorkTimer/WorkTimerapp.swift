@@ -100,6 +100,7 @@ struct WorkTimerApp: App {
                     SiriSummaryCacheService().refresh(using: container.mainContext)
                     SiriShortcutsHelper.shared.refreshAppShortcutParametersIfNeeded()
                     PhoneWatchConnectivity.shared.start(context: container.mainContext)
+                    NotificationService.shared.refreshForgottenTimerReminder()
 
                     // Crash reporting & analytics — non bloquant
                     CrashReporting.shared.configure()
