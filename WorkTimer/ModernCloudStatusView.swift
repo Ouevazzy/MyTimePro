@@ -174,7 +174,7 @@ struct CloudStatusDetailsView: View {
                 // Section Statut
                 Section("cloud.section.status".localized) {
                     HStack {
-                        Label("État actuel", systemImage: "info.circle")
+                        Label("cloud.currentState".localized, systemImage: "info.circle")
                         Spacer()
                         Text(cloudService.syncStatus.description)
                             .foregroundStyle(cloudService.syncStatus.color)
@@ -182,7 +182,7 @@ struct CloudStatusDetailsView: View {
 
                     if let lastSync = cloudService.lastSyncDate {
                         HStack {
-                            Label("Dernière synchronisation", systemImage: "clock")
+                            Label("sync.lastSync.label".localized, systemImage: "clock")
                             Spacer()
                             Text(formatDate(lastSync))
                                 .foregroundStyle(.secondary)
