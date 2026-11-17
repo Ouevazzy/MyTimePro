@@ -17,7 +17,7 @@
 "watch.add.end" = "End";
 "watch.add.break" = "Break %d min";
 "watch.add.bonus" = "Bonus %d";
-"watch.add.invalid" = "End must be after start";
+"watch.add.invalid" = "Check the times: no worked time left";
 "watch.add.save" = "Save";
 "watch.add.saved" = "Saved ✓";
 

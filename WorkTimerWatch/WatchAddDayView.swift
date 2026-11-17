@@ -20,7 +20,8 @@ struct WatchAddDayView: View {
 
     private var isValid: Bool {
         guard type.isWork else { return true }
-        return endTime > startTime
+        let range = workRange(on: Calendar.current.startOfDay(for: date), calendar: .current)
+        return range.end.timeIntervalSince(range.start) > TimeInterval(breakMinutes * 60)
     }
 
     var body: some View {
@@ -58,7 +59,7 @@ struct WatchAddDayView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(justSaved ? .green : .blue)
-            .disabled(!isValid)
+            .disabled(!isValid || justSaved)
         }
         .navigationTitle("watch.tab.add".loc)
     }
@@ -66,8 +67,7 @@ struct WatchAddDayView: View {
     private func save() {
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: date)
-        let start = combine(day: day, time: startTime, calendar: calendar)
-        let end = combine(day: day, time: endTime, calendar: calendar)
+        let (start, end) = workRange(on: day, calendar: calendar)
 
         link.createDay(
             date: day,
@@ -83,6 +83,17 @@ struct WatchAddDayView: View {
             try? await Task.sleep(for: .seconds(1.5))
             withAnimation { justSaved = false }
         }
+    }
+
+    /// Plage de travail du jour choisi. Une fin avant le début désigne
+    /// le lendemain (session de nuit), comme sur l'iPhone.
+    private func workRange(on day: Date, calendar: Calendar) -> (start: Date, end: Date) {
+        let start = combine(day: day, time: startTime, calendar: calendar)
+        var end = combine(day: day, time: endTime, calendar: calendar)
+        if end < start {
+            end = calendar.date(byAdding: .day, value: 1, to: end) ?? end
+        }
+        return (start, end)
     }
 
     private func combine(day: Date, time: Date, calendar: Calendar) -> Date {

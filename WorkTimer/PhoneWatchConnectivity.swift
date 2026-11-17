@@ -142,6 +142,10 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
             workDay.updateData(startTime: nil, endTime: nil, breakDuration: 0)
         }
 
+        // Un même message peut arriver deux fois (renvoi après un échec
+        // d'envoi direct, double appui) : on n'ajoute pas une copie exacte.
+        if isDuplicate(workDay, in: context) { return }
+
         do {
             context.insert(workDay)
             _ = try WorkDay.reconcileDailyOvertime(in: context, for: [dayDate], calendar: calendar)
@@ -150,6 +154,23 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
         } catch {
             context.rollback()
             ErrorManager.shared.handle(error, context: "WatchCreateDay")
+        }
+    }
+
+    /// Vrai si une entrée du même jour a déjà le même type et les mêmes heures.
+    /// Plusieurs entrées différentes par jour restent permises.
+    @MainActor
+    private func isDuplicate(_ candidate: WorkDay, in context: ModelContext) -> Bool {
+        let dayStart = calendar.startOfDay(for: candidate.date)
+        guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return false }
+        let descriptor = FetchDescriptor<WorkDay>(
+            predicate: #Predicate { $0.date >= dayStart && $0.date < dayEnd && !$0.isDeleted }
+        )
+        let sameDay = (try? context.fetch(descriptor)) ?? []
+        return sameDay.contains { existing in
+            existing.typeRawValue == candidate.typeRawValue
+                && existing.startTime == candidate.startTime
+                && existing.endTime == candidate.endTime
         }
     }
 

@@ -17,7 +17,7 @@
 "watch.add.end" = "Fin";
 "watch.add.break" = "Pause %d min";
 "watch.add.bonus" = "Bonus %d";
-"watch.add.invalid" = "La fin doit être après le début";
+"watch.add.invalid" = "Vérifie les heures : il ne reste aucun temps travaillé";
 "watch.add.save" = "Enregistrer";
 "watch.add.saved" = "Enregistré ✓";
 

@@ -149,3 +149,81 @@ struct HourlyRateEarningsTests {
         #expect(abs(work.grossEarnings - 10) < 0.001)
     }
 }
+
+@Suite("Montre → iPhone — nuits et doublons", .serialized)
+@MainActor
+struct WatchCreateDayEdgeCaseTests {
+    private let calendar = Calendar.current
+
+    private func makeContext() throws -> ModelContext {
+        let schema = Schema([WorkDay.self])
+        let configuration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: true,
+            allowsSave: true,
+            cloudKitDatabase: .none
+        )
+        return ModelContext(try ModelContainer(for: schema, configurations: configuration))
+    }
+
+    private var day: Date {
+        calendar.date(from: DateComponents(year: 2026, month: 3, day: 10))!
+    }
+
+    private func message(start: Date, end: Date, type: WorkDayType = .work) -> [String: Any] {
+        [
+            WatchKeys.type: type.rawValue,
+            WatchKeys.date: day.timeIntervalSince1970,
+            WatchKeys.start: start.timeIntervalSince1970,
+            WatchKeys.end: end.timeIntervalSince1970,
+            WatchKeys.breakSeconds: 0.0
+        ]
+    }
+
+    private func at(_ hour: Int, dayOffset: Int = 0) -> Date {
+        let base = calendar.date(byAdding: .day, value: dayOffset, to: day)!
+        return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: base)!
+    }
+
+    @Test("Une session de nuit envoyée par la montre (fin le lendemain) est enregistrée")
+    func overnightSessionIsSaved() throws {
+        let context = try makeContext()
+        PhoneWatchConnectivity.shared.apply("createDay", message: message(start: at(22), end: at(6, dayOffset: 1)), in: context)
+
+        let saved = try #require(try context.fetch(FetchDescriptor<WorkDay>()).first)
+        #expect(calendar.isDate(saved.date, inSameDayAs: day))
+        #expect(abs(saved.totalHours - 8) < 0.001)
+    }
+
+    @Test("Le même message reçu deux fois ne crée qu'une entrée")
+    func repeatedMessageIsIgnored() throws {
+        let context = try makeContext()
+        let sameMessage = message(start: at(8), end: at(17))
+        PhoneWatchConnectivity.shared.apply("createDay", message: sameMessage, in: context)
+        PhoneWatchConnectivity.shared.apply("createDay", message: sameMessage, in: context)
+
+        #expect(try context.fetch(FetchDescriptor<WorkDay>()).count == 1)
+    }
+
+    @Test("Deux entrées différentes le même jour restent permises")
+    func distinctEntriesSameDayAreKept() throws {
+        let context = try makeContext()
+        PhoneWatchConnectivity.shared.apply("createDay", message: message(start: at(8), end: at(12)), in: context)
+        PhoneWatchConnectivity.shared.apply("createDay", message: message(start: at(13), end: at(17)), in: context)
+
+        #expect(try context.fetch(FetchDescriptor<WorkDay>()).count == 2)
+    }
+
+    @Test("Un congé déjà saisi pour ce jour n'est pas dupliqué")
+    func repeatedVacationIsIgnored() throws {
+        let context = try makeContext()
+        let vacation: [String: Any] = [
+            WatchKeys.type: WorkDayType.vacation.rawValue,
+            WatchKeys.date: day.timeIntervalSince1970
+        ]
+        PhoneWatchConnectivity.shared.apply("createDay", message: vacation, in: context)
+        PhoneWatchConnectivity.shared.apply("createDay", message: vacation, in: context)
+
+        #expect(try context.fetch(FetchDescriptor<WorkDay>()).count == 1)
+    }
+}
