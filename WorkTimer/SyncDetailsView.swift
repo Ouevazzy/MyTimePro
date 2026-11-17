@@ -30,10 +30,10 @@ struct SyncDetailsView: View {
                     Spacer()
                     if let lastSync = cloudService.lastSyncDate {
                         Text(lastSync.formatted(.relative(presentation: .named)))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     } else {
                         Text("sync.lastSync.never".localized)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 
@@ -43,10 +43,10 @@ struct SyncDetailsView: View {
                         Spacer()
                         VStack(alignment: .trailing, spacing: 4) {
                             Text(friendlyErrorMessage(from: error))
-                                .foregroundColor(.red)
+                                .foregroundStyle(.red)
                                 .font(.caption)
                             Text(error.localizedDescription)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                                 .font(.caption2)
                         }
                     }
@@ -66,14 +66,43 @@ struct SyncDetailsView: View {
                     showingResetAlert = true
                 }) {
                     Label("sync.reset".localized, systemImage: "arrow.counterclockwise")
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                 }
             }
             
+            Section {
+                LabeledContent("sync.diagnostic.cloudkit".localized) {
+                    Label(
+                        cloudService.isCloudKitActive
+                            ? "sync.diagnostic.enabled".localized
+                            : "sync.diagnostic.disabled".localized,
+                        systemImage: cloudService.isCloudKitActive ? "checkmark.circle.fill" : "pause.circle.fill"
+                    )
+                    .labelStyle(.titleAndIcon)
+                    .foregroundStyle(cloudService.isCloudKitActive ? .green : .orange)
+                    .font(.callout)
+                }
+
+                LabeledContent("sync.diagnostic.environment".localized,
+                               value: cloudService.cloudKitEnvironment)
+
+                LabeledContent("sync.diagnostic.container".localized) {
+                    Text(cloudService.cloudKitContainerID)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                        .multilineTextAlignment(.trailing)
+                }
+            } header: {
+                Text("sync.diagnostic.section".localized)
+            } footer: {
+                Text("sync.diagnostic.note".localized)
+            }
+
             Section("sync.section.about".localized) {
                 Text("sync.about.description".localized)
                     .font(.footnote)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("sync.title".localized)

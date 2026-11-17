@@ -9,6 +9,39 @@ class WorkTimeCalculations {
     static func calculateOvertimeHours(totalHours: Double, standardHours: Double) -> Double {
         return totalHours - standardHours
     }
+
+    /// Calcule le solde d'une date complète, et non celui d'une entrée isolée.
+    /// La cible quotidienne n'est donc déduite qu'une seule fois, même lorsque
+    /// plusieurs plages de travail existent le même jour.
+    static func dailyOvertimeSeconds(
+        from entries: [WorkDay],
+        calendar: Calendar = .current,
+        expectedDailyHours: ((Date) -> Double)? = nil
+    ) -> Int {
+        let activeEntries = entries.filter { !$0.isDeleted }
+        guard let referenceDate = activeEntries.first?.date else { return 0 }
+
+        let workedEntries = activeEntries.filter {
+            ($0.type == .work || $0.type == .training) && $0.totalHours > 0
+        }
+        let standardSeconds = Int(round(
+            (expectedDailyHours?(referenceDate)
+                ?? UserSettings.shared.expectedDailyHours(for: referenceDate, calendar: calendar)) * 3600
+        ))
+
+        if !workedEntries.isEmpty {
+            let workedSeconds = Int(round(
+                workedEntries.reduce(0.0) { $0 + $1.totalHours } * 3600
+            ))
+            return workedSeconds - standardSeconds
+        }
+
+        if activeEntries.contains(where: { $0.type == .compensatory }) {
+            return -standardSeconds
+        }
+
+        return 0
+    }
     
     /// Formate un intervalle de temps en secondes au format hh:mm
     static func formattedTimeInterval(_ interval: TimeInterval) -> String {
@@ -65,6 +98,35 @@ class WorkTimeCalculations {
         let sign = seconds < 0 ? "-" : ""
         return String(format: "%@%dh%02d", sign, h, m)
     }
+
+    /// Somme les statistiques visibles du tableau de bord en ignorant les entrées supprimées.
+    static func activePeriodStats(from workDays: [WorkDay]) -> (totalHours: Double, overtimeSeconds: Int) {
+        activePeriodStats(from: workDays) { _ in true }
+    }
+
+    /// Somme les statistiques actives dans une fenêtre [startDate, endDate).
+    static func activePeriodStats(from workDays: [WorkDay], startDate: Date, endDate: Date) -> (totalHours: Double, overtimeSeconds: Int) {
+        activePeriodStats(from: workDays) { day in
+            day.date >= startDate && day.date < endDate
+        }
+    }
+
+    private static func activePeriodStats(
+        from workDays: [WorkDay],
+        where isIncluded: (WorkDay) -> Bool
+    ) -> (totalHours: Double, overtimeSeconds: Int) {
+        var totalHours = 0.0
+        var overtimeSeconds = 0
+
+        for day in workDays {
+            guard !day.isDeleted else { continue }
+            guard isIncluded(day) else { continue }
+            totalHours += day.totalHours
+            overtimeSeconds += day.overtimeSeconds
+        }
+
+        return (totalHours, overtimeSeconds)
+    }
 }
 
 struct VacationCalculations {
@@ -74,6 +136,7 @@ struct VacationCalculations {
         let calendar = Calendar.current
         var total = 0.0
         for day in workDays {
+            guard !day.isDeleted else { continue }
             guard calendar.component(.year, from: day.date) == year else { continue }
             switch day.type {
             case .vacation:        total += 1.0

@@ -5,6 +5,11 @@ class FirstLaunchManager {
     var showFirstSyncInfo = false
     
     init() {
+        guard !ProcessInfo.processInfo.arguments.contains("UI_TESTING") else {
+            showFirstSyncInfo = false
+            return
+        }
+
         // Vérifier si c'est une première installation ou réinstallation
         let hasCompletedFirstSync = UserDefaults.standard.bool(forKey: "hasCompletedFirstSync")
         let isReinstallation = UserDefaults.standard.bool(forKey: "isReinstallation")
@@ -59,7 +64,7 @@ struct FirstLaunchInfoView: View {
                     Button("Passer") {
                         isPresented = false
                     }
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .padding()
                 }
                 
@@ -104,7 +109,7 @@ struct FirstLaunchInfoView: View {
                         Image(systemName: currentPage < features.count - 1 ? "arrow.right" : "checkmark")
                             .font(.system(size: 14, weight: .bold))
                     }
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -112,9 +117,9 @@ struct FirstLaunchInfoView: View {
                             colors: features[currentPage].colors,
                             startPoint: .leading,
                             endPoint: .trailing
-                        )
+                        ),
+                        in: RoundedRectangle(cornerRadius: 16)
                     )
-                    .cornerRadius(16)
                     .shadow(color: features[currentPage].colors[0].opacity(0.2), radius: 4, x: 0, y: 2)
                 }
                 .buttonStyle(.pressable)
@@ -167,7 +172,7 @@ struct FirstLaunchInfoView: View {
             // Description
             Text(feature.description)
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .fixedSize(horizontal: false, vertical: true)

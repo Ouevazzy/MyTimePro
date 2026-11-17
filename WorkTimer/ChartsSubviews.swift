@@ -67,11 +67,14 @@ struct WeeklyChartView: View {
                         LinearGradient(colors: [.blue, .cyan], startPoint: .bottom, endPoint: .top)
                     )
                     .cornerRadius(4)
+                    .accessibilityLabel(item.weekLabel)
+                    .accessibilityValue(WorkTimeCalculations.formattedHoursRounded(item.totalHours))
 
                     // Ligne de référence pour les heures standard
                     RuleMark(y: .value("Standard", item.standardHours))
                         .foregroundStyle(.orange.opacity(0.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
+                        .accessibilityHidden(true)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading)
@@ -83,13 +86,12 @@ struct WeeklyChartView: View {
                     }
                 }
                 .frame(height: chartHeight)
-                .accessibilityElement(children: .combine)
                 .accessibilityLabel("charts.accessibility.weekly".localized(data.count))
                 .animation(reduceMotion ? nil : DS.Animation.progress, value: animate)
             }
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 }
 
@@ -119,6 +121,8 @@ struct MonthlyChartView: View {
                         LinearGradient(colors: [.purple, .pink], startPoint: .bottom, endPoint: .top)
                     )
                     .cornerRadius(4)
+                    .accessibilityLabel(item.monthName)
+                    .accessibilityValue(WorkTimeCalculations.formattedHoursRounded(item.totalHours))
 
                     // Overtime / déficit en superposition.
                     // BarMark toujours émis (hauteur nulle si overtime == 0) pour éviter
@@ -129,12 +133,12 @@ struct MonthlyChartView: View {
                     )
                     .foregroundStyle((item.overtime >= 0 ? Color.green : Color.red).opacity(0.7))
                     .cornerRadius(4)
+                    .accessibilityHidden(true)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }
                 .frame(height: chartHeight)
-                .accessibilityElement(children: .combine)
                 .accessibilityLabel("charts.accessibility.monthly".localized(selectedYear))
                 .animation(reduceMotion ? nil : DS.Animation.progress, value: animate)
 
@@ -148,7 +152,7 @@ struct MonthlyChartView: View {
             }
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     private func legendItem(color: Color, text: String) -> some View {
@@ -185,16 +189,13 @@ struct DailyChartView: View {
                     )
                     .foregroundStyle(by: .value("Type", item.type.displayName))
                     .cornerRadius(2)
+                    .accessibilityLabel(item.date.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                    .accessibilityValue("\(item.type.displayName), \(WorkTimeCalculations.formattedHoursRounded(item.hours))")
                 }
-                .chartForegroundStyleScale([
-                    WorkDayType.work.displayName: Color.blue,
-                    WorkDayType.vacation.displayName: Color.orange,
-                    WorkDayType.halfDayVacation.displayName: Color.orange.opacity(0.75),
-                    WorkDayType.sickLeave.displayName: Color.red,
-                    WorkDayType.holiday.displayName: Color.yellow,
-                    WorkDayType.compensatory.displayName: Color.green,
-                    WorkDayType.training.displayName: Color.purple
-                ])
+                .chartForegroundStyleScale(
+                    domain: WorkDayType.allCases.map(\.displayName),
+                    range: WorkDayType.allCases.map { ChartPalette.color(for: $0) }
+                )
                 .chartLegend(.hidden)
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .day, count: 7)) { _ in
@@ -203,7 +204,6 @@ struct DailyChartView: View {
                     }
                 }
                 .frame(height: chartHeight)
-                .accessibilityElement(children: .combine)
                 .accessibilityLabel("charts.accessibility.daily".localized(data.count))
                 .animation(reduceMotion ? nil : DS.Animation.progress, value: animate)
 
@@ -211,7 +211,7 @@ struct DailyChartView: View {
             }
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     private func typeLegend(for types: [WorkDayType]) -> some View {
@@ -258,19 +258,15 @@ struct DistributionChartView: View {
                     )
                     .foregroundStyle(by: .value("Type", item.type.displayName))
                     .cornerRadius(4)
+                    .accessibilityLabel(item.type.displayName)
+                    .accessibilityValue("\(item.count)")
                 }
-                .chartForegroundStyleScale([
-                    WorkDayType.work.displayName: Color.blue,
-                    WorkDayType.vacation.displayName: Color.green,
-                    WorkDayType.halfDayVacation.displayName: Color.mint,
-                    WorkDayType.sickLeave.displayName: Color.orange,
-                    WorkDayType.holiday.displayName: Color.purple,
-                    WorkDayType.compensatory.displayName: Color.pink,
-                    WorkDayType.training.displayName: Color.cyan
-                ])
+                .chartForegroundStyleScale(
+                    domain: WorkDayType.allCases.map(\.displayName),
+                    range: WorkDayType.allCases.map { ChartPalette.color(for: $0) }
+                )
                 .chartLegend(.hidden)
                 .frame(height: chartHeight)
-                .accessibilityElement(children: .combine)
                 .accessibilityLabel("charts.accessibility.distribution".localized)
                 .animation(reduceMotion ? nil : DS.Animation.progress, value: animate)
 
@@ -294,7 +290,7 @@ struct DistributionChartView: View {
             }
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 }
 
@@ -340,7 +336,7 @@ struct ChartsSummaryView: View {
             }
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     private func summaryCard(title: String, value: String, icon: String, color: Color) -> some View {

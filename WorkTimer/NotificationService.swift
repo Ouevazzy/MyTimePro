@@ -18,6 +18,7 @@ class NotificationService {
     // MARK: - Properties
     private(set) var isAuthorized = false
     private(set) var pendingNotifications: [UNNotificationRequest] = []
+    private static let testNotificationDelay: TimeInterval = 5
     
     // MARK: - User Defaults Keys
     private enum Keys {
@@ -26,6 +27,7 @@ class NotificationService {
         static let morningReminderTime = "morningReminderTime"
         static let eveningReminderTime = "eveningReminderTime"
         static let reminderDays = "reminderDays" // Jours sélectionnés pour les rappels
+        static let timerReminderEnabled = "timerReminderEnabled"
     }
     
     // MARK: - Settings
@@ -45,6 +47,15 @@ class NotificationService {
         }
     }
     
+    /// Prévient quand une session de chrono semble oubliée. Activé par défaut.
+    var timerReminderEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.timerReminderEnabled) as? Bool ?? true }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.timerReminderEnabled)
+            refreshForgottenTimerReminder()
+        }
+    }
+
     var morningReminderTime: Date {
         get {
             if let interval = UserDefaults.standard.object(forKey: Keys.morningReminderTime) as? Double {
@@ -98,28 +109,29 @@ class NotificationService {
     }
     
     // Noms des jours pour l'affichage - locale-aware
-    static let dayNames: [String] = {
+    static var dayNames: [String] {
         let formatter = DateFormatter()
-        formatter.locale = Locale.current
+        formatter.locale = .autoupdatingCurrent
         // Calendar weekday symbols start from Sunday, rotate to start from Monday
-        var symbols = formatter.standaloneWeekdaySymbols ?? ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        var symbols = formatter.standaloneWeekdaySymbols ?? ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
         let sunday = symbols.removeFirst()
         symbols.append(sunday)
         return symbols.map { $0.capitalized }
-    }()
-    static let shortDayNames: [String] = {
+    }
+    static var shortDayNames: [String] {
         let formatter = DateFormatter()
-        formatter.locale = Locale.current
-        var symbols = formatter.shortStandaloneWeekdaySymbols ?? ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+        formatter.locale = .autoupdatingCurrent
+        var symbols = formatter.shortStandaloneWeekdaySymbols ?? ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
         let sunday = symbols.removeFirst()
         symbols.append(sunday)
         return symbols
-    }()
+    }
     
     // MARK: - Notification Identifiers
     private enum NotificationID {
         static let morningReminder = "com.worktimer.morning-reminder"
         static let eveningReminder = "com.worktimer.evening-reminder"
+        static let forgottenTimer = "com.worktimer.forgotten-timer"
     }
     
     // MARK: - Initialization
@@ -139,6 +151,7 @@ class NotificationService {
             
             if granted {
                 scheduleNotifications()
+                refreshForgottenTimerReminder()
             }
             
             return granted
@@ -173,8 +186,8 @@ class NotificationService {
         if morningReminderEnabled {
             scheduleDailyReminder(
                 identifier: NotificationID.morningReminder,
-                title: NSLocalizedString("notification.morning.title", value: "🌅 Bonne journée !", comment: "Morning reminder notification title"),
-                body: NSLocalizedString("notification.morning.body", value: "N'oubliez pas de pointer votre arrivée", comment: "Morning reminder notification body"),
+                title: "notification.morning.title".localized,
+                body: "notification.morning.body".localized,
                 time: morningReminderTime,
                 selectedDays: selectedDays
             )
@@ -184,8 +197,8 @@ class NotificationService {
         if eveningReminderEnabled {
             scheduleDailyReminder(
                 identifier: NotificationID.eveningReminder,
-                title: NSLocalizedString("notification.evening.title", value: "🌙 Fin de journée", comment: "Evening reminder notification title"),
-                body: NSLocalizedString("notification.evening.body", value: "N'oubliez pas de pointer votre départ", comment: "Evening reminder notification body"),
+                title: "notification.evening.title".localized,
+                body: "notification.evening.body".localized,
                 time: eveningReminderTime,
                 selectedDays: selectedDays
             )
@@ -240,6 +253,43 @@ class NotificationService {
         }
     }
     
+    // MARK: - Chrono oublié
+
+    /// Aligne l'unique rappel de chrono oublié sur la session en cours. L'état
+    /// est relu après l'attente : un arrêt survenu entre-temps ne laisse aucun rappel.
+    func refreshForgottenTimerReminder() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [NotificationID.forgottenTimer])
+
+        Task {
+            let settings = await center.notificationSettings()
+            guard settings.authorizationStatus == .authorized,
+                  timerReminderEnabled,
+                  let fireDate = TimerManager.shared.forgottenReminderDate
+            else { return }
+
+            let delay = fireDate.timeIntervalSinceNow
+            guard delay > 0 else { return }
+
+            let content = UNMutableNotificationContent()
+            content.title = "notification.timer.title".localized
+            content.body = "notification.timer.body".localized
+            content.sound = .default
+
+            let request = UNNotificationRequest(
+                identifier: NotificationID.forgottenTimer,
+                content: content,
+                trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
+            )
+
+            do {
+                try await center.add(request)
+            } catch {
+                AppLogger.error("Forgotten timer reminder failed", category: AppLogger.general, error: error)
+            }
+        }
+    }
+
     // MARK: - Management
     func refreshPendingNotifications() {
         Task {
@@ -264,11 +314,11 @@ class NotificationService {
     // MARK: - Test Notification
     func sendTestNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "🧪 Test de notification"
-        content.body = "Les notifications WorkTimer fonctionnent correctement !"
+        content.title = "notification.test.title".localized
+        content.body = "notification.test.body".localized
         content.sound = .default
         
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.testNotificationDelay, repeats: false)
         let request = UNNotificationRequest(identifier: "test-notification", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request) { error in
@@ -281,6 +331,7 @@ class NotificationService {
 
 // MARK: - SwiftUI View for Notification Settings
 struct NotificationSettingsView: View {
+    @Environment(\.openURL) private var openURL
     @State private var notificationService = NotificationService.shared
     @State private var showingAuthorizationAlert = false
     @State private var reminderDays: [Bool] = NotificationService.shared.reminderDays
@@ -291,6 +342,11 @@ struct NotificationSettingsView: View {
     @State private var eveningEnabled = NotificationService.shared.eveningReminderEnabled
     @State private var morningTime = NotificationService.shared.morningReminderTime
     @State private var eveningTime = NotificationService.shared.eveningReminderTime
+    @State private var timerReminderEnabled = NotificationService.shared.timerReminderEnabled
+
+    private var activeReminderDaysCount: Int {
+        reminderDays.filter { $0 }.count
+    }
     
     var body: some View {
         List {
@@ -302,9 +358,9 @@ struct NotificationSettingsView: View {
                         .font(.title2)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Notifications")
+                        Text("notification.title".localized)
                             .font(.headline)
-                        Text(notificationService.isAuthorized ? "Autorisées" : "Non autorisées")
+                        Text(notificationService.isAuthorized ? "notification.authorized".localized : "notification.unauthorized".localized)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -312,7 +368,7 @@ struct NotificationSettingsView: View {
                     Spacer()
                     
                     if !notificationService.isAuthorized {
-                        Button("Autoriser") {
+                        Button("notification.authorize".localized) {
                             Task {
                                 let granted = await notificationService.requestAuthorization()
                                 if !granted {
@@ -326,13 +382,13 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("Autorisation")
+                Text("notification.section.authorization".localized)
             }
             
             // Section jours de rappel
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Jours actifs")
+                    Text("notification.section.activeDays".localized)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     
@@ -340,6 +396,7 @@ struct NotificationSettingsView: View {
                         ForEach(0..<7, id: \.self) { index in
                             DayToggleButton(
                                 day: NotificationService.shortDayNames[index],
+                                accessibilityName: NotificationService.dayNames[index],
                                 isSelected: reminderDays[index],
                                 isEnabled: notificationService.isAuthorized
                             ) {
@@ -351,15 +408,15 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("Jours de notification")
+                Text("notification.section.notificationDays".localized)
             } footer: {
-                Text("Sélectionnez les jours où vous souhaitez recevoir des rappels")
+                Text("notification.section.selectDaysHelp".localized)
             }
             
             // Section rappel matin
             Section {
                 Toggle(isOn: $morningEnabled) {
-                    Label("Rappel du matin", systemImage: "sunrise.fill")
+                    Label("notification.reminder.morning".localized, systemImage: "sunrise.fill")
                 }
                 .disabled(!notificationService.isAuthorized)
                 .onChange(of: morningEnabled) { _, newValue in
@@ -368,7 +425,7 @@ struct NotificationSettingsView: View {
                 
                 if morningEnabled {
                     DatePicker(
-                        "Heure du rappel",
+                        "notification.reminder.time".localized,
                         selection: $morningTime,
                         displayedComponents: .hourAndMinute
                     )
@@ -379,11 +436,10 @@ struct NotificationSettingsView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             } header: {
-                Text("Rappel d'arrivée")
+                Text("notification.reminder.arrival".localized)
             } footer: {
                 if morningEnabled {
-                    let activeCount = reminderDays.filter { $0 }.count
-                    Text("Rappel programmé pour \(activeCount) jour\(activeCount > 1 ? "s" : "") par semaine")
+                    Text(scheduleSummary)
                 }
             }
             .animation(DS.Animation.micro, value: morningEnabled)
@@ -391,7 +447,7 @@ struct NotificationSettingsView: View {
             // Section rappel soir
             Section {
                 Toggle(isOn: $eveningEnabled) {
-                    Label("Rappel du soir", systemImage: "sunset.fill")
+                    Label("notification.reminder.evening".localized, systemImage: "sunset.fill")
                 }
                 .disabled(!notificationService.isAuthorized)
                 .onChange(of: eveningEnabled) { _, newValue in
@@ -400,7 +456,7 @@ struct NotificationSettingsView: View {
                 
                 if eveningEnabled {
                     DatePicker(
-                        "Heure du rappel",
+                        "notification.reminder.time".localized,
                         selection: $eveningTime,
                         displayedComponents: .hourAndMinute
                     )
@@ -411,15 +467,27 @@ struct NotificationSettingsView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             } header: {
-                Text("Rappel de départ")
+                Text("notification.reminder.departure".localized)
             } footer: {
                 if eveningEnabled {
-                    let activeCount = reminderDays.filter { $0 }.count
-                    Text("Rappel programmé pour \(activeCount) jour\(activeCount > 1 ? "s" : "") par semaine")
+                    Text(scheduleSummary)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: eveningEnabled)
             
+            // Section chrono oublié
+            Section {
+                Toggle(isOn: $timerReminderEnabled) {
+                    Label("notification.reminder.timer".localized, systemImage: "timer")
+                }
+                .disabled(!notificationService.isAuthorized)
+                .onChange(of: timerReminderEnabled) { _, newValue in
+                    notificationService.timerReminderEnabled = newValue
+                }
+            } footer: {
+                Text("notification.reminder.timer.help".localized)
+            }
+
             // Section test
             Section {
                 Button {
@@ -428,7 +496,7 @@ struct NotificationSettingsView: View {
                     showTestSentAlert = true
                 } label: {
                     HStack {
-                        Label("Envoyer une notification test", systemImage: "paperplane.fill")
+                        Label("notification.test.send".localized, systemImage: "paperplane.fill")
                         Spacer()
                         Image(systemName: "arrow.right.circle")
                             .foregroundStyle(.secondary)
@@ -436,25 +504,25 @@ struct NotificationSettingsView: View {
                 }
                 .disabled(!notificationService.isAuthorized)
             } footer: {
-                Text("La notification apparaîtra dans 2 secondes. Vérifiez le centre de notifications si l'app est au premier plan.")
+                Text("notification.test.footer".localized)
             }
         }
-        .navigationTitle("Notifications")
+        .navigationTitle("notification.title".localized)
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Notifications désactivées", isPresented: $showingAuthorizationAlert) {
-            Button("Ouvrir Réglages") {
+        .alert("notification.alert.disabled.title".localized, isPresented: $showingAuthorizationAlert) {
+            Button("notification.alert.openSettings".localized) {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
+                    openURL(url)
                 }
             }
-            Button("Annuler", role: .cancel) { }
+            Button("action.cancel".localized, role: .cancel) { }
         } message: {
-            Text("Veuillez autoriser les notifications dans les réglages de votre appareil.")
+            Text("notification.alert.disabled.message".localized)
         }
-        .alert("Notification envoyée", isPresented: $showTestSentAlert) {
-            Button("OK", role: .cancel) { }
+        .alert("notification.alert.sent.title".localized, isPresented: $showTestSentAlert) {
+            Button("action.done".localized, role: .cancel) { }
         } message: {
-            Text("Une notification test a été programmée. Elle apparaîtra dans 2 secondes.")
+            Text("notification.alert.sent.message".localized)
         }
         .onAppear {
             notificationService.checkAuthorizationStatus()
@@ -463,22 +531,29 @@ struct NotificationSettingsView: View {
             eveningEnabled = notificationService.eveningReminderEnabled
             morningTime = notificationService.morningReminderTime
             eveningTime = notificationService.eveningReminderTime
+            timerReminderEnabled = notificationService.timerReminderEnabled
         }
+    }
+
+    private var scheduleSummary: String {
+        "notification.reminder.scheduleSummary".localized(
+            activeReminderDaysCount,
+            activeReminderDaysCount == 1 ? "time.day".localized : "time.days".localized
+        )
     }
 }
 
 // MARK: - Day Toggle Button
 struct DayToggleButton: View {
     let day: String
+    let accessibilityName: String
     let isSelected: Bool
     let isEnabled: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: {
-            if isEnabled {
-                action()
-            }
+            action()
         }) {
             Text(day)
                 .font(.caption)
@@ -491,7 +566,11 @@ struct DayToggleButton: View {
                 )
         }
         .buttonStyle(.plain)
+        .disabled(!isEnabled)
         .opacity(isEnabled ? 1.0 : 0.5)
+        .accessibilityLabel(accessibilityName)
+        .accessibilityValue(isSelected ? "notification.day.selected".localized : "notification.day.notSelected".localized)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
@@ -500,4 +579,3 @@ struct DayToggleButton: View {
         NotificationSettingsView()
     }
 }
-

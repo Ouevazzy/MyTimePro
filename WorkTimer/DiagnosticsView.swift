@@ -6,7 +6,7 @@ struct DiagnosticsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkDay.date, order: .reverse) private var workDays: [WorkDay]
-    
+
     @State private var selectedYear: Int
     @State private var showingExportAlert = false
     @State private var diagnosticReport = ""
@@ -31,52 +31,52 @@ struct DiagnosticsView: View {
             List {
                 // Section Paramètres
                 Section {
-                    configurationRow("Date de début", value: formatDate(settings.vacationStartDate))
-                    configurationRow("Solde initial", value: String(format: "%.2f jours", settings.initialVacationDays))
-                    configurationRow("Droits annuels", value: "\(settings.annualVacationDays) jours")
-                    configurationRow("Heures/semaine", value: String(format: "%.1f h", settings.weeklyHours))
-                    configurationRow("Heures/jour", value: String(format: "%.2f h", settings.standardDailyHours))
+                    configurationRow("diagnostics.config.startDate".localized, value: formatDate(settings.vacationStartDate))
+                    configurationRow("diagnostics.vacation.initial".localized, value: "diagnostics.days.decimal2".localized(settings.initialVacationDays))
+                    configurationRow("diagnostics.config.annual".localized, value: "diagnostics.days.count".localized(settings.annualVacationDays))
+                    configurationRow("diagnostics.config.weeklyHours".localized, value: String(format: "%.1f h", settings.weeklyHours))
+                    configurationRow("diagnostics.config.dailyHours".localized, value: String(format: "%.2f h", settings.standardDailyHours))
                 } header: {
-                    Label("CONFIGURATION", systemImage: "gearshape")
+                    Label("diagnostics.config.header".localized, systemImage: "gearshape")
                 }
                 
                 // Section Sélection d'année
                 Section {
-                    Picker("Année", selection: $selectedYear) {
+                    Picker("diagnostics.year".localized, selection: $selectedYear) {
                         ForEach(availableYears, id: \.self) { year in
                             Text(String(year)).tag(year)
                         }
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Label("SÉLECTION", systemImage: "calendar")
+                    Label("diagnostics.selection.header".localized, systemImage: "calendar")
                 }
                 
                 // Section Statistiques de l'année
                 Section {
                     let stats = yearStats
                     
-                    diagnosticRow("Entrées totales", value: "\(stats.totalEntries)", icon: "doc.text", color: .blue)
-                    diagnosticRow("Entrées supprimées", value: "\(stats.deletedEntries)", icon: "trash", color: .red)
-                    diagnosticRow("Entrées actives", value: "\(stats.activeEntries)", icon: "checkmark.circle", color: .green)
+                    diagnosticRow("diagnostics.stats.totalEntries".localized, value: "\(stats.totalEntries)", icon: "doc.text", color: .blue)
+                    diagnosticRow("diagnostics.stats.deletedEntries".localized, value: "\(stats.deletedEntries)", icon: "trash", color: .red)
+                    diagnosticRow("diagnostics.stats.activeEntries".localized, value: "\(stats.activeEntries)", icon: "checkmark.circle", color: .green)
                     
                     Divider()
                     
-                    diagnosticRow("Jours travaillés", value: "\(stats.workDays)", icon: "briefcase", color: .blue)
-                    diagnosticRow("Heures totales", value: formatHours(stats.totalHours), icon: "clock", color: .blue)
-                    diagnosticRow("Heures supp.", value: formatSeconds(stats.overtimeSeconds), icon: "clock.badge.exclamationmark", color: stats.overtimeSeconds >= 0 ? .green : .red)
+                    diagnosticRow("diagnostics.stats.workDays".localized, value: "\(stats.workDays)", icon: "briefcase", color: .blue)
+                    diagnosticRow("diagnostics.stats.totalHours".localized, value: formatHours(stats.totalHours), icon: "clock", color: .blue)
+                    diagnosticRow("diagnostics.stats.overtime".localized, value: formatSeconds(stats.overtimeSeconds), icon: "clock.badge.exclamationmark", color: stats.overtimeSeconds >= 0 ? .green : .red)
                     
                     Divider()
                     
-                    diagnosticRow("Congés complets", value: "\(stats.vacationDays)", icon: "sun.max", color: .orange)
-                    diagnosticRow("Demi-journées", value: "\(stats.halfVacationDays)", icon: "sun.min", color: .orange)
-                    diagnosticRow("Total congés", value: String(format: "%.1f j", stats.totalVacationDays), icon: "sun.max.fill", color: .orange)
-                    diagnosticRow("Jours maladie", value: "\(stats.sickDays)", icon: "cross.case", color: .red)
-                    diagnosticRow("Jours fériés", value: "\(stats.holidays)", icon: "star", color: .yellow)
-                    diagnosticRow("J. compensatoires", value: "\(stats.compensatoryDays)", icon: "arrow.2.squarepath", color: .green)
+                    diagnosticRow("diagnostics.stats.fullVacation".localized, value: "\(stats.vacationDays)", icon: "sun.max", color: .orange)
+                    diagnosticRow("diagnostics.stats.halfDays".localized, value: "\(stats.halfVacationDays)", icon: "sun.min", color: .orange)
+                    diagnosticRow("diagnostics.stats.totalVacation".localized, value: "diagnostics.days.short1".localized(stats.totalVacationDays), icon: "sun.max.fill", color: .orange)
+                    diagnosticRow("diagnostics.stats.sickDays".localized, value: "\(stats.sickDays)", icon: "cross.case", color: .red)
+                    diagnosticRow("diagnostics.stats.holidays".localized, value: "\(stats.holidays)", icon: "star", color: .yellow)
+                    diagnosticRow("diagnostics.stats.compensatory".localized, value: "\(stats.compensatoryDays)", icon: "arrow.2.squarepath", color: .green)
                     
                 } header: {
-                    Label("STATISTIQUES \(selectedYear)", systemImage: "chart.bar")
+                    Label("\("diagnostics.stats.header".localized) \(String(selectedYear))", systemImage: "chart.bar")
                 }
                 
                 // Section Calcul des congés détaillé
@@ -84,26 +84,26 @@ struct DiagnosticsView: View {
                     let vacationCalc = vacationCalculation
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Calcul du solde de congés")
+                        Text("diagnostics.vacation.calculation".localized)
                             .font(.headline)
                         
                         if vacationCalc.isStartYear {
-                            calculationStep("Solde initial", value: vacationCalc.carryIn, color: .purple)
-                            calculationStep("- Utilisés", value: -vacationCalc.used, color: .orange)
+                            calculationStep("diagnostics.vacation.initial".localized, value: vacationCalc.carryIn, color: .purple)
+                            calculationStep("diagnostics.vacation.used".localized, value: -vacationCalc.used, color: .orange)
                             Divider()
-                            calculationStep("= Restant", value: vacationCalc.remaining, color: vacationCalc.remaining > 0 ? .green : .red, bold: true)
+                            calculationStep("diagnostics.vacation.remaining".localized, value: vacationCalc.remaining, color: vacationCalc.remaining > 0 ? .green : .red, bold: true)
                         } else {
-                            calculationStep("Report entrant", value: vacationCalc.carryIn, color: .purple)
-                            calculationStep("+ Droits annuels", value: vacationCalc.annual, color: .blue)
-                            calculationStep("- Utilisés", value: -vacationCalc.used, color: .orange)
+                            calculationStep("diagnostics.vacation.carryIn".localized, value: vacationCalc.carryIn, color: .purple)
+                            calculationStep("diagnostics.vacation.entitlement".localized, value: vacationCalc.annual, color: .blue)
+                            calculationStep("diagnostics.vacation.used".localized, value: -vacationCalc.used, color: .orange)
                             Divider()
-                            calculationStep("= Restant", value: vacationCalc.remaining, color: vacationCalc.remaining > 0 ? .green : .red, bold: true)
+                            calculationStep("diagnostics.vacation.remaining".localized, value: vacationCalc.remaining, color: vacationCalc.remaining > 0 ? .green : .red, bold: true)
                         }
                     }
                     .padding(.vertical, 8)
                     
                 } header: {
-                    Label("CALCUL CONGÉS \(selectedYear)", systemImage: "function")
+                    Label("\("diagnostics.vacation.header".localized) \(String(selectedYear))", systemImage: "function")
                 }
                 
                 // Section Détail du report par année
@@ -111,49 +111,49 @@ struct DiagnosticsView: View {
                     ForEach(carryoverHistory, id: \.year) { entry in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text("\(entry.year)")
+                                Text(String(entry.year))
                                     .font(.headline)
                                 Spacer()
-                                Text(String(format: "%.1f j restants", entry.remaining))
-                                    .foregroundColor(entry.remaining > 0 ? .green : .red)
+                                Text("diagnostics.history.remaining".localized(entry.remaining))
+                                    .foregroundStyle(entry.remaining > 0 ? .green : .red)
                             }
                             
                             HStack {
                                 if entry.isStartYear {
-                                    Text("Initial: \(String(format: "%.1f", entry.carryIn))")
+                                    Text("diagnostics.history.initial".localized(String(format: "%.1f", entry.carryIn)))
                                 } else {
-                                    Text("Report: \(String(format: "%.1f", entry.carryIn)) + Droits: \(String(format: "%.1f", entry.entitlement))")
+                                    Text("diagnostics.history.carry".localized(String(format: "%.1f", entry.carryIn), String(format: "%.1f", entry.entitlement)))
                                 }
-                                Text("- Utilisés: \(String(format: "%.1f", entry.used))")
+                                Text("diagnostics.history.used".localized(String(format: "%.1f", entry.used)))
                             }
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
                     }
                 } header: {
-                    Label("HISTORIQUE DES REPORTS", systemImage: "clock.arrow.circlepath")
+                    Label("diagnostics.history.header".localized, systemImage: "clock.arrow.circlepath")
                 }
                 
                 // Section Vérification des heures
                 Section {
                     let hoursCheck = hoursVerification
                     
-                    diagnosticRow("Heures calculées (WorkDay)", value: formatHours(hoursCheck.fromWorkDays), icon: "doc.text", color: .blue)
-                    diagnosticRow("Heures recalculées", value: formatHours(hoursCheck.recalculated), icon: "arrow.triangle.2.circlepath", color: .blue)
+                    diagnosticRow("diagnostics.hours.calculated".localized, value: formatHours(hoursCheck.fromWorkDays), icon: "doc.text", color: .blue)
+                    diagnosticRow("diagnostics.hours.recalculated".localized, value: formatHours(hoursCheck.recalculated), icon: "arrow.triangle.2.circlepath", color: .blue)
                     
                     let difference = abs(hoursCheck.fromWorkDays - hoursCheck.recalculated)
                     let isMatching = difference < 0.01
                     
                     HStack {
                         Image(systemName: isMatching ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .foregroundColor(isMatching ? .green : .orange)
-                        Text(isMatching ? "Les calculs correspondent ✓" : "Différence: \(formatHours(difference))")
-                            .foregroundColor(isMatching ? .green : .orange)
+                            .foregroundStyle(isMatching ? .green : .orange)
+                        Text(isMatching ? "diagnostics.hours.matching".localized : "diagnostics.hours.differenceValue".localized(formatHours(difference)))
+                            .foregroundStyle(isMatching ? .green : .orange)
                     }
                     
                 } header: {
-                    Label("VÉRIFICATION HEURES", systemImage: "checkmark.shield")
+                    Label("diagnostics.hours.header".localized, systemImage: "checkmark.shield")
                 }
                 
                 // Section Détection des doublons
@@ -163,25 +163,25 @@ struct DiagnosticsView: View {
                     if duplicates.isEmpty {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("Aucun doublon détecté ✓")
-                                .foregroundColor(.green)
+                                .foregroundStyle(.green)
+                            Text("diagnostics.duplicates.none".localized)
+                                .foregroundStyle(.green)
                         }
                     } else {
-                        diagnosticRow("Dates avec doublons", value: "\(duplicates.count)", icon: "exclamationmark.triangle.fill", color: .orange)
-                        diagnosticRow("Entrées en double", value: "\(duplicates.reduce(0) { $0 + $1.entries.count })", icon: "doc.on.doc", color: .orange)
+                        diagnosticRow("diagnostics.duplicates.datesCount".localized, value: "\(duplicates.count)", icon: "exclamationmark.triangle.fill", color: .orange)
+                        diagnosticRow("diagnostics.duplicates.entriesCount".localized, value: "\(duplicates.reduce(0) { $0 + $1.entries.count })", icon: "doc.on.doc", color: .orange)
                         
                         ForEach(duplicates, id: \.dateString) { duplicate in
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Image(systemName: "calendar.badge.exclamationmark")
-                                        .foregroundColor(.orange)
+                                        .foregroundStyle(.orange)
                                     Text(duplicate.dateString)
                                         .fontWeight(.semibold)
                                     Spacer()
-                                    Text("\(duplicate.entries.count) entrées")
+                                    Text("diagnostics.duplicates.entriesBadge".localized(duplicate.entries.count))
                                         .font(.caption)
-                                        .foregroundColor(.orange)
+                                        .foregroundStyle(.orange)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 2)
                                         .background(Color.orange.opacity(0.2))
@@ -192,11 +192,11 @@ struct DiagnosticsView: View {
                                     HStack {
                                         Text("• \(entry.type.displayName)")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                         if entry.type.isWorkDay, let start = entry.startTime, let end = entry.endTime {
                                             Text("\(formatTime(start)) - \(formatTime(end))")
                                                 .font(.caption)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                         Spacer()
                                     }
@@ -207,58 +207,58 @@ struct DiagnosticsView: View {
                         }
                     }
                 } header: {
-                    Label("DÉTECTION DOUBLONS \(selectedYear)", systemImage: "doc.on.doc")
+                    Label("\("diagnostics.duplicates.header".localized) \(String(selectedYear))", systemImage: "doc.on.doc")
                 }
                 
                 // Section Outils de correction
                 Section {
                     Button(action: { showingRecalculateAlert = true }) {
-                        Label("Recalculer toutes les heures (\(selectedYear))", systemImage: "arrow.triangle.2.circlepath")
+                        Label("diagnostics.recalculate.allYear".localized(String(selectedYear)), systemImage: "arrow.triangle.2.circlepath")
                     }
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     
-                    Text("Recalcule les heures travaillées et supplémentaires de chaque entrée en fonction des paramètres actuels.")
+                    Text("diagnostics.recalculate.description".localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 } header: {
-                    Label("OUTILS DE CORRECTION", systemImage: "wrench.and.screwdriver")
+                    Label("diagnostics.tools.header".localized, systemImage: "wrench.and.screwdriver")
                 }
                 
                 // Bouton d'export
                 Section {
                     Button(action: generateReport) {
-                        Label("Générer rapport de diagnostic", systemImage: "doc.badge.gearshape")
+                        Label("diagnostics.export.report".localized, systemImage: "doc.badge.gearshape")
                     }
                 } header: {
-                    Label("EXPORT", systemImage: "square.and.arrow.up")
+                    Label("diagnostics.export.header".localized, systemImage: "square.and.arrow.up")
                 }
             }
-            .navigationTitle("Diagnostic")
+            .navigationTitle("diagnostics.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Fermer") {
+                    Button("action.close".localized) {
                         dismiss()
                     }
                 }
             }
-            .alert("Rapport généré", isPresented: $showingExportAlert) {
+            .alert("diagnostics.report.generated.title".localized, isPresented: $showingExportAlert) {
                 Button("OK", role: .cancel) { }
-                Button("Copier") {
+                Button("diagnostics.report.copy".localized) {
                     UIPasteboard.general.string = diagnosticReport
                 }
             } message: {
-                Text("Le rapport a été généré. Voulez-vous le copier dans le presse-papiers ?")
+                Text("diagnostics.report.copyQuestion".localized)
             }
-            .alert("Recalculer les heures", isPresented: $showingRecalculateAlert) {
-                Button("Annuler", role: .cancel) { }
-                Button("Recalculer", role: .destructive) {
+            .alert("diagnostics.recalculate.title".localized, isPresented: $showingRecalculateAlert) {
+                Button("action.cancel".localized, role: .cancel) { }
+                Button("diagnostics.recalculate.confirm".localized, role: .destructive) {
                     recalculateAllHours()
                 }
             } message: {
-                Text("Cette action va recalculer les heures travaillées et supplémentaires de toutes les entrées de \(selectedYear) en fonction de vos paramètres actuels.\n\nCette action est irréversible.")
+                Text("diagnostics.recalculate.confirmMessage".localized(String(selectedYear)))
             }
-            .alert("Recalcul terminé", isPresented: $showingRecalculateResult) {
+            .alert("diagnostics.recalculate.completed.title".localized, isPresented: $showingRecalculateResult) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(recalculateResultMessage)
@@ -267,21 +267,31 @@ struct DiagnosticsView: View {
     }
     
     // MARK: - Computed Properties
-    
-    private var yearStats: YearStatistics {
+
+    private var selectedYearWorkDays: [WorkDay] {
         let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
+        return workDays.filter {
             calendar.component(.year, from: $0.date) == selectedYear
         }
-        
-        let activeWorkDays = yearWorkDays
+    }
+
+    private var activeSelectedYearWorkDays: [WorkDay] {
+        selectedYearWorkDays.filter { !$0.isDeleted }
+    }
+
+    private var yearStats: YearStatistics {
+        let yearWorkDays = selectedYearWorkDays
+        let activeWorkDays = activeSelectedYearWorkDays
         
         return YearStatistics(
             totalEntries: yearWorkDays.count,
-            deletedEntries: 0,
+            deletedEntries: yearWorkDays.count - activeWorkDays.count,
             activeEntries: activeWorkDays.count,
-            workDays: activeWorkDays.filter { $0.type == .work }.count,
+            workDays: Set(
+                activeWorkDays
+                    .filter { $0.type == .work }
+                    .map { Calendar.current.startOfDay(for: $0.date) }
+            ).count,
             totalHours: activeWorkDays.filter { $0.type == .work }.reduce(0) { $0 + $1.totalHours },
             overtimeSeconds: activeWorkDays.reduce(0) { $0 + $1.overtimeSeconds },
             vacationDays: activeWorkDays.filter { $0.type == .vacation }.count,
@@ -354,12 +364,7 @@ struct DiagnosticsView: View {
     }
     
     private var hoursVerification: HoursCheck {
-        let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear &&
-            $0.type == .work
-        }
+        let yearWorkDays = activeSelectedYearWorkDays.filter { $0.type == .work }
 
         // Heures stockées dans les WorkDay
         let storedHours = yearWorkDays.reduce(0.0) { $0 + $1.totalHours }
@@ -378,20 +383,12 @@ struct DiagnosticsView: View {
     
     /// Détecte les entrées en double pour la même date
     private var duplicateEntries: [DuplicateGroup] {
-        let calendar = Calendar.current
-        
-        // Filtrer par année sélectionnée
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear
-        }
+        let yearWorkDays = activeSelectedYearWorkDays
         
         // Grouper par date et type (jour uniquement, sans l'heure)
         var grouped: [String: [WorkDay]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-
         for workDay in yearWorkDays {
-            let key = "\(dateFormatter.string(from: workDay.date)):\(workDay.type.rawValue)"
+            let key = "\(Self.duplicateKeyFormatter.string(from: workDay.date)):\(workDay.type.rawValue)"
             grouped[key, default: []].append(workDay)
         }
         
@@ -399,12 +396,10 @@ struct DiagnosticsView: View {
         let duplicates = grouped
             .filter { $0.value.count > 1 }
             .map { (key, entries) -> DuplicateGroup in
-                let displayFormatter = DateFormatter()
-                displayFormatter.dateStyle = .medium
-                displayFormatter.locale = Locale(identifier: "fr_FR")
-                let displayDate = dateFormatter.date(from: key) ?? Date()
+                let dateKey = key.split(separator: ":", maxSplits: 1).first.map(String.init) ?? ""
+                let displayDate = Self.duplicateKeyFormatter.date(from: dateKey) ?? Date()
                 return DuplicateGroup(
-                    dateString: displayFormatter.string(from: displayDate),
+                    dateString: Self.mediumDateFormatter.string(from: displayDate),
                     entries: entries.sorted { $0.createdAt < $1.createdAt }
                 )
             }
@@ -418,7 +413,7 @@ struct DiagnosticsView: View {
     private func configurationRow(_ title: String, value: String) -> some View {
         HStack {
             Text(title)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
@@ -428,23 +423,23 @@ struct DiagnosticsView: View {
     private func diagnosticRow(_ title: String, value: String, icon: String, color: Color) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .frame(width: 24)
             Text(title)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
-                .foregroundColor(color)
+                .foregroundStyle(color)
         }
     }
     
     private func calculationStep(_ label: String, value: Double, color: Color, bold: Bool = false) -> some View {
         HStack {
             Text(label)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Spacer()
-            Text(String(format: "%.2f j", value))
-                .foregroundColor(color)
+            Text("diagnostics.days.short2".localized(value))
+                .foregroundStyle(color)
                 .fontWeight(bold ? .bold : .regular)
         }
     }
@@ -452,10 +447,7 @@ struct DiagnosticsView: View {
     // MARK: - Helper Methods
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+        Self.mediumDateFormatter.string(from: date)
     }
     
     private func formatHours(_ hours: Double) -> String {
@@ -469,18 +461,14 @@ struct DiagnosticsView: View {
     }
     
     private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+        Self.shortTimeFormatter.string(from: date)
     }
     
     private func recalculateAllHours() {
-        let calendar = Calendar.current
-        
-        let yearWorkDays = workDays.filter {
-            calendar.component(.year, from: $0.date) == selectedYear
-        }
+        let yearWorkDays = activeSelectedYearWorkDays
+        let previousValues = Dictionary(uniqueKeysWithValues: yearWorkDays.map {
+            ($0.id, ($0.totalHours, $0.overtimeSeconds))
+        })
         
         var modifiedCount = 0
         var unchangedCount = 0
@@ -488,17 +476,18 @@ struct DiagnosticsView: View {
         var totalOvertimeAfter: Int = 0
         
         for workDay in yearWorkDays {
-            let oldOvertime = workDay.overtimeSeconds
-            let oldTotalHours = workDay.totalHours
-            totalOvertimeBefore += oldOvertime
+            totalOvertimeBefore += workDay.overtimeSeconds
             
             // Recalculer les heures
             workDay.calculateHours()
-            
+        }
+
+        _ = WorkDay.reconcileDailyOvertime(for: yearWorkDays)
+
+        for workDay in yearWorkDays {
             totalOvertimeAfter += workDay.overtimeSeconds
-            
-            // Vérifier si quelque chose a changé
-            if workDay.overtimeSeconds != oldOvertime || abs(workDay.totalHours - oldTotalHours) > 0.001 {
+            guard let previous = previousValues[workDay.id] else { continue }
+            if workDay.overtimeSeconds != previous.1 || abs(workDay.totalHours - previous.0) > 0.001 {
                 modifiedCount += 1
             } else {
                 unchangedCount += 1
@@ -514,74 +503,80 @@ struct DiagnosticsView: View {
             let differenceSeconds = totalOvertimeAfter - totalOvertimeBefore
             let differenceFormatted = formatSeconds(differenceSeconds)
             
-            recalculateResultMessage = """
-            \(yearWorkDays.count) entrées traitées
-            • \(modifiedCount) modifiées
-            • \(unchangedCount) inchangées
-            
-            Heures supp. avant: \(beforeFormatted)
-            Heures supp. après: \(afterFormatted)
-            Différence: \(differenceFormatted)
-            """
+            recalculateResultMessage = "diagnostics.recalculate.result".localized(
+                yearWorkDays.count, modifiedCount, unchangedCount,
+                beforeFormatted, afterFormatted, differenceFormatted
+            )
         } catch {
-            recalculateResultMessage = "Erreur lors de la sauvegarde: \(error.localizedDescription)"
+            recalculateResultMessage = "diagnostics.recalculate.saveError".localized(error.localizedDescription)
         }
         
         showingRecalculateResult = true
     }
+
+    private static let mediumDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+
+    private static let shortTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+
+    private static let duplicateKeyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
     
     private func generateReport() {
-        var report = """
-        ═══════════════════════════════════════
-        RAPPORT DE DIAGNOSTIC WORKTIMER
-        Généré le: \(formatDate(Date()))
-        ═══════════════════════════════════════
-        
-        CONFIGURATION
-        ─────────────
-        Date de début: \(formatDate(settings.vacationStartDate))
-        Solde initial: \(String(format: "%.2f", settings.initialVacationDays)) jours
-        Droits annuels: \(settings.annualVacationDays) jours
-        Heures/semaine: \(String(format: "%.1f", settings.weeklyHours))h
-        Heures/jour: \(String(format: "%.2f", settings.standardDailyHours))h
-        
-        """
-        
+        let day = "diagnostics.unit.dayShort".localized
+        let rule = "═══════════════════════════════════════"
+        var lines = [
+            rule,
+            "diagnostics.report.title".localized,
+            "diagnostics.report.generatedOn".localized(formatDate(Date())),
+            rule,
+            "",
+            "diagnostics.config.header".localized,
+            "─────────────",
+            "\("diagnostics.config.startDate".localized): \(formatDate(settings.vacationStartDate))",
+            "\("diagnostics.vacation.initial".localized): \("diagnostics.days.decimal2".localized(settings.initialVacationDays))",
+            "\("diagnostics.config.annual".localized): \("diagnostics.days.count".localized(settings.annualVacationDays))",
+            "\("diagnostics.config.weeklyHours".localized): \(String(format: "%.1f", settings.weeklyHours))h",
+            "\("diagnostics.config.dailyHours".localized): \(String(format: "%.2f", settings.standardDailyHours))h"
+        ]
+
         // Ajouter les stats pour chaque année
         for entry in carryoverHistory {
-            report += """
-            
-            ANNÉE \(entry.year) \(entry.isStartYear ? "(DÉBUT)" : "")
-            ─────────────
-            """
-            
+            let startMark = entry.isStartYear ? " " + "diagnostics.report.startYear".localized : ""
+            lines += ["", "diagnostics.report.year".localized(String(entry.year)) + startMark, "─────────────"]
             if entry.isStartYear {
-                report += """
-                
-                Solde initial: \(String(format: "%.2f", entry.carryIn)) j
-                Utilisés: \(String(format: "%.2f", entry.used)) j
-                Restant: \(String(format: "%.2f", entry.remaining)) j
-                """
+                lines += [
+                    "\("diagnostics.vacation.initial".localized): \(String(format: "%.2f", entry.carryIn)) \(day)",
+                    "\("diagnostics.report.used".localized): \(String(format: "%.2f", entry.used)) \(day)",
+                    "\("diagnostics.report.remaining".localized): \(String(format: "%.2f", entry.remaining)) \(day)"
+                ]
             } else {
-                report += """
-                
-                Report entrant: \(String(format: "%.2f", entry.carryIn)) j
-                + Droits annuels: \(String(format: "%.2f", entry.entitlement)) j
-                - Utilisés: \(String(format: "%.2f", entry.used)) j
-                = Restant: \(String(format: "%.2f", entry.remaining)) j
-                """
+                lines += [
+                    "\("diagnostics.vacation.carryIn".localized): \(String(format: "%.2f", entry.carryIn)) \(day)",
+                    "\("diagnostics.vacation.entitlement".localized): \(String(format: "%.2f", entry.entitlement)) \(day)",
+                    "\("diagnostics.vacation.used".localized): \(String(format: "%.2f", entry.used)) \(day)",
+                    "\("diagnostics.vacation.remaining".localized): \(String(format: "%.2f", entry.remaining)) \(day)"
+                ]
             }
         }
-        
-        report += """
-        
-        
-        ═══════════════════════════════════════
-        FIN DU RAPPORT
-        ═══════════════════════════════════════
-        """
-        
-        diagnosticReport = report
+
+        lines += ["", "", rule, "diagnostics.report.end".localized, rule]
+
+        diagnosticReport = lines.joined(separator: "\n")
         showingExportAlert = true
     }
 }
@@ -636,9 +631,4 @@ private struct DuplicateGroup {
     DiagnosticsView()
         .modelContainer(for: WorkDay.self, inMemory: true)
 }
-
-
-
-
-
 

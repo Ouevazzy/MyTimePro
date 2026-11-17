@@ -3,37 +3,50 @@ import SwiftData
 
 struct FeaturesSettingsSection: View {
     @Environment(\.modelContext) private var modelContext
+    private var store: StoreManager { StoreManager.shared }
     @Binding var activeSection: SettingsSection?
 
     @State private var showNotifications = false
     @State private var showCharts = false
     @State private var showSiriSettings = false
+    @State private var showPaywall = false
 
     var body: some View {
         SettingsCard(
             title: "settings.features.title".localized, icon: "star.fill", color: .orange,
             isExpanded: activeSection == .features,
             onToggle: {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                withAnimation(DS.Animation.cardToggle) {
                     activeSection = activeSection == .features ? nil : .features
                 }
             }
         ) {
             VStack(spacing: DS.Spacing.md) {
-                FeatureButton(title: "Notifications", subtitle: "Rappels de pointage",
-                              icon: "bell.badge.fill", color: .red) {
+                FeatureButton(
+                    title: "settings.notifications".localized,
+                    subtitle: "settings.notifications.subtitle".localized,
+                    icon: "bell.badge.fill", color: .red
+                ) {
                     showNotifications = true
                 }
-                FeatureButton(title: "Graphiques", subtitle: "Visualiser vos heures",
-                              icon: "chart.bar.fill", color: .blue) {
-                    showCharts = true
+                FeatureButton(
+                    title: "settings.charts".localized,
+                    subtitle: "settings.charts.subtitle".localized,
+                    icon: "chart.bar.fill", color: .blue,
+                    isPro: !store.isPro
+                ) {
+                    if store.isPro { showCharts = true } else { showPaywall = true }
                 }
-                FeatureButton(title: "Raccourcis Siri", subtitle: "Contrôle vocal",
-                              icon: "mic.fill", color: .purple) {
-                    showSiriSettings = true
+                FeatureButton(
+                    title: "settings.siri".localized,
+                    subtitle: "settings.siri.subtitle".localized,
+                    icon: "mic.fill", color: .purple,
+                    isPro: !store.isPro
+                ) {
+                    if store.isPro { showSiriSettings = true } else { showPaywall = true }
                 }
             }
-            .padding(.vertical, 5).padding(.horizontal)
+            .padding(.vertical, DS.Spacing.xs).padding(.horizontal)
         }
         .sheet(isPresented: $showNotifications) {
             NavigationStack { NotificationSettingsView() }
@@ -45,6 +58,9 @@ struct FeaturesSettingsSection: View {
         }
         .sheet(isPresented: $showSiriSettings) {
             NavigationStack { SiriSettingsView() }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 }

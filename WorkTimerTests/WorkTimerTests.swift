@@ -122,6 +122,66 @@ struct WorkHoursTests {
     }
 }
 
+@Suite("Statistiques actives du tableau de bord")
+struct ActivePeriodStatsTests {
+    private let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar
+    }()
+
+    @Test("les entrees supprimees ne participent pas aux totaux")
+    func ignoreDeletedEntries() {
+        let active = WorkDay(totalHours: 8.0, overtimeSeconds: 1800, type: .work)
+        let deleted = WorkDay(totalHours: 12.0, overtimeSeconds: 7200, type: .work)
+        deleted.isDeleted = true
+
+        let stats = WorkTimeCalculations.activePeriodStats(from: [active, deleted])
+
+        #expect(abs(stats.totalHours - 8.0) < 0.01)
+        #expect(stats.overtimeSeconds == 1800)
+    }
+
+    @Test("additionne les heures et le solde actif")
+    func sumsActiveEntries() {
+        let first = WorkDay(totalHours: 8.0, overtimeSeconds: 1800, type: .work)
+        let second = WorkDay(totalHours: 7.5, overtimeSeconds: -900, type: .work)
+
+        let stats = WorkTimeCalculations.activePeriodStats(from: [first, second])
+
+        #expect(abs(stats.totalHours - 15.5) < 0.01)
+        #expect(stats.overtimeSeconds == 900)
+    }
+
+    @Test("filtre une fenetre de dates sans inclure la borne de fin")
+    func filtersDateWindow() {
+        let before = WorkDay(date: makeDate(year: 2026, month: 12, day: 31), totalHours: 5.0, overtimeSeconds: 300, type: .work)
+        let inside = WorkDay(date: makeDate(year: 2027, month: 1, day: 1), totalHours: 8.0, overtimeSeconds: 600, type: .work)
+        let endBoundary = WorkDay(date: makeDate(year: 2027, month: 1, day: 2), totalHours: 9.0, overtimeSeconds: 900, type: .work)
+        let deletedInside = WorkDay(date: makeDate(year: 2027, month: 1, day: 1), totalHours: 7.0, overtimeSeconds: 700, type: .work)
+        deletedInside.isDeleted = true
+
+        let stats = WorkTimeCalculations.activePeriodStats(
+            from: [before, inside, endBoundary, deletedInside],
+            startDate: makeDate(year: 2027, month: 1, day: 1),
+            endDate: makeDate(year: 2027, month: 1, day: 2)
+        )
+
+        #expect(abs(stats.totalHours - 8.0) < 0.01)
+        #expect(stats.overtimeSeconds == 600)
+    }
+
+    private func makeDate(year: Int, month: Int, day: Int) -> Date {
+        var components = DateComponents()
+        components.calendar = calendar
+        components.timeZone = calendar.timeZone
+        components.year = year
+        components.month = month
+        components.day = day
+        return calendar.date(from: components)!
+    }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // MARK: - TESTS DES HEURES SUPPLÉMENTAIRES
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1300,15 +1360,11 @@ struct PerformanceTests {
     func performanceFiltrage() {
         var workDays: [WorkDay] = []
         let calendar = Calendar.current
-        
-        for year in 2015...2024 {
-            for dayOfYear in 1...365 {
-                var components = DateComponents()
-                components.year = year
-                components.day = dayOfYear
-                if let date = calendar.date(from: components) {
-                    workDays.append(createWorkDay(date: date, type: .work))
-                }
+
+        let baseDate = makeDate(year: 2000, month: 1, day: 1)
+        for dayOffset in 0..<10_000 {
+            if let date = calendar.date(byAdding: .day, value: dayOffset, to: baseDate) {
+                workDays.append(createWorkDay(date: date, type: .work))
             }
         }
         
@@ -1316,7 +1372,7 @@ struct PerformanceTests {
         
         // Filtrer par année (opération fréquente)
         var totalFiltered = 0
-        for year in 2015...2024 {
+        for year in 2000...2027 {
             let filtered = workDays.filter {
                 calendar.component(.year, from: $0.date) == year && !$0.isDeleted
             }
@@ -1327,7 +1383,8 @@ struct PerformanceTests {
         
         // Tolérance large pour le simulateur iOS (plus lent qu'un vrai appareil)
         #expect(elapsed < 0.5, "Filtrage 10 ans devrait prendre < 500ms (trouvé: \(elapsed * 1000)ms)")
-        #expect(totalFiltered > 3000, "Devrait avoir filtré des entrées")
+        #expect(workDays.count == 10_000, "Le jeu de données doit réellement contenir 10 000 entrées")
+        #expect(totalFiltered == 10_000, "Chaque entrée doit être filtrée exactement une fois")
     }
     
     @Test("Calcul report sur 30 ans en < 10ms")
@@ -2123,6 +2180,124 @@ struct WorkDayValidationTests {
     }
 }
 
+@Suite("WorkDayFormDraft — sauvegarde du formulaire")
+struct WorkDayFormDraftTests {
+
+    private func makeDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0) -> Date {
+        var c = DateComponents()
+        c.year = year
+        c.month = month
+        c.day = day
+        c.hour = hour
+        c.minute = minute
+        return Calendar.current.date(from: c)!
+    }
+
+    @Test("normalise les heures sur la date choisie")
+    func normaliseHeuresSurDateChoisie() {
+        let selectedDate = makeDate(year: 2024, month: 6, day: 15)
+        let draft = WorkDayFormDraft(
+            date: selectedDate,
+            type: .work,
+            startTime: makeDate(year: 2026, month: 1, day: 1, hour: 8, minute: 15),
+            endTime: makeDate(year: 2026, month: 1, day: 1, hour: 17, minute: 45),
+            breakDuration: makeDate(year: 2026, month: 1, day: 1, hour: 1),
+            bonusAmount: 25,
+            note: "  Mission client  "
+        )
+
+        let workDay = WorkDay(date: Date(), type: .work)
+        draft.apply(to: workDay)
+
+        #expect(Calendar.current.isDate(workDay.date, inSameDayAs: selectedDate))
+        #expect(Calendar.current.isDate(workDay.startTime!, inSameDayAs: selectedDate))
+        #expect(Calendar.current.isDate(workDay.endTime!, inSameDayAs: selectedDate))
+        #expect(Calendar.current.component(.hour, from: workDay.startTime!) == 8)
+        #expect(Calendar.current.component(.minute, from: workDay.endTime!) == 45)
+        #expect(workDay.note == "Mission client")
+        #expect(abs(workDay.totalHours - 8.5) < 0.01)
+    }
+
+    @Test("refuse une journee de travail avec 0h nette")
+    func refuseZeroHeureNette() {
+        let draft = WorkDayFormDraft(
+            date: makeDate(year: 2024, month: 6, day: 15),
+            type: .work,
+            startTime: makeDate(year: 2024, month: 6, day: 15, hour: 8),
+            endTime: makeDate(year: 2024, month: 6, day: 15, hour: 9),
+            breakDuration: makeDate(year: 2024, month: 6, day: 15, hour: 1),
+            bonusAmount: 0,
+            note: ""
+        )
+
+        #expect(!draft.isValid)
+        #expect(draft.validationIssue == .noNetHours)
+        #expect(draft.makeValidatedWorkDay() == nil)
+    }
+
+    @Test("explique une pause plus longue que la duree")
+    func expliquePauseTropLongue() {
+        let draft = WorkDayFormDraft(
+            date: makeDate(year: 2024, month: 6, day: 15),
+            type: .work,
+            startTime: makeDate(year: 2024, month: 6, day: 15, hour: 8),
+            endTime: makeDate(year: 2024, month: 6, day: 15, hour: 9),
+            breakDuration: makeDate(year: 2024, month: 6, day: 15, hour: 2),
+            bonusAmount: 0,
+            note: ""
+        )
+
+        #expect(!draft.isValid)
+        #expect(draft.validationIssue == .breakTooLong)
+    }
+
+    @Test("explique une note trop longue")
+    func expliqueNoteTropLongue() {
+        let draft = WorkDayFormDraft(
+            date: makeDate(year: 2024, month: 6, day: 15),
+            type: .vacation,
+            startTime: makeDate(year: 2024, month: 6, day: 15, hour: 8),
+            endTime: makeDate(year: 2024, month: 6, day: 15, hour: 17),
+            breakDuration: makeDate(year: 2024, month: 6, day: 15, hour: 1),
+            bonusAmount: 0,
+            note: String(repeating: "a", count: 501)
+        )
+
+        #expect(!draft.isValid)
+        #expect(draft.validationIssue == .noteTooLong)
+    }
+
+    @Test("un type non travail efface les heures et le bonus")
+    func typeNonTravailEffaceHeures() {
+        let workDay = WorkDay(
+            date: makeDate(year: 2024, month: 6, day: 15),
+            startTime: makeDate(year: 2024, month: 6, day: 15, hour: 8),
+            endTime: makeDate(year: 2024, month: 6, day: 15, hour: 17),
+            type: .work,
+            bonusAmount: 50
+        )
+
+        let draft = WorkDayFormDraft(
+            date: makeDate(year: 2024, month: 6, day: 16),
+            type: .vacation,
+            startTime: makeDate(year: 2024, month: 6, day: 15, hour: 8),
+            endTime: makeDate(year: 2024, month: 6, day: 15, hour: 17),
+            breakDuration: makeDate(year: 2024, month: 6, day: 15, hour: 1),
+            bonusAmount: 50,
+            note: "   "
+        )
+
+        draft.apply(to: workDay)
+
+        #expect(workDay.type == .vacation)
+        #expect(workDay.startTime == nil)
+        #expect(workDay.endTime == nil)
+        #expect(workDay.breakDuration == 0)
+        #expect(workDay.bonusAmount == 0)
+        #expect(workDay.note == nil)
+    }
+}
+
 @Suite("WorkDay.calculateHours() — calcul interne")
 struct WorkDayCalculateHoursTests {
 
@@ -2643,7 +2818,7 @@ struct RemainingStatsWithWorkDaysTests {
 // MARK: - TESTS StatsCache — hit/miss/invalidation
 // ══════════════════════════════════════════════════════════════════════════════
 
-@Suite("StatsCache — cache hit, miss et invalidation")
+@Suite("StatsCache — cache hit, miss et invalidation", .serialized)
 @MainActor
 struct StatsCacheTests {
 
@@ -2652,6 +2827,14 @@ struct StatsCacheTests {
         let cache = StatsCache.shared
         cache.invalidateAll()
         return cache
+    }
+
+    private func makeDate(year: Int, month: Int, day: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+        return Calendar.current.date(from: components)!
     }
 
     @Test("cache miss retourne nil avant tout insert")
@@ -2759,5 +2942,54 @@ struct StatsCacheTests {
         let result = cache.getYearlyStats(for: 2024)
         #expect(result?.workDays == 220, "La deuxième valeur doit écraser la première")
         #expect(cache.cacheInfo.yearly == 1, "Toujours une seule entrée pour 2024")
+    }
+
+    @Test("onWorkDayChanged invalide l'ancien et le nouveau mois")
+    func invalidationAncienEtNouveauMois() {
+        let cache = freshCache()
+        cache.cacheMonthlyStats(
+            year: 2024, month: 6, workDays: 20,
+            totalHours: 160, overtimeSeconds: 0, totalBonus: 0
+        )
+        cache.cacheMonthlyStats(
+            year: 2024, month: 7, workDays: 18,
+            totalHours: 144, overtimeSeconds: 0, totalBonus: 0
+        )
+        cache.cacheYearlyStats(
+            year: 2024, workDays: 220, vacationDays: 10, sickDays: 2,
+            totalHours: 1760, overtimeSeconds: 0, totalBonus: 0
+        )
+
+        let movedWorkDay = WorkDay(date: makeDate(year: 2024, month: 7, day: 3), type: .work)
+        cache.onWorkDayChanged(
+            movedWorkDay,
+            previousDate: makeDate(year: 2024, month: 6, day: 28),
+            previousType: .work
+        )
+
+        #expect(cache.getMonthlyStats(year: 2024, month: 6) == nil)
+        #expect(cache.getMonthlyStats(year: 2024, month: 7) == nil)
+        #expect(cache.getYearlyStats(for: 2024) == nil)
+    }
+
+    @Test("onWorkDayChanged invalide les vacances de l'ancien type")
+    func invalidationAncienTypeVacances() {
+        let cache = freshCache()
+        cache.cacheVacationStats(
+            year: 2024,
+            used: 5,
+            remaining: 20,
+            carryIn: 0,
+            annual: 25
+        )
+
+        let workDay = WorkDay(date: makeDate(year: 2024, month: 7, day: 3), type: .work)
+        cache.onWorkDayChanged(
+            workDay,
+            previousDate: makeDate(year: 2024, month: 6, day: 28),
+            previousType: .vacation
+        )
+
+        #expect(cache.getVacationStats(for: 2024) == nil)
     }
 }

@@ -1,0 +1,761 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /tmp/worktimer-audit-probes-project/WorkTimer.xcodeproj -scheme WorkTimer -configuration Debug -destination "platform=iOS Simulator,id=06F4225E-211B-4003-A3C5-FD19ED5780A3" -derivedDataPath /tmp/worktimer-audit-final-derived -resultBundlePath /tmp/worktimer-audit-isolation.xcresult -parallel-testing-enabled NO "-only-testing:WorkTimerTests" test
+
+Writing result bundle at path:
+	/tmp/worktimer-audit-isolation.xcresult
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'WorkTimerUITests' in project 'WorkTimer'
+        ➜ Explicit dependency on target 'WorkTimer' in project 'WorkTimer'
+    Target 'WorkTimerTests' in project 'WorkTimer'
+        ➜ Explicit dependency on target 'WorkTimer' in project 'WorkTimer'
+    Target 'WorkTimer' in project 'WorkTimer'
+        ➜ Explicit dependency on target 'WorkTimerWidget' in project 'WorkTimer'
+    Target 'WorkTimerWidget' in project 'WorkTimer' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk /tmp/worktimer-audit-final-derived/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache
+    cd /tmp/worktimer-audit-probes-project/WorkTimer.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -o /tmp/worktimer-audit-final-derived/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache
+
+Copy /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerWidget.appex /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerWidget.appex (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks -remove-static-executable /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerWidget.appex /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns
+
+ProcessInfoPlistFile /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Info.plist /tmp/worktimer-audit-probes-project/WorkTimer/Info.plist (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-infoPlistUtility /tmp/worktimer-audit-probes-project/WorkTimer/Info.plist -producttype com.apple.product-type.application -genpkginfo /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimer.build/assetcatalog_generated_info.plist -scanforprivacyfile /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerWidget.appex -o /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Info.plist
+
+SwiftDriver WorkTimerTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name WorkTimerTests -Onone @/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -target arm64-apple-ios26.0-simulator -g -module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/worktimer-audit-final-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/Developer/Library/Frameworks -c -j16 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/worktimer-audit-final-derived/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache -output-file-map /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -sdk-module-cache-path /tmp/worktimer-audit-final-derived/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /tmp/worktimer-audit-final-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-generated-files.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-own-target-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-project-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources-normal/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-Swift.h -working-directory /tmp/worktimer-audit-probes-project -experimental-emit-module-separately -disable-cmo
+
+CopySwiftLibs /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer.debug.dylib --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Frameworks --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/SystemExtensions --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Extensions --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/StoreKit.framework --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimer.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ WorkTimerTests (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftCompile normal arm64 (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    
+
+SwiftCompile normal arm64 Compiling\ MultipleEntriesPerDayTests.swift /tmp/worktimer-audit-probes-project/WorkTimerTests/MultipleEntriesPerDayTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftCompile normal arm64 /tmp/worktimer-audit-probes-project/WorkTimerTests/MultipleEntriesPerDayTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-SwiftPerFileCompile MultipleEntriesPerDayTests.swift
+
+SwiftCompile normal arm64 Compiling\ AuditBehaviorProbes.swift /tmp/worktimer-audit-probes-project/WorkTimerTests/AuditBehaviorProbes.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftCompile normal arm64 /tmp/worktimer-audit-probes-project/WorkTimerTests/AuditBehaviorProbes.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-SwiftPerFileCompile AuditBehaviorProbes.swift
+
+SwiftCompile normal arm64 Compiling\ SiriShortcutsTests.swift /tmp/worktimer-audit-probes-project/WorkTimerTests/SiriShortcutsTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftCompile normal arm64 /tmp/worktimer-audit-probes-project/WorkTimerTests/SiriShortcutsTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-SwiftPerFileCompile SiriShortcutsTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling AuditBehaviorProbes.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftDriverJobDiscovery normal arm64 Compiling MultipleEntriesPerDayTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SiriShortcutsTests.swift (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftDriver\ Compilation WorkTimerTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name WorkTimerTests -Onone @/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -target arm64-apple-ios26.0-simulator -g -module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/worktimer-audit-final-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/Developer/Library/Frameworks -c -j16 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/worktimer-audit-final-derived/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache -output-file-map /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -sdk-module-cache-path /tmp/worktimer-audit-final-derived/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /tmp/worktimer-audit-final-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-generated-files.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-own-target-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-project-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources-normal/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-Swift.h -working-directory /tmp/worktimer-audit-probes-project -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for WorkTimerTests (in target 'WorkTimerTests' from project 'WorkTimer')
+
+SwiftDriver\ Compilation\ Requirements WorkTimerTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name WorkTimerTests -Onone @/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -target arm64-apple-ios26.0-simulator -g -module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/worktimer-audit-final-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/Developer/Library/Frameworks -c -j16 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/worktimer-audit-final-derived/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache -output-file-map /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/worktimer-audit-final-derived/ModuleCache.noindex -sdk-module-cache-path /tmp/worktimer-audit-final-derived/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /tmp/worktimer-audit-final-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-generated-files.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-own-target-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests-project-headers.hmap -Xcc -I/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources-normal/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources/arm64 -Xcc -I/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests-Swift.h -working-directory /tmp/worktimer-audit-probes-project -experimental-emit-module-separately -disable-cmo
+
+Copy /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerTests.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftsourceinfo (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftsourceinfo /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerTests.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+Copy /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerTests.swiftmodule/arm64-apple-ios-simulator.abi.json /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.abi.json (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.abi.json /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimerTests.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Ld /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/WorkTimerTests normal (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios26.0-simulator -bundle -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -L/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F/tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/Developer/Library/Frameworks -filelist /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.LinkFileList -Xlinker -rpath -Xlinker @loader_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -bundle_loader /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer -Xlinker -object_path_lto -Xlinker /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.swiftmodule -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer.debug.dylib -Xlinker -no_adhoc_codesign -o /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/WorkTimerTests
+
+ExtractAppIntentsMetadata (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name WorkTimerTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk --xcode-version 27A266a --platform-family iOS --deployment-target 26.0 --bundle-identifier Jordanpayez.WorkTimerTests --output /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest --target-triple arm64-apple-ios26.0-simulator --binary-file /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/WorkTimerTests --dependency-file /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests_dependency_info.dat --stringsdata-file /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.SwiftFileList --metadata-file-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests.DependencyMetadataFileList --static-metadata-file-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/WorkTimerTests.DependencyStaticMetadataFileList --swift-const-vals-list /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/Objects-normal/arm64/WorkTimerTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-09-18 14:56:34.712 appintentsmetadataprocessor[3854:108296] Starting appintentsmetadataprocessor export
+2026-09-18 14:56:34.747 appintentsmetadataprocessor[3854:108296] Extracted no relevant App Intents symbols, skipping writing output
+
+CopySwiftLibs /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/WorkTimerTests --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/Frameworks --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/PlugIns --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/SystemExtensions --scan-folder /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimerTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+CodeSign /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest (in target 'WorkTimerTests' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerTests.xctest
+
+CodeSign /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer.debug.dylib (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer.debug.dylib
+/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/WorkTimer.debug.dylib: replacing existing signature
+
+CodeSign /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/__preview.dylib (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/__preview.dylib
+/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/__preview.dylib: replacing existing signature
+
+CodeSign /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --entitlements /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/WorkTimer.build/Debug-iphonesimulator/WorkTimer.build/WorkTimer.app.xcent --timestamp\=none --generate-entitlement-der /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app
+/tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app: replacing existing signature
+
+Validate /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    builtin-validationUtility /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app -shallow-bundle -infoplist-subpath Info.plist
+
+ValidateEmbeddedBinary /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerWidget.appex (in target 'WorkTimer' from project 'WorkTimer')
+    cd /tmp/worktimer-audit-probes-project
+    /Applications/Xcode.app/Contents/Developer/usr/bin/embeddedBinaryValidationUtility /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/PlugIns/WorkTimerWidget.appex -signing-cert - -info-plist-path /tmp/worktimer-audit-final-derived/Build/Products/Debug-iphonesimulator/WorkTimer.app/Info.plist
+
+PruneExplicitPrecompiledModules /tmp/worktimer-audit-final-derived/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /tmp/worktimer-audit-final-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+2026-09-18 14:56:47.886869+0200 WorkTimer[4059:110023] [Data] ModelContainer initialisé avec succès
+2026-09-18 14:56:47.911510+0200 WorkTimer[4059:110023] [General] Background tasks registered sync=true cleanup=true
+2026-09-18 14:56:48.110037+0200 WorkTimer[4059:110023] [CloudKit] Configuration initiale du service cloud
+2026-09-18 14:56:48.316461+0200 WorkTimer[4059:111118] [General] Failed to send CA Event for app launch measurements for ca_event_type: 0 event_name: com.apple.app_launch_measurement.FirstFramePresentationMetric
+2026-09-18 14:56:48.381287+0200 WorkTimer[4059:110023] [XPCErrors] non-launching port is incompatible with service identifier "com.apple.PointerUI.pointeruid.default-service"
+2026-09-18 14:56:48.386839+0200 WorkTimer[4059:111112] [User Defaults] Could not resolve UID for user "mobile".
+2026-09-18 14:56:48.387273+0200 WorkTimer[4059:111112] [CK] Could not read account info validation counter. (This is a potential performance issue.)
+2026-09-18 14:56:48.389902+0200 WorkTimer[4059:110023] [API] cannot add handler to 0 from 0 - dropping
+2026-09-18 14:56:48.389999+0200 WorkTimer[4059:110023] [API] cannot add handler to 0 from 0 - dropping
+IOSurfaceClientSetSurfaceNotify failed e00002c7
+2026-09-18 14:56:48.401624+0200 WorkTimer[4059:110023] [API] cannot add handler to 0 from 0 - dropping
+2026-09-18 14:56:48.401733+0200 WorkTimer[4059:110023] [API] cannot add handler to 0 from 0 - dropping
+2026-09-18 14:56:48.410916+0200 WorkTimer[4059:110023] [CloudKit] iCloud status refresh failed - Error: Aucune connexion réseau disponible
+Test Suite 'All tests' started at 2026-09-18 14:56:48.662.
+Test Suite 'All tests' passed at 2026-09-18 14:56:48.662.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64-apple-ios17.0-simulator
+◇ Suite "Analytics" started.
+◇ Test "Les analytics restent désactivés par défaut" started.
+2026-09-18 14:56:48.672080+0200 WorkTimer[4059:110023] [General] Analytics désactivé
+✔ Test "Les analytics restent désactivés par défaut" passed after 0.001 seconds.
+✔ Suite "Analytics" passed after 0.001 seconds.
+◇ Suite "Sondes audit iOS 27" started.
+◇ Test monthlyPDFCoverIncludesOtherMonths() started.
+AUDIT monthly PDF cover:
+WorkTimer
+Rapport Mensuel Septembre 2026
+Généré le 18 septembre 2026
+📊
+2
+Jours travaillés
+⏱
+17.00 h
+Heures totales
+💰
+0.00 CHF
+Bonus
+Résumé
+Jours travaillés: 2 jours
+Congés utilisés: 0.0 jours
+Droits annuels: 0.0 jours
+Report: 0.0 jours
+Solde restant: 0.0 jours
+Jours de maladie: 0 jours
+Heures moyennes/jour: 8.50 h
+Heures supplémentaires:0.00 h
+Total bonus: 0.00 CHF
+Généré le 18/09/2026 14:56 Page 1 sur 2
+✔ Test monthlyPDFCoverIncludesOtherMonths() passed after 0.026 seconds.
+◇ Test halfVacationAndHalfWorkDeductFullTarget() started.
+AUDIT half vacation + 4h work, target 8h: -14400 seconds
+✔ Test halfVacationAndHalfWorkDeductFullTarget() passed after 0.012 seconds.
+◇ Test compensatoryDayMissingFromChartOvertime() started.
+AUDIT monthly chart: 2.0 hours; summary: -6 hours
+✔ Test compensatoryDayMissingFromChartOvertime() passed after 0.001 seconds.
+◇ Test trainingCalculatesZeroHours() started.
+AUDIT training totalHours: 0.0
+✔ Test trainingCalculatesZeroHours() passed after 0.001 seconds.
+◇ Test annualCSVCountsHalfVacationAsOne() started.
+AUDIT annual CSV: TOTAL;0;0.00;+0h00;1;0;0
+✔ Test annualCSVCountsHalfVacationAsOne() passed after 0.001 seconds.
+✔ Suite "Sondes audit iOS 27" passed after 0.041 seconds.
+◇ Suite "Export CSV" started.
+◇ Test "L'export detaille echappe les notes avec separateur, guillemets et retour ligne" started.
+✔ Test "L'export detaille echappe les notes avec separateur, guillemets et retour ligne" passed after 0.001 seconds.
+◇ Test "Les donnees CSV partagees commencent par un BOM UTF-8 pour Excel" started.
+✔ Test "Les donnees CSV partagees commencent par un BOM UTF-8 pour Excel" passed after 0.001 seconds.
+◇ Test "L'export complet utilise le format detaille avec separateur point-virgule" started.
+✔ Test "L'export complet utilise le format detaille avec separateur point-virgule" passed after 0.001 seconds.
+✔ Suite "Export CSV" passed after 0.001 seconds.
+◇ Suite "Disposition du calendrier" started.
+◇ Test "Le calendrier d'affichage commence le lundi" started.
+✔ Test "Le calendrier d'affichage commence le lundi" passed after 0.001 seconds.
+◇ Test "L'en-tete des jours suit le meme ordre que la grille" started.
+✔ Test "L'en-tete des jours suit le meme ordre que la grille" passed after 0.001 seconds.
+◇ Test "La grille mensuelle aligne un dimanche en derniere colonne quand la semaine commence lundi" started.
+✔ Test "La grille mensuelle aligne un dimanche en derniere colonne quand la semaine commence lundi" passed after 0.001 seconds.
+◇ Test "La date d'affichage mensuelle est toujours le debut du mois" started.
+✔ Test "La date d'affichage mensuelle est toujours le debut du mois" passed after 0.001 seconds.
+◇ Test "Les cases du mois utilisent une identite basee sur la date visible" started.
+✔ Test "Les cases du mois utilisent une identite basee sur la date visible" passed after 0.001 seconds.
+◇ Test "La navigation mensuelle conserve le jour prefere apres un mois plus court" started.
+✔ Test "La navigation mensuelle conserve le jour prefere apres un mois plus court" passed after 0.001 seconds.
+◇ Test "La vue semaine commence sur le lundi visible" started.
+✔ Test "La vue semaine commence sur le lundi visible" passed after 0.001 seconds.
+✔ Suite "Disposition du calendrier" passed after 0.001 seconds.
+◇ Suite "Calculs des graphiques (ChartsDataService)" started.
+◇ Test "Le résumé ne somme les heures que des jours travaillés" started.
+✔ Test "Le résumé ne somme les heures que des jours travaillés" passed after 0.001 seconds.
+◇ Test "Résumé vide pour une liste vide" started.
+✔ Test "Résumé vide pour une liste vide" passed after 0.001 seconds.
+◇ Test "La répartition compte et trie les types par fréquence" started.
+✔ Test "La répartition compte et trie les types par fréquence" passed after 0.001 seconds.
+◇ Test "Répartition vide pour une liste vide" started.
+✔ Test "Répartition vide pour une liste vide" passed after 0.001 seconds.
+◇ Test "La fenêtre quotidienne reste dans l'année sélectionnée" started.
+✔ Test "La fenêtre quotidienne reste dans l'année sélectionnée" passed after 0.001 seconds.
+◇ Test "La fenêtre quotidienne de l'année courante inclut aujourd'hui" started.
+✔ Test "La fenêtre quotidienne de l'année courante inclut aujourd'hui" passed after 0.001 seconds.
+◇ Test "Les données quotidiennes excluent les jours à 0h et sont triées par date" started.
+✔ Test "Les données quotidiennes excluent les jours à 0h et sont triées par date" passed after 0.001 seconds.
+◇ Test "Les données mensuelles n'incluent que les mois contenant des jours travaillés" started.
+✔ Test "Les données mensuelles n'incluent que les mois contenant des jours travaillés" passed after 0.001 seconds.
+◇ Test "orderedTypes respecte l'ordre canonique de WorkDayType" started.
+✔ Test "orderedTypes respecte l'ordre canonique de WorkDayType" passed after 0.001 seconds.
+✔ Suite "Calculs des graphiques (ChartsDataService)" passed after 0.002 seconds.
+◇ Suite "Navigation iOS 27" started.
+◇ Test "Une sélection d'onglet persistée invalide revient à l'accueil" started.
+✔ Test "Une sélection d'onglet persistée invalide revient à l'accueil" passed after 0.001 seconds.
+◇ Test "Les sélections d'onglets valides sont conservées" started.
+✔ Test "Les sélections d'onglets valides sont conservées" passed after 0.001 seconds.
+✔ Suite "Navigation iOS 27" passed after 0.001 seconds.
+◇ Suite "Services background" started.
+◇ Test "Les services CloudKit en arrière-plan suivent la configuration de build" started.
+✔ Test "Les services CloudKit en arrière-plan suivent la configuration de build" passed after 0.001 seconds.
+◇ Test "L'Info.plist ne déclare que les modes background réellement utilisés" started.
+✔ Test "L'Info.plist ne déclare que les modes background réellement utilisés" passed after 0.001 seconds.
+✔ Suite "Services background" passed after 0.001 seconds.
+◇ Suite "Plusieurs entrées par journée" started.
+◇ Test "4 h + 6 h avec une cible de 9 h donnent 1 h supplémentaire" started.
+✔ Test "4 h + 6 h avec une cible de 9 h donnent 1 h supplémentaire" passed after 0.001 seconds.
+◇ Test "une seule entrée de 4 h conserve un déficit de 5 h" started.
+✔ Test "une seule entrée de 4 h conserve un déficit de 5 h" passed after 0.001 seconds.
+◇ Test "la réconciliation SwiftData inclut les nouvelles entrées avant la sauvegarde" started.
+✔ Test "la réconciliation SwiftData inclut les nouvelles entrées avant la sauvegarde" passed after 0.011 seconds.
+◇ Test "supprimer une entrée recalcule le solde des entrées restantes" started.
+✔ Test "supprimer une entrée recalcule le solde des entrées restantes" passed after 0.004 seconds.
+◇ Test "les statistiques comptent une date travaillée une seule fois" started.
+✔ Test "les statistiques comptent une date travaillée une seule fois" passed after 0.001 seconds.
+✔ Suite "Plusieurs entrées par journée" passed after 0.017 seconds.
+◇ Suite "Raccourcis Siri" started.
+◇ Test "Les choix de type de journée couvrent les valeurs utiles du modèle" started.
+✔ Test "Les choix de type de journée couvrent les valeurs utiles du modèle" passed after 0.001 seconds.
+◇ Test "Chaque choix AppEnum a une représentation visible" started.
+✔ Test "Chaque choix AppEnum a une représentation visible" passed after 0.001 seconds.
+◇ Test "Chaque destination WorkTimer exposée à Raccourcis a une représentation visible" started.
+✔ Test "Chaque destination WorkTimer exposée à Raccourcis a une représentation visible" passed after 0.001 seconds.
+◇ Test "Chaque preset de date Siri a une représentation visible" started.
+✔ Test "Chaque preset de date Siri a une représentation visible" passed after 0.071 seconds.
+◇ Test "L'app utilise App Intents sans déclaration SiriKit legacy" started.
+✔ Test "L'app utilise App Intents sans déclaration SiriKit legacy" passed after 0.001 seconds.
+◇ Test "Les descriptions App Intent évitent le mot refusé par App Store Connect" started.
+✔ Test "Les descriptions App Intent évitent le mot refusé par App Store Connect" passed after 0.001 seconds.
+◇ Test "L'ajout rapide conserve le type choisi dans Raccourcis" started.
+✔ Test "L'ajout rapide conserve le type choisi dans Raccourcis" passed after 0.007 seconds.
+◇ Test "L'ouverture par Raccourcis conserve la destination choisie" started.
+✔ Test "L'ouverture par Raccourcis conserve la destination choisie" passed after 0.047 seconds.
+◇ Test "L'ouverture d'une date par Raccourcis conserve la date choisie" started.
+✔ Test "L'ouverture d'une date par Raccourcis conserve la date choisie" passed after 0.077 seconds.
+◇ Test "Les presets de date Siri calculent le bon jour" started.
+2026-09-18 14:56:48.950083+0200 WorkTimer[4059:110023] [API] cannot add handler to 0 from 0 - dropping
+✔ Test "Les presets de date Siri calculent le bon jour" passed after 0.008 seconds.
+◇ Test "Les paramètres App Shortcuts sont rafraîchis seulement quand la signature change" started.
+✔ Test "Les paramètres App Shortcuts sont rafraîchis seulement quand la signature change" passed after 0.007 seconds.
+◇ Test "Une destination Raccourcis inconnue ouvre le calendrier par défaut" started.
+✔ Test "Une destination Raccourcis inconnue ouvre le calendrier par défaut" passed after 0.007 seconds.
+◇ Test "L'action arrivée Siri crée une journée de travail en attente" started.
+✔ Test "L'action arrivée Siri crée une journée de travail en attente" passed after 0.022 seconds.
+◇ Test "L'action départ Siri complète une journée de travail" started.
+✔ Test "L'action départ Siri complète une journée de travail" passed after 0.031 seconds.
+◇ Test "L'action ajout rapide crée le type demandé" started.
+✔ Test "L'action ajout rapide crée le type demandé" passed after 0.012 seconds.
+◇ Test "Le résumé Siri reflète les données SwiftData récentes" started.
+✔ Test "Le résumé Siri reflète les données SwiftData récentes" passed after 0.002 seconds.
+◇ Test "Le résumé hebdomadaire Siri inclut les jours de la semaine qui traversent une année" started.
+✔ Test "Le résumé hebdomadaire Siri inclut les jours de la semaine qui traversent une année" passed after 0.002 seconds.
+◇ Test "Le rafraîchissement du résumé Siri écrit le cache utilisé hors app" started.
+✔ Test "Le rafraîchissement du résumé Siri écrit le cache utilisé hors app" passed after 0.015 seconds.
+◇ Test "Les raccourcis de consultation préfèrent un résumé frais au cache vide" started.
+✔ Test "Les raccourcis de consultation préfèrent un résumé frais au cache vide" passed after 0.009 seconds.
+✔ Suite "Raccourcis Siri" passed after 0.327 seconds.
+◇ Suite "Navigation mensuelle de la liste" started.
+◇ Test "Le mois visible est toujours normalise au premier jour" started.
+✔ Test "Le mois visible est toujours normalise au premier jour" passed after 0.001 seconds.
+◇ Test "La navigation mensuelle garde annee et mois synchronises" started.
+✔ Test "La navigation mensuelle garde annee et mois synchronises" passed after 0.001 seconds.
+◇ Test "Le mois visible reconnait uniquement les dates du meme mois" started.
+✔ Test "Le mois visible reconnait uniquement les dates du meme mois" passed after 0.001 seconds.
+✔ Suite "Navigation mensuelle de la liste" passed after 0.001 seconds.
+◇ Suite "Horaires de travail — logique pure" started.
+◇ Test "normalizedWeek conserve un tableau de 7 valeurs déjà valides" started.
+✔ Test "normalizedWeek conserve un tableau de 7 valeurs déjà valides" passed after 0.001 seconds.
+◇ Test "normalizedWeek complète un tableau trop court avec des zéros" started.
+✔ Test "normalizedWeek complète un tableau trop court avec des zéros" passed after 0.001 seconds.
+◇ Test "normalizedWeek tronque un tableau trop long à 7 valeurs" started.
+✔ Test "normalizedWeek tronque un tableau trop long à 7 valeurs" passed after 0.001 seconds.
+◇ Test "normalizedWeek borne chaque valeur entre 0 et 24 heures" started.
+✔ Test "normalizedWeek borne chaque valeur entre 0 et 24 heures" passed after 0.001 seconds.
+◇ Test "normalizedWeek remplace les valeurs non finies par 0" started.
+✔ Test "normalizedWeek remplace les valeurs non finies par 0" passed after 0.001 seconds.
+◇ Test "weekdayIndex mappe lundi→0 … dimanche→6" started.
+✔ Test "weekdayIndex mappe lundi→0 … dimanche→6" passed after 0.001 seconds.
+◇ Test "Mode par jour : chaque jour renvoie sa cible (ex. vendredi = 5h)" started.
+✔ Test "Mode par jour : chaque jour renvoie sa cible (ex. vendredi = 5h)" passed after 0.001 seconds.
+◇ Test "Mode par jour : un tableau incomplet renvoie 0 pour les jours manquants" started.
+✔ Test "Mode par jour : un tableau incomplet renvoie 0 pour les jours manquants" passed after 0.001 seconds.
+◇ Test "Mode uniforme : jour travaillé → heures standard, sinon 0" started.
+✔ Test "Mode uniforme : jour travaillé → heures standard, sinon 0" passed after 0.001 seconds.
+◇ Test "Un index hors plage renvoie 0 dans les deux modes" started.
+✔ Test "Un index hors plage renvoie 0 dans les deux modes" passed after 0.001 seconds.
+✔ Suite "Horaires de travail — logique pure" passed after 0.002 seconds.
+◇ Suite "Calculs des heures de travail" started.
+◇ Test "Journée standard 8h00-17h00 avec 1h pause = 8h" started.
+✔ Test "Journée standard 8h00-17h00 avec 1h pause = 8h" passed after 0.001 seconds.
+◇ Test "Journée longue 7h00-19h00 avec 1h pause = 11h" started.
+✔ Test "Journée longue 7h00-19h00 avec 1h pause = 11h" passed after 0.001 seconds.
+◇ Test "Demi-journée 8h00-12h30 sans pause = 4h30" started.
+✔ Test "Demi-journée 8h00-12h30 sans pause = 4h30" passed after 0.001 seconds.
+◇ Test "Journée avec minutes 8h15-17h45 avec 1h pause = 8h30" started.
+✔ Test "Journée avec minutes 8h15-17h45 avec 1h pause = 8h30" passed after 0.001 seconds.
+◇ Test "Pause de 2 heures" started.
+✔ Test "Pause de 2 heures" passed after 0.001 seconds.
+◇ Test "Pause de 30 minutes" started.
+✔ Test "Pause de 30 minutes" passed after 0.001 seconds.
+✔ Suite "Calculs des heures de travail" passed after 0.001 seconds.
+◇ Suite "Statistiques actives du tableau de bord" started.
+◇ Test "les entrees supprimees ne participent pas aux totaux" started.
+✔ Test "les entrees supprimees ne participent pas aux totaux" passed after 0.001 seconds.
+◇ Test "additionne les heures et le solde actif" started.
+✔ Test "additionne les heures et le solde actif" passed after 0.001 seconds.
+◇ Test "filtre une fenetre de dates sans inclure la borne de fin" started.
+✔ Test "filtre une fenetre de dates sans inclure la borne de fin" passed after 0.001 seconds.
+✔ Suite "Statistiques actives du tableau de bord" passed after 0.003 seconds.
+◇ Suite "Calculs des heures supplémentaires" started.
+◇ Test "Heures supplémentaires positives: 10h - 8h = +2h" started.
+✔ Test "Heures supplémentaires positives: 10h - 8h = +2h" passed after 0.001 seconds.
+◇ Test "Heures supplémentaires négatives: 6h - 8h = -2h" started.
+✔ Test "Heures supplémentaires négatives: 6h - 8h = -2h" passed after 0.001 seconds.
+◇ Test "Heures supplémentaires exactes: 8h - 8h = 0h" started.
+✔ Test "Heures supplémentaires exactes: 8h - 8h = 0h" passed after 0.001 seconds.
+◇ Test "Standard non entier: 9h - 8.2h = +0.8h" started.
+✔ Test "Standard non entier: 9h - 8.2h = +0.8h" passed after 0.001 seconds.
+◇ Test "Petite différence: 8.25h - 8.2h = +0.05h" started.
+✔ Test "Petite différence: 8.25h - 8.2h = +0.05h" passed after 0.001 seconds.
+✔ Suite "Calculs des heures supplémentaires" passed after 0.001 seconds.
+◇ Suite "Formatage des heures" started.
+◇ Test "Format positif: 7380s = 2h03" started.
+✔ Test "Format positif: 7380s = 2h03" passed after 0.001 seconds.
+◇ Test "Format négatif: -5400s = -1h30" started.
+✔ Test "Format négatif: -5400s = -1h30" passed after 0.001 seconds.
+◇ Test "Format zéro: 0s = 0h00" started.
+✔ Test "Format zéro: 0s = 0h00" passed after 0.001 seconds.
+◇ Test "Format heures pleines: 18000s = 5h00" started.
+✔ Test "Format heures pleines: 18000s = 5h00" passed after 0.001 seconds.
+◇ Test "Format grande valeur: 362700s = 100h45" started.
+✔ Test "Format grande valeur: 362700s = 100h45" passed after 0.001 seconds.
+◇ Test "Format avec arrondi: 3659s ≈ 1h01" started.
+✔ Test "Format avec arrondi: 3659s ≈ 1h01" passed after 0.001 seconds.
+✔ Suite "Formatage des heures" passed after 0.001 seconds.
+◇ Suite "Calculs des congés utilisés" started.
+◇ Test "3 jours de congé complets = 3.0 jours" started.
+✔ Test "3 jours de congé complets = 3.0 jours" passed after 0.001 seconds.
+◇ Test "4 demi-journées = 2.0 jours" started.
+✔ Test "4 demi-journées = 2.0 jours" passed after 0.001 seconds.
+◇ Test "2 jours + 3 demi-journées = 3.5 jours" started.
+✔ Test "2 jours + 3 demi-journées = 3.5 jours" passed after 0.001 seconds.
+◇ Test "Entrées supprimées ne sont pas comptées" started.
+✔ Test "Entrées supprimées ne sont pas comptées" passed after 0.001 seconds.
+◇ Test "Filtre par année correct" started.
+✔ Test "Filtre par année correct" passed after 0.001 seconds.
+◇ Test "Ignore les autres types (travail, maladie, férié)" started.
+✔ Test "Ignore les autres types (travail, maladie, férié)" passed after 0.001 seconds.
+◇ Test "Aucune entrée = 0 jours" started.
+✔ Test "Aucune entrée = 0 jours" passed after 0.001 seconds.
+✔ Suite "Calculs des congés utilisés" passed after 0.003 seconds.
+◇ Suite "Calculs du report de congés" started.
+◇ Test "Scénario utilisateur: 6.7 initial - 5 utilisés = 1.7 reportés" started.
+✔ Test "Scénario utilisateur: 6.7 initial - 5 utilisés = 1.7 reportés" passed after 0.001 seconds.
+◇ Test "Année suivante: 1.7 report + 25 droits - 10 utilisés = 16.7" started.
+✔ Test "Année suivante: 1.7 report + 25 droits - 10 utilisés = 16.7" passed after 0.001 seconds.
+◇ Test "Calcul sur 4 années" started.
+✔ Test "Calcul sur 4 années" passed after 0.001 seconds.
+◇ Test "Le report ne peut pas être négatif" started.
+✔ Test "Le report ne peut pas être négatif" passed after 0.001 seconds.
+✔ Suite "Calculs du report de congés" passed after 0.002 seconds.
+◇ Suite "Calculs du solde restant" started.
+◇ Test "Année de début: 6.7 initial - 3 utilisés = 3.7 restants" started.
+✔ Test "Année de début: 6.7 initial - 3 utilisés = 3.7 restants" passed after 0.001 seconds.
+◇ Test "Année suivante: 1.7 report + 25 droits - 8 utilisés = 18.7" started.
+✔ Test "Année suivante: 1.7 report + 25 droits - 8 utilisés = 18.7" passed after 0.001 seconds.
+◇ Test "Tous congés utilisés = 0 restant (pas négatif)" started.
+✔ Test "Tous congés utilisés = 0 restant (pas négatif)" passed after 0.001 seconds.
+◇ Test "Aucun congé utilisé" started.
+✔ Test "Aucun congé utilisé" passed after 0.001 seconds.
+✔ Suite "Calculs du solde restant" passed after 0.001 seconds.
+◇ Suite "Calculs des droits proratisés" started.
+◇ Test "Début 1er janvier = ~25 jours (année complète)" started.
+✔ Test "Début 1er janvier = ~25 jours (année complète)" passed after 0.001 seconds.
+◇ Test "Début 1er juillet = ~12.5 jours (moitié d'année)" started.
+✔ Test "Début 1er juillet = ~12.5 jours (moitié d'année)" passed after 0.001 seconds.
+◇ Test "Début 1er septembre = ~8.3 jours" started.
+✔ Test "Début 1er septembre = ~8.3 jours" passed after 0.001 seconds.
+◇ Test "Début 1er décembre = ~2 jours" started.
+✔ Test "Début 1er décembre = ~2 jours" passed after 0.001 seconds.
+✔ Suite "Calculs des droits proratisés" passed after 0.001 seconds.
+◇ Suite "Tests d'intégration" started.
+◇ Test "Scénario complet sur 3 ans" started.
+✔ Test "Scénario complet sur 3 ans" passed after 0.001 seconds.
+◇ Test "Semaine de travail complète: 5 × 8h = 40h" started.
+✔ Test "Semaine de travail complète: 5 × 8h = 40h" passed after 0.001 seconds.
+◇ Test "Heures supp. sur une semaine: 5 × (8h - 8.2h) = -1h" started.
+✔ Test "Heures supp. sur une semaine: 5 × (8h - 8.2h) = -1h" passed after 0.001 seconds.
+✔ Suite "Tests d'intégration" passed after 0.002 seconds.
+◇ Suite "Cas limites" started.
+◇ Test "Aucune entrée de congé = 0 jours" started.
+✔ Test "Aucune entrée de congé = 0 jours" passed after 0.001 seconds.
+◇ Test "Toutes entrées supprimées = 0 jours" started.
+✔ Test "Toutes entrées supprimées = 0 jours" passed after 0.001 seconds.
+◇ Test "Année sans congés = 0 utilisés" started.
+✔ Test "Année sans congés = 0 utilisés" passed after 0.001 seconds.
+◇ Test "Valeurs très grandes" started.
+✔ Test "Valeurs très grandes" passed after 0.001 seconds.
+◇ Test "Valeurs décimales précises" started.
+✔ Test "Valeurs décimales précises" passed after 0.001 seconds.
+✔ Suite "Cas limites" passed after 0.001 seconds.
+◇ Suite "Tests de volume - 1 année (250 jours)" started.
+◇ Test "Calcul heures totales sur 250 jours de travail" started.
+✔ Test "Calcul heures totales sur 250 jours de travail" passed after 0.004 seconds.
+◇ Test "Calcul heures supplémentaires sur 1 an" started.
+✔ Test "Calcul heures supplémentaires sur 1 an" passed after 0.004 seconds.
+◇ Test "Calcul congés utilisés sur 1 an (20 jours)" started.
+✔ Test "Calcul congés utilisés sur 1 an (20 jours)" passed after 0.004 seconds.
+◇ Test "Filtrage par mois sur données annuelles" started.
+✔ Test "Filtrage par mois sur données annuelles" passed after 0.005 seconds.
+✔ Suite "Tests de volume - 1 année (250 jours)" passed after 0.019 seconds.
+◇ Suite "Tests de volume - 5 années (~1250 jours)" started.
+◇ Test "Calcul heures totales sur 5 ans (~1250 jours)" started.
+2026-09-18 14:56:49.109124+0200 WorkTimer[4059:111186] [General] Failed to send CA Event for app launch measurements for ca_event_type: 1 event_name: com.apple.app_launch_measurement.ExtendedLaunchMetrics
+✔ Test "Calcul heures totales sur 5 ans (~1250 jours)" passed after 0.009 seconds.
+◇ Test "Calcul heures supplémentaires cumulées sur 5 ans" started.
+✔ Test "Calcul heures supplémentaires cumulées sur 5 ans" passed after 0.012 seconds.
+◇ Test "Calcul congés par année sur 5 ans (variations)" started.
+✔ Test "Calcul congés par année sur 5 ans (variations)" passed after 0.013 seconds.
+◇ Test "Report de congés sur 5 ans (accumulation et consommation)" started.
+✔ Test "Report de congés sur 5 ans (accumulation et consommation)" passed after 0.014 seconds.
+✔ Suite "Tests de volume - 5 années (~1250 jours)" passed after 0.049 seconds.
+◇ Suite "Tests de volume - 10 années (~2500 jours)" started.
+◇ Test "Calcul heures totales sur 10 ans (~2500 jours)" started.
+✔ Test "Calcul heures totales sur 10 ans (~2500 jours)" passed after 0.019 seconds.
+◇ Test "Nombre total d'entrées sur 10 ans" started.
+✔ Test "Nombre total d'entrées sur 10 ans" passed after 0.016 seconds.
+◇ Test "Calcul congés cumulés sur 10 ans" started.
+✔ Test "Calcul congés cumulés sur 10 ans" passed after 0.036 seconds.
+◇ Test "Report progressif sur 10 ans avec variations" started.
+✔ Test "Report progressif sur 10 ans avec variations" passed after 0.037 seconds.
+✔ Suite "Tests de volume - 10 années (~2500 jours)" passed after 0.109 seconds.
+◇ Suite "Tests de stress - Données extrêmes" started.
+◇ Test "5000 entrées - calcul heures" started.
+✔ Test "5000 entrées - calcul heures" passed after 0.035 seconds.
+◇ Test "10000 entrées - calcul congés" started.
+✔ Test "10000 entrées - calcul congés" passed after 0.227 seconds.
+◇ Test "Mélange types avec entrées supprimées" started.
+✔ Test "Mélange types avec entrées supprimées" passed after 0.007 seconds.
+◇ Test "Report sur 20 ans" started.
+✔ Test "Report sur 20 ans" passed after 0.001 seconds.
+◇ Test "Calcul avec valeurs décimales précises" started.
+✔ Test "Calcul avec valeurs décimales précises" passed after 0.001 seconds.
+◇ Test "Filtrage rapide sur grande quantité" started.
+✔ Test "Filtrage rapide sur grande quantité" passed after 0.014 seconds.
+✔ Suite "Tests de stress - Données extrêmes" passed after 0.285 seconds.
+◇ Suite "Tests de performance" started.
+◇ Test "Calcul 1000 entrées en < 50ms" started.
+✔ Test "Calcul 1000 entrées en < 50ms" passed after 0.007 seconds.
+◇ Test "Calcul 5000 entrées en < 200ms" started.
+✔ Test "Calcul 5000 entrées en < 200ms" passed after 0.043 seconds.
+◇ Test "Filtrage par année sur 10000 entrées en < 500ms" started.
+✔ Test "Filtrage par année sur 10000 entrées en < 500ms" passed after 0.193 seconds.
+◇ Test "Calcul report sur 30 ans en < 10ms" started.
+✔ Test "Calcul report sur 30 ans en < 10ms" passed after 0.001 seconds.
+✔ Suite "Tests de performance" passed after 0.244 seconds.
+◇ Suite "Tests du modèle WorkDay" started.
+◇ Test "Création WorkDay avec valeurs par défaut" started.
+✔ Test "Création WorkDay avec valeurs par défaut" passed after 0.001 seconds.
+◇ Test "WorkDay type congé" started.
+✔ Test "WorkDay type congé" passed after 0.001 seconds.
+◇ Test "WorkDay avec heures et overtime" started.
+✔ Test "WorkDay avec heures et overtime" passed after 0.001 seconds.
+◇ Test "WorkDay marqué comme supprimé" started.
+✔ Test "WorkDay marqué comme supprimé" passed after 0.001 seconds.
+◇ Test "WorkDay avec bonus" started.
+✔ Test "WorkDay avec bonus" passed after 0.001 seconds.
+◇ Test "Tous les types de WorkDay" started.
+✔ Test "Tous les types de WorkDay" passed after 0.001 seconds.
+✔ Suite "Tests du modèle WorkDay" passed after 0.001 seconds.
+◇ Suite "Tests de dates spéciales" started.
+◇ Test "Année bissextile 2024 - 29 février" started.
+✔ Test "Année bissextile 2024 - 29 février" passed after 0.001 seconds.
+◇ Test "Fin d'année - 31 décembre" started.
+✔ Test "Fin d'année - 31 décembre" passed after 0.001 seconds.
+◇ Test "Début d'année - 1er janvier" started.
+✔ Test "Début d'année - 1er janvier" passed after 0.001 seconds.
+◇ Test "Transition d'année dans les calculs" started.
+✔ Test "Transition d'année dans les calculs" passed after 0.001 seconds.
+◇ Test "Congés sur plusieurs années" started.
+✔ Test "Congés sur plusieurs années" passed after 0.001 seconds.
+◇ Test "Mois de février non bissextile" started.
+✔ Test "Mois de février non bissextile" passed after 0.001 seconds.
+◇ Test "Mois de février bissextile" started.
+✔ Test "Mois de février bissextile" passed after 0.001 seconds.
+✔ Suite "Tests de dates spéciales" passed after 0.001 seconds.
+◇ Suite "Tests de cohérence des données" started.
+◇ Test "Cohérence heures totales vs overtime" started.
+✔ Test "Cohérence heures totales vs overtime" passed after 0.001 seconds.
+◇ Test "Cohérence congés complets vs demi-journées" started.
+✔ Test "Cohérence congés complets vs demi-journées" passed after 0.001 seconds.
+◇ Test "Cohérence après suppression" started.
+✔ Test "Cohérence après suppression" passed after 0.001 seconds.
+◇ Test "Cohérence cumul overtime" started.
+✔ Test "Cohérence cumul overtime" passed after 0.001 seconds.
+◇ Test "Cohérence entre mois et année" started.
+✔ Test "Cohérence entre mois et année" passed after 0.001 seconds.
+✔ Suite "Tests de cohérence des données" passed after 0.001 seconds.
+◇ Suite "Tests de filtrage et tri" started.
+◇ Test "Filtrage par type de journée" started.
+✔ Test "Filtrage par type de journée" passed after 0.001 seconds.
+◇ Test "Filtrage par période (mois)" started.
+✔ Test "Filtrage par période (mois)" passed after 0.001 seconds.
+◇ Test "Filtrage excluant les supprimés" started.
+✔ Test "Filtrage excluant les supprimés" passed after 0.001 seconds.
+◇ Test "Tri par date croissant" started.
+✔ Test "Tri par date croissant" passed after 0.001 seconds.
+◇ Test "Tri par date décroissant" started.
+✔ Test "Tri par date décroissant" passed after 0.001 seconds.
+◇ Test "Filtrage combiné (type + période + actif)" started.
+✔ Test "Filtrage combiné (type + période + actif)" passed after 0.001 seconds.
+◇ Test "Recherche par note" started.
+✔ Test "Recherche par note" passed after 0.001 seconds.
+✔ Suite "Tests de filtrage et tri" passed after 0.006 seconds.
+◇ Suite "Tests de statistiques mensuelles" started.
+◇ Test "Stats mois complet (20 jours ouvrés)" started.
+✔ Test "Stats mois complet (20 jours ouvrés)" passed after 0.001 seconds.
+◇ Test "Stats mois avec congés" started.
+✔ Test "Stats mois avec congés" passed after 0.001 seconds.
+◇ Test "Stats mois avec overtime positif" started.
+✔ Test "Stats mois avec overtime positif" passed after 0.001 seconds.
+◇ Test "Stats mois avec overtime négatif" started.
+✔ Test "Stats mois avec overtime négatif" passed after 0.001 seconds.
+◇ Test "Comparaison 2 mois" started.
+✔ Test "Comparaison 2 mois" passed after 0.001 seconds.
+✔ Suite "Tests de statistiques mensuelles" passed after 0.001 seconds.
+◇ Suite "WorkDay.isValid — validation métier" started.
+◇ Test "Journée valide 8h-17h avec 1h pause" started.
+✔ Test "Journée valide 8h-17h avec 1h pause" passed after 0.001 seconds.
+◇ Test "Congé valide (pas d'heures requises)" started.
+✔ Test "Congé valide (pas d'heures requises)" passed after 0.001 seconds.
+◇ Test "Demi-journée valide" started.
+✔ Test "Demi-journée valide" passed after 0.001 seconds.
+◇ Test "Maladie valide" started.
+✔ Test "Maladie valide" passed after 0.001 seconds.
+◇ Test "Travail avec bonus positif" started.
+✔ Test "Travail avec bonus positif" passed after 0.001 seconds.
+◇ Test "Invalide: fin avant début" started.
+✔ Test "Invalide: fin avant début" passed after 0.001 seconds.
+◇ Test "Invalide: durée > 24h" started.
+✔ Test "Invalide: durée > 24h" passed after 0.001 seconds.
+◇ Test "Invalide: pause > durée travaillée" started.
+✔ Test "Invalide: pause > durée travaillée" passed after 0.001 seconds.
+◇ Test "Invalide: bonus négatif" started.
+✔ Test "Invalide: bonus négatif" passed after 0.001 seconds.
+◇ Test "Invalide: note > 500 caractères" started.
+✔ Test "Invalide: note > 500 caractères" passed after 0.001 seconds.
+◇ Test "Invalide: date dans +11 ans" started.
+✔ Test "Invalide: date dans +11 ans" passed after 0.001 seconds.
+◇ Test "Invalide: date dans -11 ans" started.
+✔ Test "Invalide: date dans -11 ans" passed after 0.001 seconds.
+✔ Suite "WorkDay.isValid — validation métier" passed after 0.002 seconds.
+◇ Suite "WorkDayFormDraft — sauvegarde du formulaire" started.
+◇ Test "normalise les heures sur la date choisie" started.
+✔ Test "normalise les heures sur la date choisie" passed after 0.001 seconds.
+◇ Test "refuse une journee de travail avec 0h nette" started.
+✔ Test "refuse une journee de travail avec 0h nette" passed after 0.001 seconds.
+◇ Test "explique une pause plus longue que la duree" started.
+✔ Test "explique une pause plus longue que la duree" passed after 0.001 seconds.
+◇ Test "explique une note trop longue" started.
+✔ Test "explique une note trop longue" passed after 0.001 seconds.
+◇ Test "un type non travail efface les heures et le bonus" started.
+✔ Test "un type non travail efface les heures et le bonus" passed after 0.001 seconds.
+✔ Suite "WorkDayFormDraft — sauvegarde du formulaire" passed after 0.001 seconds.
+◇ Suite "WorkDay.calculateHours() — calcul interne" started.
+◇ Test "Journée 8h-17h 1h pause → 8h et overtime basé sur les réglages" started.
+✔ Test "Journée 8h-17h 1h pause → 8h et overtime basé sur les réglages" passed after 0.001 seconds.
+◇ Test "Journée longue 7h-20h 1h pause → 12h" started.
+✔ Test "Journée longue 7h-20h 1h pause → 12h" passed after 0.001 seconds.
+◇ Test "Type congé → 0h, heures effacées" started.
+✔ Test "Type congé → 0h, heures effacées" passed after 0.001 seconds.
+◇ Test "Pas de startTime → 0h (guard)" started.
+✔ Test "Pas de startTime → 0h (guard)" passed after 0.001 seconds.
+◇ Test "updateData recalcule et met à jour modifiedAt" started.
+✔ Test "updateData recalcule et met à jour modifiedAt" passed after 0.012 seconds.
+◇ Test "updateData: pause clampée si > durée travaillée" started.
+✔ Test "updateData: pause clampée si > durée travaillée" passed after 0.001 seconds.
+✔ Suite "WorkDay.calculateHours() — calcul interne" passed after 0.016 seconds.
+◇ Suite "WorkDay.shouldSync — logique de synchronisation" started.
+◇ Test "shouldSync vrai à la création (nouvelle entrée à synchroniser)" started.
+✔ Test "shouldSync vrai à la création (nouvelle entrée à synchroniser)" passed after 0.001 seconds.
+◇ Test "shouldSync faux après markSynced()" started.
+✔ Test "shouldSync faux après markSynced()" passed after 0.001 seconds.
+◇ Test "shouldSync vrai de nouveau après modification post-sync" started.
+✔ Test "shouldSync vrai de nouveau après modification post-sync" passed after 0.001 seconds.
+◇ Test "shouldSync faux si isDeleted == true" started.
+✔ Test "shouldSync faux si isDeleted == true" passed after 0.001 seconds.
+◇ Test "shouldSync: seules les entrées needsSync=true et non supprimées remontent" started.
+✔ Test "shouldSync: seules les entrées needsSync=true et non supprimées remontent" passed after 0.001 seconds.
+✔ Suite "WorkDay.shouldSync — logique de synchronisation" passed after 0.001 seconds.
+◇ Suite "Formatage heures et secondes (decimal vs HH:mm)" started.
+◇ Test "formattedHoursRounded: 8.5h en mode HH:mm = 8h30" started.
+✔ Test "formattedHoursRounded: 8.5h en mode HH:mm = 8h30" passed after 0.001 seconds.
+◇ Test "formattedHoursRounded: 8.5h en mode décimal = '8.50 h'" started.
+✔ Test "formattedHoursRounded: 8.5h en mode décimal = '8.50 h'" passed after 0.006 seconds.
+◇ Test "formattedHoursRounded: 0h en mode HH:mm = 0h00" started.
+✔ Test "formattedHoursRounded: 0h en mode HH:mm = 0h00" passed after 0.001 seconds.
+◇ Test "formattedHoursRounded: 0h en mode décimal = '0.00 h'" started.
+✔ Test "formattedHoursRounded: 0h en mode décimal = '0.00 h'" passed after 0.004 seconds.
+◇ Test "formattedHoursRounded: -1.5h en mode HH:mm = -1h30" started.
+✔ Test "formattedHoursRounded: -1.5h en mode HH:mm = -1h30" passed after 0.001 seconds.
+◇ Test "formattedHoursRounded: -1.5h en mode décimal = '-1.50 h'" started.
+✔ Test "formattedHoursRounded: -1.5h en mode décimal = '-1.50 h'" passed after 0.004 seconds.
+◇ Test "formattedHoursRounded: arrondi à la minute la plus proche" started.
+✔ Test "formattedHoursRounded: arrondi à la minute la plus proche" passed after 0.001 seconds.
+◇ Test "formattedSecondsRounded: 3600s en mode HH:mm = 1h00" started.
+✔ Test "formattedSecondsRounded: 3600s en mode HH:mm = 1h00" passed after 0.001 seconds.
+◇ Test "formattedSecondsRounded: 3600s en mode décimal = '1.00 h'" started.
+✔ Test "formattedSecondsRounded: 3600s en mode décimal = '1.00 h'" passed after 0.003 seconds.
+◇ Test "formattedSecondsRounded: 5400s en mode HH:mm = 1h30" started.
+✔ Test "formattedSecondsRounded: 5400s en mode HH:mm = 1h30" passed after 0.001 seconds.
+◇ Test "formattedSecondsRounded: 5400s en mode décimal = '1.50 h'" started.
+✔ Test "formattedSecondsRounded: 5400s en mode décimal = '1.50 h'" passed after 0.003 seconds.
+◇ Test "formattedSecondsRounded: 0s en mode HH:mm = 0h00" started.
+✔ Test "formattedSecondsRounded: 0s en mode HH:mm = 0h00" passed after 0.001 seconds.
+◇ Test "formattedSecondsRounded: -7200s en mode HH:mm = -2h00" started.
+✔ Test "formattedSecondsRounded: -7200s en mode HH:mm = -2h00" passed after 0.001 seconds.
+◇ Test "formattedSecondsRounded: -7200s en mode décimal = '-2.00 h'" started.
+✔ Test "formattedSecondsRounded: -7200s en mode décimal = '-2.00 h'" passed after 0.003 seconds.
+◇ Test "formattedHoursTruncated: 8.9h en HH:mm = 8h54 (troncature, pas arrondi vers 9h)" started.
+✔ Test "formattedHoursTruncated: 8.9h en HH:mm = 8h54 (troncature, pas arrondi vers 9h)" passed after 0.001 seconds.
+◇ Test "formattedHoursTruncated: 8.9h en décimal = '8.90 h'" started.
+✔ Test "formattedHoursTruncated: 8.9h en décimal = '8.90 h'" passed after 0.003 seconds.
+◇ Test "formattedHoursTruncated: 2.5h en HH:mm = 2h30" started.
+✔ Test "formattedHoursTruncated: 2.5h en HH:mm = 2h30" passed after 0.001 seconds.
+◇ Test "formattedHoursTruncated: 0h en HH:mm = 0h00" started.
+✔ Test "formattedHoursTruncated: 0h en HH:mm = 0h00" passed after 0.001 seconds.
+◇ Test "formattedHoursTruncated: 40.25h en HH:mm = 40h15" started.
+✔ Test "formattedHoursTruncated: 40.25h en HH:mm = 40h15" passed after 0.001 seconds.
+◇ Test "formattedSecondsTruncated: 3660s en HH:mm = 1h01 (secondes tronquées)" started.
+✔ Test "formattedSecondsTruncated: 3660s en HH:mm = 1h01 (secondes tronquées)" passed after 0.001 seconds.
+◇ Test "formattedSecondsTruncated: 3660s en décimal = '1.02 h' ou '1.01 h'" started.
+✔ Test "formattedSecondsTruncated: 3660s en décimal = '1.02 h' ou '1.01 h'" passed after 0.006 seconds.
+◇ Test "formattedSecondsTruncated: -5400s en HH:mm = -1h30" started.
+✔ Test "formattedSecondsTruncated: -5400s en HH:mm = -1h30" passed after 0.001 seconds.
+◇ Test "formattedSecondsTruncated: -5400s en décimal = '-1.50 h'" started.
+✔ Test "formattedSecondsTruncated: -5400s en décimal = '-1.50 h'" passed after 0.003 seconds.
+◇ Test "formattedSecondsTruncated: 0s en HH:mm = 0h00" started.
+✔ Test "formattedSecondsTruncated: 0s en HH:mm = 0h00" passed after 0.001 seconds.
+✔ Suite "Formatage heures et secondes (decimal vs HH:mm)" passed after 0.048 seconds.
+◇ Suite "VacationCalculations.remainingStats — avec WorkDay réels" started.
+◇ Test "année de début: 10 jours initiaux, 3 utilisés → 7 restants, 0 droits ajoutés" started.
+✔ Test "année de début: 10 jours initiaux, 3 utilisés → 7 restants, 0 droits ajoutés" passed after 0.006 seconds.
+◇ Test "année suivante: 5 jours reportés + 25 droits - 8 utilisés = 22 restants" started.
+✔ Test "année suivante: 5 jours reportés + 25 droits - 8 utilisés = 22 restants" passed after 0.006 seconds.
+◇ Test "demi-journées comptent 0.5 dans remainingStats" started.
+✔ Test "demi-journées comptent 0.5 dans remainingStats" passed after 0.006 seconds.
+◇ Test "entrées isDeleted ignorées dans remainingStats" started.
+✔ Test "entrées isDeleted ignorées dans remainingStats" passed after 0.005 seconds.
+◇ Test "aucun congé: used=0, remaining = carryIn (année de début)" started.
+✔ Test "aucun congé: used=0, remaining = carryIn (année de début)" passed after 0.010 seconds.
+◇ Test "remaining plafonné à 0 quand plus de congés que de droits" started.
+✔ Test "remaining plafonné à 0 quand plus de congés que de droits" passed after 0.007 seconds.
+◇ Test "types non-congé (work, sickLeave, holiday) n'affectent pas used" started.
+✔ Test "types non-congé (work, sickLeave, holiday) n'affectent pas used" passed after 0.006 seconds.
+✔ Suite "VacationCalculations.remainingStats — avec WorkDay réels" passed after 0.047 seconds.
+◇ Suite "StatsCache — cache hit, miss et invalidation" started.
+◇ Test "cache miss retourne nil avant tout insert" started.
+✔ Test "cache miss retourne nil avant tout insert" passed after 0.001 seconds.
+◇ Test "cache hit retourne les valeurs insérées immédiatement après" started.
+✔ Test "cache hit retourne les valeurs insérées immédiatement après" passed after 0.001 seconds.
+◇ Test "invalidateYear supprime l'entrée yearly du cache" started.
+✔ Test "invalidateYear supprime l'entrée yearly du cache" passed after 0.001 seconds.
+◇ Test "invalidateYear n'affecte pas les autres années" started.
+✔ Test "invalidateYear n'affecte pas les autres années" passed after 0.001 seconds.
+◇ Test "invalidateAll vide complètement le cache" started.
+✔ Test "invalidateAll vide complètement le cache" passed after 0.001 seconds.
+◇ Test "cacheInfo reflète le nombre d'entrées actuelles" started.
+✔ Test "cacheInfo reflète le nombre d'entrées actuelles" passed after 0.001 seconds.
+◇ Test "second insert pour la même année écrase la valeur précédente" started.
+✔ Test "second insert pour la même année écrase la valeur précédente" passed after 0.001 seconds.
+◇ Test "onWorkDayChanged invalide l'ancien et le nouveau mois" started.
+✔ Test "onWorkDayChanged invalide l'ancien et le nouveau mois" passed after 0.001 seconds.
+◇ Test "onWorkDayChanged invalide les vacances de l'ancien type" started.
+✔ Test "onWorkDayChanged invalide les vacances de l'ancien type" passed after 0.001 seconds.
+✔ Suite "StatsCache — cache hit, miss et invalidation" passed after 0.002 seconds.
+✔ Test run with 233 tests in 38 suites passed after 1.253 seconds.
+2026-09-18 14:56:50.210 xcodebuild[3835:108103] [MT] IDETestOperationsObserverDebug: 14.947 elapsed -- Testing started completed.
+2026-09-18 14:56:50.210 xcodebuild[3835:108103] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-09-18 14:56:50.210 xcodebuild[3835:108103] [MT] IDETestOperationsObserverDebug: 14.947 sec, +14.947 sec -- end
+
+Test session results, code coverage, and logs:
+	/tmp/worktimer-audit-isolation.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

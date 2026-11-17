@@ -9,6 +9,7 @@ struct PaywallView: View {
     @State private var showOfferCodeRedemption = false
     @State private var showSuccess = false
     @State private var errorMessage: String?
+    @State private var pendingMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -47,6 +48,16 @@ struct PaywallView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
+            // Achat en attente d'approbation (« Demander à acheter », validation
+            // bancaire) : feedback explicite au lieu d'un échec silencieux.
+            .alert("paywall.purchase.pending.title".localized, isPresented: Binding(
+                get: { pendingMessage != nil },
+                set: { if !$0 { pendingMessage = nil } }
+            )) {
+                Button("OK") { pendingMessage = nil }
+            } message: {
+                Text(pendingMessage ?? "")
+            }
             .offerCodeRedemption(isPresented: $showOfferCodeRedemption) { result in
                 handleOfferCodeRedemption(result)
             }
@@ -68,6 +79,7 @@ struct PaywallView: View {
                 Image(systemName: "star.fill")
                     .font(.system(size: 36))
                     .foregroundStyle(.white)
+                    .accessibilityHidden(true)
             }
             .shadow(color: .orange.opacity(0.3), radius: 12, y: 6)
 
@@ -97,18 +109,41 @@ struct PaywallView: View {
                               subtitle: "paywall.feature.siri.subtitle".localized)
         }
         .padding()
-        .dsGlassSurface(cornerRadius: DS.Radius.card)
+        .dsContentSurface(cornerRadius: DS.Radius.card)
     }
 
     // MARK: - Plan picker
 
     private var planPicker: some View {
         VStack(spacing: DS.Spacing.sm) {
-            if store.products.isEmpty {
+            switch store.productsState {
+            case .loading:
                 ProgressView("paywall.loading".localized)
                     .frame(maxWidth: .infinity)
                     .padding()
-            } else {
+
+            case .failed:
+                // Échec de chargement : message + bouton réessayer au lieu
+                // d'un spinner infini.
+                VStack(spacing: DS.Spacing.md) {
+                    Image(systemName: "wifi.exclamationmark")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+
+                    Text("paywall.error.loadFailed".localized)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    Button("paywall.retry".localized) {
+                        Task { await store.loadProducts() }
+                    }
+                    .buttonStyle(.glass)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+
+            case .loaded:
                 ForEach(store.products, id: \.id) { product in
                     PlanCard(
                         product: product,
@@ -205,7 +240,7 @@ struct PaywallView: View {
     private var legalLinks: some View {
         HStack(spacing: DS.Spacing.md) {
             Link("paywall.legal.privacy".localized,
-                 destination: URL(string: "https://ouevazzy.github.io/MyTimePro-Support/")!)
+                 destination: URL(string: "https://ouevazzy.github.io/MyTimePro-Support/privacy.html")!)
             Text("·").foregroundStyle(.tertiary)
             Link("paywall.legal.terms".localized,
                  destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
@@ -245,11 +280,19 @@ struct PaywallView: View {
         isPurchasing = true
         defer { isPurchasing = false }
         do {
-            try await store.purchase(product)
-            if store.isPro {
-                showSuccess = true
-                try? await Task.sleep(for: .seconds(2))
-                dismiss()
+            switch try await store.purchase(product) {
+            case .success:
+                if store.isPro {
+                    showSuccess = true
+                    try? await Task.sleep(for: .seconds(2))
+                    dismiss()
+                }
+            case .pending:
+                pendingMessage = "paywall.purchase.pending.message".localized
+            case .cancelled:
+                break
+            case .verificationFailed:
+                errorMessage = "paywall.error.verification".localized
             }
         } catch {
             errorMessage = "paywall.error.purchase".localized
@@ -290,6 +333,7 @@ private struct PlanCard: View {
                     .font(.title3)
                     .foregroundStyle(isSelected ? Color.orange : Color.secondary)
                     .animation(DS.Animation.micro, value: isSelected)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: DS.Spacing.sm) {
@@ -327,10 +371,12 @@ private struct PlanCard: View {
                             .stroke(isSelected ? Color.orange : Color.clear, lineWidth: 2)
                     )
             )
-            .dsGlassSurface(cornerRadius: DS.Radius.card, interactive: true)
+            .dsContentSurface(cornerRadius: DS.Radius.card)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private var planTitle: String {
@@ -367,6 +413,7 @@ struct PaywallFeatureRow: View {
                 .foregroundStyle(.white)
                 .frame(width: 30, height: 30)
                 .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(title).font(.subheadline).fontWeight(.medium)
@@ -378,7 +425,9 @@ struct PaywallFeatureRow: View {
             Image(systemName: "checkmark")
                 .font(.caption).fontWeight(.bold)
                 .foregroundStyle(.green)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

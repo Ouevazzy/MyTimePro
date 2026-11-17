@@ -1,10 +1,22 @@
 # Xcode
 .DS_Store
 xcuserdata/
-*.xcodeproj/*
 -l.xcodeproj/project.pbxproj
 -l.xcodeproj/xcshareddata/
 -l.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 DerivedData/
 *.xcuserstate
+
+# Local automation / app-store secrets
+AuthKey_*.p8
+
+# Local agent and vector databases
+.codex/
+.omc/
+agentdb.rvf
+agentdb.rvf.lock
+ruvector.db
+
+# Simulator captures
+Simulator Screenshot*.png

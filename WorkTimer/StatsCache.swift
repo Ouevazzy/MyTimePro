@@ -240,7 +240,11 @@ extension StatsCache {
             calendar.component(.year, from: $0.date) == year
         }
         
-        let workDaysCount = yearWorkDays.filter { $0.type == .work }.count
+        let workDaysCount = Set(
+            yearWorkDays
+                .filter { $0.type == .work }
+                .map { calendar.startOfDay(for: $0.date) }
+        ).count
         let vacationDays = yearWorkDays.reduce(0.0) { total, day in
             switch day.type {
             case .vacation: return total + 1
@@ -289,11 +293,11 @@ extension StatsCache {
             return components.year == year && components.month == month
         }
 
-        var workDaysCount = 0; var vacationDays = 0.0; var sickDays = 0
+        var workedDates: Set<Date> = []; var vacationDays = 0.0; var sickDays = 0
         var totalHours = 0.0; var overtimeSeconds = 0; var totalBonus = 0.0
         for day in monthWorkDays {
             switch day.type {
-            case .work:            workDaysCount += 1; totalHours += day.totalHours
+            case .work:            workedDates.insert(calendar.startOfDay(for: day.date)); totalHours += day.totalHours
             case .vacation:        vacationDays += 1.0
             case .halfDayVacation: vacationDays += 0.5
             case .sickLeave:       sickDays += 1
@@ -307,7 +311,7 @@ extension StatsCache {
         cacheMonthlyStats(
             year: year,
             month: month,
-            workDays: workDaysCount,
+            workDays: workedDates.count,
             vacationDays: vacationDays,
             sickDays: sickDays,
             totalHours: totalHours,
@@ -353,15 +357,23 @@ extension StatsCache {
 // MARK: - Observer for Data Changes
 extension StatsCache {
     /// Appelé quand les données changent pour invalider le cache pertinent
-    func onWorkDayChanged(_ workDay: WorkDay) {
+    func onWorkDayChanged(_ workDay: WorkDay, previousDate: Date? = nil, previousType: WorkDayType? = nil) {
+        if let previousDate {
+            invalidateCaches(for: previousDate, type: previousType ?? workDay.type)
+        }
+
+        invalidateCaches(for: workDay.date, type: workDay.type)
+    }
+
+    private func invalidateCaches(for date: Date, type: WorkDayType) {
         let calendar = Calendar.current
-        let year = calendar.component(.year, from: workDay.date)
-        let month = calendar.component(.month, from: workDay.date)
+        let year = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
         
         invalidateMonth(year: year, month: month)
         
         // Si c'est un congé, invalider aussi le cache des vacances
-        if workDay.type == .vacation || workDay.type == .halfDayVacation {
+        if type == .vacation || type == .halfDayVacation {
             vacationCache.removeValue(forKey: year)
         }
     }
@@ -374,4 +386,3 @@ extension StatsCache {
         onWorkDayChanged(workDay)
     }
 }
-

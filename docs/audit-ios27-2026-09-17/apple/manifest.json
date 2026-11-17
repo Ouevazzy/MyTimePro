@@ -1,0 +1,355 @@
+[
+  {
+    "url": "https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-27-release-notes",
+    "download_url": "https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-27-release-notes.md",
+    "retrieved_at": "2026-09-17T16:12:11.790270+00:00",
+    "status": "downloaded",
+    "file": "documentation__ios-ipados-release-notes__ios-ipados-27-release-notes.md",
+    "bytes": 68449,
+    "sha256": "a65addc4751488b7bd15d625b0df9021b9e4c5045637bdc96dc08e4492f4142e"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes",
+    "download_url": "https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes.md",
+    "retrieved_at": "2026-09-17T16:12:11.790790+00:00",
+    "status": "downloaded",
+    "file": "documentation__xcode-release-notes__xcode-27-release-notes.md",
+    "bytes": 67593,
+    "sha256": "318463d4d177c63b21d3d101e1b6b0e3d3b0e317d83520162dc645ab3771d8f2"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates",
+    "download_url": "https://developer.apple.com/documentation/updates.md",
+    "retrieved_at": "2026-09-17T16:12:11.790961+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates.md",
+    "bytes": 33220,
+    "sha256": "4cdd1f1ea0359d96ec9f306798d3ac75739bdbf26dca82621e6c282f479844ff"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/swiftui",
+    "download_url": "https://developer.apple.com/documentation/updates/swiftui.md",
+    "retrieved_at": "2026-09-17T16:12:11.791123+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__swiftui.md",
+    "bytes": 46178,
+    "sha256": "840aaf31d1acdcd0252ed192160b3ce624ca6501961a7a2cc68b6309a8864a4c"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/swiftdata",
+    "download_url": "https://developer.apple.com/documentation/updates/swiftdata.md",
+    "retrieved_at": "2026-09-17T16:12:12.440785+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__swiftdata.md",
+    "bytes": 3104,
+    "sha256": "5a57bf9a0397d51fa0860f383fed28e275e9750e4c2a6694da67434ce83d3ea2"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/appintents",
+    "download_url": "https://developer.apple.com/documentation/updates/appintents.md",
+    "retrieved_at": "2026-09-17T16:12:12.521850+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__appintents.md",
+    "bytes": 9459,
+    "sha256": "debebb503ac5dc3528666968b4f56159e222ab16ef0c21718571364f46e7ad28"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/widgetkit",
+    "download_url": "https://developer.apple.com/documentation/updates/widgetkit.md",
+    "retrieved_at": "2026-09-17T16:12:12.552152+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__widgetkit.md",
+    "bytes": 3442,
+    "sha256": "8f704da69859a4560c36658c50711220b83c197dbb337819074729feb67c6184"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/storekit",
+    "download_url": "https://developer.apple.com/documentation/updates/storekit.md",
+    "retrieved_at": "2026-09-17T16:12:12.781044+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__storekit.md",
+    "bytes": 2126,
+    "sha256": "7c7c1aa4df50236e77c5ab4420b282b39a1f6e83d8f95bdf0af4d0932dbb3db8"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/swift-charts",
+    "download_url": "https://developer.apple.com/documentation/updates/swift-charts.md",
+    "retrieved_at": "2026-09-17T16:12:12.877426+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/accessibility",
+    "download_url": "https://developer.apple.com/documentation/updates/accessibility.md",
+    "retrieved_at": "2026-09-17T16:12:12.982018+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__accessibility.md",
+    "bytes": 7571,
+    "sha256": "179c956dd5bbc52babcd85fc1995b81039f42e92d7874d836d63c6cacc9e4725"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/foundationmodels",
+    "download_url": "https://developer.apple.com/documentation/updates/foundationmodels.md",
+    "retrieved_at": "2026-09-17T16:12:13.070197+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__foundationmodels.md",
+    "bytes": 4783,
+    "sha256": "35c3434f6c1ba4de167749f804a03da0f468af103bdcd537acd10cafb554eaa3"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftui",
+    "download_url": "https://developer.apple.com/documentation/swiftui.md",
+    "retrieved_at": "2026-09-17T16:12:13.327814+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftui.md",
+    "bytes": 10083,
+    "sha256": "b48e4b6a6a0924180c13f19f50a835c3849fdd19db0ff1521f73bab403c22fbe"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftdata",
+    "download_url": "https://developer.apple.com/documentation/swiftdata.md",
+    "retrieved_at": "2026-09-17T16:12:13.433571+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftdata.md",
+    "bytes": 11594,
+    "sha256": "3f639f81f8dd1b31e86026f3c6d4b517a3af11319c8eba7d39983eb2003b5b36"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/appintents",
+    "download_url": "https://developer.apple.com/documentation/appintents.md",
+    "retrieved_at": "2026-09-17T16:12:13.439784+00:00",
+    "status": "downloaded",
+    "file": "documentation__appintents.md",
+    "bytes": 8195,
+    "sha256": "f9ba5f2de5af1ad020af2ff944bb3d700754fed7e07f48963a05021836503ea6"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/widgetkit",
+    "download_url": "https://developer.apple.com/documentation/widgetkit.md",
+    "retrieved_at": "2026-09-17T16:12:13.627345+00:00",
+    "status": "downloaded",
+    "file": "documentation__widgetkit.md",
+    "bytes": 12179,
+    "sha256": "888ae64fbeddc5961183e3de5b9f3afcf3525a456ab28c822d8a7edec66aaafd"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/storekit",
+    "download_url": "https://developer.apple.com/documentation/storekit.md",
+    "retrieved_at": "2026-09-17T16:12:13.946338+00:00",
+    "status": "downloaded",
+    "file": "documentation__storekit.md",
+    "bytes": 6773,
+    "sha256": "3a181db26f4d377fd80e4d970207097758a279f813f4be008f7e111513c25f7c"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/activitykit",
+    "download_url": "https://developer.apple.com/documentation/activitykit.md",
+    "retrieved_at": "2026-09-17T16:12:13.952456+00:00",
+    "status": "downloaded",
+    "file": "documentation__activitykit.md",
+    "bytes": 5409,
+    "sha256": "a5f8a31b19dec37d296390e10fa838b9cfcc8faf45265e480743a7d365a4caeb"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/backgroundtasks",
+    "download_url": "https://developer.apple.com/documentation/backgroundtasks.md",
+    "retrieved_at": "2026-09-17T16:12:13.954562+00:00",
+    "status": "downloaded",
+    "file": "documentation__backgroundtasks.md",
+    "bytes": 4740,
+    "sha256": "dba8bf79e08543e2d38d5516277e45501ec1a011a301f66049657842880bc0ce"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/usernotifications",
+    "download_url": "https://developer.apple.com/documentation/usernotifications.md",
+    "retrieved_at": "2026-09-17T16:12:14.354876+00:00",
+    "status": "downloaded",
+    "file": "documentation__usernotifications.md",
+    "bytes": 11694,
+    "sha256": "1711174611ace26d07b09377fbcacafffebd7dad7fc5c96b38b3b9db9d0d68f9"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views",
+    "download_url": "https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views.md",
+    "retrieved_at": "2026-09-17T16:12:14.484093+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftui__applying-liquid-glass-to-custom-views.md",
+    "bytes": 11311,
+    "sha256": "181a2f103b805d5cb7c8dc2ab37c8d26a92345ec9fd338863ba22ba459cf2030"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftui/understanding-and-improving-swiftui-performance",
+    "download_url": "https://developer.apple.com/documentation/swiftui/understanding-and-improving-swiftui-performance.md",
+    "retrieved_at": "2026-09-17T16:12:14.491655+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftdata/fetchdescriptor",
+    "download_url": "https://developer.apple.com/documentation/swiftdata/fetchdescriptor.md",
+    "retrieved_at": "2026-09-17T16:12:14.622511+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftdata__fetchdescriptor.md",
+    "bytes": 5060,
+    "sha256": "ea4d47acb2b2f37658f18bbd17dc522350aacc750284c9a2086b450048e6154a"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftdata/modelactor",
+    "download_url": "https://developer.apple.com/documentation/swiftdata/modelactor.md",
+    "retrieved_at": "2026-09-17T16:12:14.840069+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftdata__modelactor.md",
+    "bytes": 2087,
+    "sha256": "a82f6c75cc122f3b1ac24c71021dcc1b46a0fe3cce0d8c4b323e1280eac6a0d8"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices",
+    "download_url": "https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices.md",
+    "retrieved_at": "2026-09-17T16:12:14.998420+00:00",
+    "status": "downloaded",
+    "file": "documentation__swiftdata__syncing-model-data-across-a-persons-devices.md",
+    "bytes": 12031,
+    "sha256": "f0cdd58535e13c400322b904ddd6bd94a900667038ba7e97927760525c5d859e"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/widgetkit/keeping-a-widget-up-to-date",
+    "download_url": "https://developer.apple.com/documentation/widgetkit/keeping-a-widget-up-to-date.md",
+    "retrieved_at": "2026-09-17T16:12:15.094823+00:00",
+    "status": "downloaded",
+    "file": "documentation__widgetkit__keeping-a-widget-up-to-date.md",
+    "bytes": 14376,
+    "sha256": "43e32f22bcb69bb083907c9b55e05fea13a89f4757502a81ed0eb5bb2e2f2250"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities",
+    "download_url": "https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities.md",
+    "retrieved_at": "2026-09-17T16:12:15.101375+00:00",
+    "status": "downloaded",
+    "file": "documentation__widgetkit__adding-interactivity-to-widgets-and-live-activities.md",
+    "bytes": 16306,
+    "sha256": "44a8e96a735041fb77e08e6e8beccc7695f3ffb27692d8d47512f745ceef5663"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api",
+    "download_url": "https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api.md",
+    "retrieved_at": "2026-09-17T16:12:15.482653+00:00",
+    "status": "downloaded",
+    "file": "documentation__bundleresources__describing-use-of-required-reason-api.md",
+    "bytes": 4588,
+    "sha256": "e5cc866c722a51e3e06f82edf65d8ef1bc96489dae5c75a88696af5261aafafb"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/materials.md",
+    "retrieved_at": "2026-09-17T16:12:15.582531+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/accessibility.md",
+    "retrieved_at": "2026-09-17T16:12:15.681142+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/layout.md",
+    "retrieved_at": "2026-09-17T16:12:15.689306+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/charts",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/charts.md",
+    "retrieved_at": "2026-09-17T16:12:16.012347+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/widgets",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/widgets.md",
+    "retrieved_at": "2026-09-17T16:12:16.382781+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo",
+    "download_url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo.md",
+    "retrieved_at": "2026-09-17T16:12:16.419561+00:00",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/materials.json",
+    "retrieved_at": "2026-09-17T16:13:29.210374+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__materials.json",
+    "bytes": 76600,
+    "sha256": "597da170985715de4bd8446df12e3604595e634a790b5da0ce6673d2b2327ed5"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/accessibility.json",
+    "retrieved_at": "2026-09-17T16:13:29.496490+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__accessibility.json",
+    "bytes": 85010,
+    "sha256": "be49ec0b34397f356a1e3fd8c7ad323713198515523947097913cb9c57da699b"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/layout.json",
+    "retrieved_at": "2026-09-17T16:13:29.649364+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__layout.json",
+    "bytes": 84939,
+    "sha256": "d41f32ddf76c597f0edd54eac361fa294a8736cfc4ccc627d1709fe092ed7267"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/charts",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/charts.json",
+    "retrieved_at": "2026-09-17T16:13:30.122634+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__charts.json",
+    "bytes": 53610,
+    "sha256": "206a83349e8a0bfcdd9ba647b995988ca7d464f8554c7fe93b7044dd8ced2ec5"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/widgets",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/widgets.json",
+    "retrieved_at": "2026-09-17T16:13:30.577936+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__widgets.json",
+    "bytes": 142173,
+    "sha256": "31bd8239f7bbd95985d426342b0329ff78b781e152e4200a3e1d9c7c4bd42613"
+  },
+  {
+    "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo",
+    "download_url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/designing-for-iphone-duo.json",
+    "retrieved_at": "2026-09-17T16:13:31.066223+00:00",
+    "status": "downloaded",
+    "file": "design__human-interface-guidelines__designing-for-iphone-duo.json",
+    "bytes": 76507,
+    "sha256": "61978e62ff0f32b34088bae8005ae9d1d52cdc9545597ce687a5ae3a65a9aaeb"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/xcode/understanding-and-improving-swiftui-performance",
+    "download_url": "https://developer.apple.com/documentation/xcode/understanding-and-improving-swiftui-performance.md",
+    "retrieved_at": "2026-09-17T16:13:31.330796+00:00",
+    "status": "downloaded",
+    "file": "documentation__xcode__understanding-and-improving-swiftui-performance.md",
+    "bytes": 13206,
+    "sha256": "10c91224352ebdb11060e1029c7d03c6c9dc14257138678ebe55e6cace96f7b3"
+  },
+  {
+    "url": "https://developer.apple.com/documentation/updates/swiftcharts",
+    "download_url": "https://developer.apple.com/documentation/updates/swiftcharts.md",
+    "retrieved_at": "2026-09-17T16:13:31.748325+00:00",
+    "status": "downloaded",
+    "file": "documentation__updates__swiftcharts.md",
+    "bytes": 1712,
+    "sha256": "cffcca0bf6f9b78587ae739ff7bb8e944f21ddce079e4c0865242450939980af"
+  }
+]

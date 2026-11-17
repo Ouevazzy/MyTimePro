@@ -1,0 +1,33 @@
+--- a/WorkTimerTests/MultipleEntriesPerDayTests.swift
++++ b/WorkTimerTests/MultipleEntriesPerDayTests.swift
+@@ -50,7 +50,8 @@
+         let configuration = ModelConfiguration(
+             schema: schema,
+             isStoredInMemoryOnly: true,
+-            allowsSave: true
++            allowsSave: true,
++            cloudKitDatabase: .none
+         )
+         let container = try ModelContainer(for: schema, configurations: configuration)
+         let context = container.mainContext
+@@ -80,7 +81,8 @@
+         let configuration = ModelConfiguration(
+             schema: schema,
+             isStoredInMemoryOnly: true,
+-            allowsSave: true
++            allowsSave: true,
++            cloudKitDatabase: .none
+         )
+         let container = try ModelContainer(for: schema, configurations: configuration)
+         let context = container.mainContext
+--- a/WorkTimerTests/SiriShortcutsTests.swift
++++ b/WorkTimerTests/SiriShortcutsTests.swift
+@@ -320,7 +320,7 @@
+ 
+     private func makeContainer() throws -> ModelContainer {
+         let schema = Schema([WorkDay.self])
+-        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, allowsSave: true)
++        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, allowsSave: true, cloudKitDatabase: .none)
+         return try ModelContainer(for: schema, configurations: configuration)
+     }
+ 

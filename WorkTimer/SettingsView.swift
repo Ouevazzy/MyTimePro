@@ -5,6 +5,7 @@ import StoreKit
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable private var settings = UserSettings.shared
 
     // MARK: - State
@@ -15,8 +16,6 @@ struct SettingsView: View {
     @State private var showOfferCodeRedemption = false
     @State private var subscriptionErrorMessage: String?
     @State private var showResetAlert = false
-    @State private var animateWorkHours = false
-    @State private var animateAnnualDays = false
 
     // Export
     @State private var exportType: ExportType?
@@ -38,26 +37,37 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: DS.Spacing.lg) {
                     profileHeader
-                    subscriptionCard
-                    WorkTimeSettingsSection(
-                        settings: settings,
-                        activeSection: $activeSection,
-                        showConfetti: $showConfetti
-                    )
-                    DisplaySettingsSection(
-                        settings: settings,
-                        activeSection: $activeSection
-                    )
-                    FeaturesSettingsSection(activeSection: $activeSection)
-                    PrivacySettingsSection(activeSection: $activeSection)
-                    ExportSettingsSection(
-                        activeSection: $activeSection,
-                        exportType: $exportType,
-                        exportFormat: $exportFormat,
-                        userCompany: $userCompany
-                    )
-                    aboutCard
-                    resetCard
+                    SettingsGroup {
+                        subscriptionCard
+                        settingsDivider
+                        WorkTimeSettingsSection(
+                            settings: settings,
+                            activeSection: $activeSection,
+                            showConfetti: $showConfetti
+                        )
+                        settingsDivider
+                        DisplaySettingsSection(
+                            settings: settings,
+                            activeSection: $activeSection
+                        )
+                    }
+                    SettingsGroup {
+                        FeaturesSettingsSection(activeSection: $activeSection)
+                        settingsDivider
+                        PrivacySettingsSection(activeSection: $activeSection)
+                        settingsDivider
+                        ExportSettingsSection(
+                            activeSection: $activeSection,
+                            exportType: $exportType,
+                            exportFormat: $exportFormat,
+                            userCompany: $userCompany
+                        )
+                    }
+                    SettingsGroup {
+                        aboutCard
+                        settingsDivider
+                        resetCard
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 30)
@@ -95,20 +105,21 @@ struct SettingsView: View {
         } message: {
             Text(subscriptionErrorMessage ?? "")
         }
-        .onAppear {
-            Task {
-                try? await Task.sleep(for: .milliseconds(400))
-                withAnimation(DS.Animation.appear) { animateWorkHours = true }
-                try? await Task.sleep(for: .milliseconds(300))
-                withAnimation(DS.Animation.appear) { animateAnnualDays = true }
-            }
-        }
     }
 
     // MARK: - Profile Header
 
+    private var settingsDivider: some View {
+        Divider()
+            .padding(.leading, DS.Spacing.lg + DS.IconSize.sectionHeader + DS.Spacing.md)
+    }
+
     private var profileHeader: some View {
-        VStack(spacing: DS.Spacing.md) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: DS.Spacing.md))
+            : AnyLayout(HStackLayout(spacing: DS.Spacing.md))
+
+        return VStack(spacing: DS.Spacing.md) {
             HStack(spacing: DS.Spacing.md) {
                 RoundedRectangle(cornerRadius: DS.Radius.medium)
                     .fill(LinearGradient(
@@ -136,20 +147,16 @@ struct SettingsView: View {
             .padding()
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: DS.Radius.card))
 
-            HStack(spacing: DS.Spacing.md) {
+            layout {
                 StatisticCard(
                     title: "settings.weeklyHours".localized,
-                    value: String(format: "%.1fh", settings.weeklyHours),
-                    icon: "clock.fill", color: .blue,
-                    iconBackground: .blue.opacity(0.2),
-                    animate: animateWorkHours
+                    value: settings.weeklyHours.formatted(.number.precision(.fractionLength(0...1))) + "time.hours.short".localized,
+                    icon: "clock.fill", color: .blue
                 )
                 StatisticCard(
                     title: "settings.annualVacationDays".localized,
                     value: "\(settings.annualVacationDays) \("time.days".localized)",
-                    icon: "sun.max.fill", color: .orange,
-                    iconBackground: .orange.opacity(0.2),
-                    animate: animateAnnualDays
+                    icon: "sun.max.fill", color: .orange
                 )
             }
         }
@@ -295,7 +302,7 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(.primary)
 
-                    Link(destination: URL(string: "https://ouevazzy.github.io/MyTimePro-Support/")!) {
+                    Link(destination: URL(string: "https://ouevazzy.github.io/MyTimePro-Support/privacy.html")!) {
                         HStack(spacing: DS.Spacing.xs) {
                             Image(systemName: "hand.raised.fill")
                                 .foregroundStyle(.green)
@@ -497,18 +504,21 @@ struct SettingsView: View {
 
     private func resetAllData() {
         do {
-            let all = try modelContext.fetch(FetchDescriptor<WorkDay>())
-            for workDay in all { modelContext.delete(workDay) }
+            // ✅ Suppression en lot : pas de chargement de toute la base en mémoire
+            try modelContext.delete(model: WorkDay.self)
             try modelContext.save()
             settings.resetToDefaults()
+            // ✅ Les stats en cache ne survivent pas au reset
+            StatsCache.shared.invalidateAll()
             SiriSummaryCacheService().refresh(using: modelContext)
         } catch {
+            modelContext.rollback()
             ErrorManager.shared.handleDataError("Erreur suppression: \(error.localizedDescription)")
         }
     }
 
     private func openPrivacyPolicy() {
-        guard let url = URL(string: "https://ouevazzy.github.io/MyTimePro-Support/") else { return }
+        guard let url = URL(string: "https://ouevazzy.github.io/MyTimePro-Support/privacy.html") else { return }
         openURL(url)
     }
 
@@ -525,5 +535,7 @@ struct SettingsView: View {
 // MARK: - Preview
 
 #Preview {
-    SettingsView().modelContainer(for: WorkDay.self, inMemory: true)
+    NavigationStack {
+        SettingsView().modelContainer(for: WorkDay.self, inMemory: true)
+    }
 }

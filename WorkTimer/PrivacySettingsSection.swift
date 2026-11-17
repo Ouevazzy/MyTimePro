@@ -36,7 +36,7 @@ struct PrivacySettingsSection: View {
 
     private var introText: some View {
         Text("settings.privacy.message".localized)
-            .font(.subheadline).foregroundColor(.secondary).padding()
+            .font(.subheadline).foregroundStyle(.secondary).padding()
             .background(RoundedRectangle(cornerRadius: 12).fill(Color.cyan.opacity(0.1)))
     }
 
@@ -51,32 +51,43 @@ struct PrivacySettingsSection: View {
     }
 
     private var iCloudSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "icloud.fill").foregroundColor(.blue)
-                Text("settings.privacy.icloud".localized).font(.headline)
-            }
-            Text("settings.privacy.icloud.message".localized)
-                .font(.caption).foregroundColor(.secondary)
-            if cloudService.syncStatus != .idle {
+        NavigationLink {
+            SyncDetailsView()
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: cloudService.syncStatus.iconName).foregroundColor(cloudService.syncStatus.color)
-                    Text(cloudService.syncStatus.description).font(.caption).foregroundColor(.secondary)
+                    Image(systemName: "icloud.fill").foregroundStyle(.blue)
+                    Text("settings.privacy.icloud".localized).font(.headline)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
                 }
-                .padding(.top, 5)
+                Text("settings.privacy.icloud.message".localized)
+                    .font(.caption).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                if cloudService.syncStatus != .idle {
+                    HStack {
+                        Image(systemName: cloudService.syncStatus.iconName).foregroundStyle(cloudService.syncStatus.color)
+                        Text(cloudService.syncStatus.description).font(.caption).foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 5)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding().background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
         }
-        .padding().background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+        .buttonStyle(.plain)
     }
 
     private var dataControlSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: "gear").foregroundColor(.orange)
+                Image(systemName: "gear").foregroundStyle(.orange)
                 Text("settings.privacy.dataControl".localized).font(.headline)
             }
             Text("settings.privacy.dataControl.message".localized)
-                .font(.caption).foregroundColor(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
         .padding().background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
     }

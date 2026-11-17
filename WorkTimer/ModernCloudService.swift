@@ -2,7 +2,6 @@ import Foundation
 import CloudKit
 import SwiftUI
 import SwiftData
-import Combine
 import Network
 
 @MainActor
@@ -15,7 +14,7 @@ final class ModernCloudService {
     private(set) var userMessage: String?
 
     private let containerIdentifier = "iCloud.jordan-payez.MyTimePro"
-    private var cancellables = Set<AnyCancellable>()
+    private var accountChangedTask: Task<Void, Never>?
     private var modelContext: ModelContext?
     private var isInitialized = false
     private let networkMonitor = NWPathMonitor()
@@ -29,11 +28,11 @@ final class ModernCloudService {
 
         var description: String {
             switch self {
-            case .idle: return "Prêt"
-            case .syncing(let progress): return "Vérification iCloud \(Int(progress * 100))%"
-            case .error(let message): return "Erreur: \(message)"
-            case .offline: return "Hors ligne"
-            case .failed(let error): return "Échec: \(error.localizedDescription)"
+            case .idle: return "cloud.status.ready".localized
+            case .syncing(let progress): return "cloud.status.checking".localized(Int(progress * 100))
+            case .error(let message): return "cloud.status.error".localized(message)
+            case .offline: return "cloud.status.offline".localized
+            case .failed(let error): return "cloud.status.failed".localized(error.localizedDescription)
             }
         }
 
@@ -79,6 +78,30 @@ final class ModernCloudService {
         modelContext = context
     }
 
+    // MARK: - Diagnostic (TestFlight / App Store)
+
+    /// Identifiant du conteneur CloudKit utilisé pour la synchronisation.
+    var cloudKitContainerID: String { containerIdentifier }
+
+    /// Environnement CloudKit ciblé par la build courante.
+    /// Debug (Xcode) → Development ; TestFlight & App Store → Production.
+    var cloudKitEnvironment: String {
+        #if DEBUG
+        return "Development"
+        #else
+        return "Production"
+        #endif
+    }
+
+    /// CloudKit est-il réellement actif sur cette build ? (désactivé en Debug)
+    var isCloudKitActive: Bool {
+        #if DEBUG
+        return false
+        #else
+        return true
+        #endif
+    }
+
     func initialize() {
         guard !isInitialized else {
             Task { await refreshICloudStatus() }
@@ -91,16 +114,16 @@ final class ModernCloudService {
     }
 
     private func setupCloudKitNotifications() {
-        NotificationCenter.default.publisher(for: NSNotification.Name.CKAccountChanged)
-            .sink { [weak self] _ in
-                Task { await self?.refreshICloudStatus() }
+        accountChangedTask = Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .CKAccountChanged) {
+                await self?.refreshICloudStatus()
             }
-            .store(in: &cancellables)
+        }
     }
 
     func refreshICloudStatus() async {
         syncStatus = .syncing(progress: 0.25)
-        userMessage = "Vérification du compte iCloud..."
+        userMessage = "cloud.msg.checkingAccount".localized
 
         do {
             let status = try await CKContainer(identifier: containerIdentifier).accountStatus()
@@ -137,18 +160,26 @@ final class ModernCloudService {
 
     func restoreFromCloud() async {
         await refreshICloudStatus()
-        userMessage = "La restauration est gérée automatiquement par iCloud."
+        userMessage = "cloud.msg.restoreAutomatic".localized
+    }
+
+    func cleanupGhostEntries() async throws {
+        guard let ctx = modelContext else { return }
+        let count = try WorkDay.deleteGhostEntries(in: ctx)
+        if count > 0 {
+            AppLogger.info("\(count) entrée(s) fantôme(s) supprimée(s) en background", category: AppLogger.data)
+        }
     }
 
     func stopSync() {
         syncStatus = .idle
-        userMessage = "Vérification arrêtée"
+        userMessage = "cloud.msg.stopped".localized
     }
 
     func resetCloudKitInitialization() {
         UserDefaults.standard.removeObject(forKey: "ckSyncEngineStateData")
         syncStatus = .idle
-        userMessage = "État iCloud réinitialisé. Redémarrez l'application si nécessaire."
+        userMessage = "cloud.msg.reset".localized
         AppLogger.info("État iCloud réinitialisé", category: AppLogger.cloudKit)
     }
 
@@ -160,22 +191,22 @@ final class ModernCloudService {
         switch status {
         case .available:
             syncStatus = .idle
-            userMessage = "iCloud disponible. Les données sont synchronisées par SwiftData."
+            userMessage = "cloud.msg.available".localized
         case .noAccount:
             syncStatus = .offline
-            userMessage = "Aucun compte iCloud configuré"
+            userMessage = "cloud.msg.noAccount".localized
         case .restricted:
-            syncStatus = .error(message: "Accès iCloud restreint")
-            userMessage = "Accès iCloud restreint"
+            syncStatus = .error(message: "cloud.msg.restricted".localized)
+            userMessage = "cloud.msg.restricted".localized
         case .couldNotDetermine:
-            syncStatus = .error(message: "Statut iCloud indéterminé")
-            userMessage = "Impossible de vérifier iCloud"
+            syncStatus = .error(message: "cloud.msg.undetermined".localized)
+            userMessage = "cloud.msg.cannotCheck".localized
         case .temporarilyUnavailable:
             syncStatus = .offline
-            userMessage = "iCloud temporairement indisponible"
+            userMessage = "cloud.msg.temporarilyUnavailable".localized
         @unknown default:
-            syncStatus = .error(message: "Statut iCloud inconnu")
-            userMessage = "Statut iCloud inconnu"
+            syncStatus = .error(message: "cloud.msg.unknown".localized)
+            userMessage = "cloud.msg.unknown".localized
         }
     }
 
@@ -184,20 +215,20 @@ final class ModernCloudService {
             switch ckError.code {
             case .networkUnavailable, .networkFailure:
                 syncStatus = .offline
-                userMessage = "Connexion réseau indisponible"
+                userMessage = "cloud.msg.networkUnavailable".localized
             case .notAuthenticated:
-                syncStatus = .error(message: "Non connecté à iCloud")
-                userMessage = "Connectez-vous à iCloud dans Réglages"
+                syncStatus = .error(message: "cloud.msg.notAuthenticated".localized)
+                userMessage = "cloud.msg.signIn".localized
             case .quotaExceeded:
-                syncStatus = .error(message: "Quota iCloud dépassé")
-                userMessage = "Libérez de l'espace dans iCloud"
+                syncStatus = .error(message: "cloud.msg.quotaExceeded".localized)
+                userMessage = "cloud.msg.freeSpace".localized
             default:
                 syncStatus = .error(message: ckError.localizedDescription)
-                userMessage = "Erreur: \(ckError.localizedDescription)"
+                userMessage = "cloud.status.error".localized(ckError.localizedDescription)
             }
         } else {
             syncStatus = .failed(error: error)
-            userMessage = "Erreur: \(error.localizedDescription)"
+            userMessage = "cloud.status.error".localized(error.localizedDescription)
         }
     }
 
@@ -212,7 +243,7 @@ final class ModernCloudService {
                     }
                 } else {
                     self.syncStatus = .offline
-                    self.userMessage = "Hors ligne - iCloud reprendra automatiquement"
+                    self.userMessage = "cloud.msg.offlineResume".localized
                 }
             }
         }
@@ -231,7 +262,7 @@ enum CloudServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noNetworkConnection:
-            return "Aucune connexion réseau disponible"
+            return "cloud.msg.noNetwork".localized
         case .accountUnavailable(let message):
             return message
         }

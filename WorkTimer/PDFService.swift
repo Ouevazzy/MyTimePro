@@ -58,8 +58,8 @@ class PDFService {
         let calendar = Calendar.current
         
         let title = annual ?
-            "Rapport Annuel \(calendar.component(.year, from: date))" :
-            "Rapport Mensuel \(formatMonth(date))"
+            "pdf.title.annual".localized(String(calendar.component(.year, from: date))) :
+            "pdf.title.monthly".localized(formatMonth(date))
         
         let pdfMetaData = [
             kCGPDFContextCreator: reportTheme.companyName,
@@ -81,7 +81,7 @@ class PDFService {
             // Page de titre et résumé
             context.beginPage()
             let stats = calculateStats(workDays, for: date, useDecimalHours: reportTheme.useDecimalHours)
-            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, theme: reportTheme)
+            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, totalPages: annual ? 13 : 2, theme: reportTheme)
             
             if annual {
                 let targetYear = calendar.component(.year, from: date)
@@ -127,7 +127,7 @@ class PDFService {
     
     // MARK: - Drawing Methods
     
-    private func drawCoverPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, date: Date, stats: PDFStats, theme: PDFTheme) {
+    func drawCoverPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, date: Date, stats: PDFStats, totalPages: Int, theme: PDFTheme) {
         let margins = UIEdgeInsets(top: 50, left: 50, bottom: 60, right: 50)
         let contentRect = pageRect.inset(by: margins)
         
@@ -156,8 +156,9 @@ class PDFService {
         
         // Date du rapport
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = reportLocale
         dateFormatter.dateStyle = .long
-        drawCenteredText("Généré le \(dateFormatter.string(from: Date()))", rect: CGRect(x: 0, y: yPosition, width: pageRect.width, height: 20), font: theme.subtitleFont, color: theme.textColor.withAlphaComponent(0.7))
+        drawCenteredText("pdf.generatedOn".localized(dateFormatter.string(from: Date())), rect: CGRect(x: 0, y: yPosition, width: pageRect.width, height: 20), font: theme.subtitleFont, color: theme.textColor.withAlphaComponent(0.7))
         yPosition += 60
         
         // Statistiques clés dans des boîtes
@@ -167,7 +168,7 @@ class PDFService {
         // Jours travaillés
         drawStatsBox(
             rect: CGRect(x: contentRect.minX, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Jours travaillés",
+            title: "pdf.workedDays".localized,
             value: "\(stats.workDays)",
             icon: "📊",
             color: theme.primaryColor
@@ -176,7 +177,7 @@ class PDFService {
         // Heures totales
         drawStatsBox(
             rect: CGRect(x: contentRect.minX + boxSize.width + boxSpacing, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Heures totales",
+            title: "pdf.totalHours".localized,
             value: stats.formattedTotalHours,
             icon: "⏱",
             color: theme.primaryColor
@@ -185,8 +186,8 @@ class PDFService {
         // Bonus
         drawStatsBox(
             rect: CGRect(x: contentRect.minX + (boxSize.width + boxSpacing) * 2, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Bonus",
-            value: String(format: "%.2f CHF", stats.totalBonus),
+            title: "pdf.bonus".localized,
+            value: UserSettings.shared.formatCurrency(stats.totalBonus),
             icon: "💰",
             color: theme.secondaryColor
         )
@@ -194,7 +195,7 @@ class PDFService {
         yPosition += boxSize.height + 30
         
         // Section des statistiques détaillées
-        drawSectionTitle("Résumé", rect: CGRect(x: contentRect.minX, y: yPosition, width: contentRect.width, height: 30), theme: theme)
+        drawSectionTitle("pdf.summary".localized, rect: CGRect(x: contentRect.minX, y: yPosition, width: contentRect.width, height: 30), theme: theme)
         yPosition += 40
         
         let columnWidth = contentRect.width / 2
@@ -202,45 +203,45 @@ class PDFService {
         
         // Colonne 1
         var itemY = yPosition
-        drawStatItem("Jours travaillés:", value: "\(stats.workDays) jours", x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.workedDays".localized, value: daysText(stats.workDays), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
         // Statistiques détaillées de vacances avec report
-        drawStatItem("Congés utilisés:", value: String(format: "%.1f jours", stats.vacationStats.used), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationUsed".localized, value: "pdf.days.decimal".localized(stats.vacationStats.used), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Droits annuels:", value: String(format: "%.1f jours", stats.vacationStats.annual), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationAnnual".localized, value: "pdf.days.decimal".localized(stats.vacationStats.annual), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Report:", value: String(format: "%.1f jours", stats.vacationStats.carryIn), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.carryIn".localized, value: "pdf.days.decimal".localized(stats.vacationStats.carryIn), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Solde restant:", value: String(format: "%.1f jours", stats.vacationStats.remaining), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationRemaining".localized, value: "pdf.days.decimal".localized(stats.vacationStats.remaining), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Jours de maladie:", value: "\(stats.sickDays) jours", x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.sickDays".localized, value: daysText(stats.sickDays), x: contentRect.minX + 20, y: itemY, theme: theme)
         
         // Colonne 2
         itemY = yPosition
-        drawStatItem("Heures moyennes/jour:", value: String(format: "%.2f h", stats.averageDailyHours), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.averageDaily".localized, value: String(format: "%.2f h", stats.averageDailyHours), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Heures supplémentaires:", value: stats.formattedOvertimeHours, x: contentRect.minX + columnWidth, y: itemY,
+        drawStatItem("pdf.summary.overtime".localized, value: stats.formattedOvertimeHours, x: contentRect.minX + columnWidth, y: itemY,
             color: stats.overtimeSeconds >= 0 ? theme.accentColor : theme.negativeColor, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Total bonus:", value: String(format: "%.2f CHF", stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.totalBonus".localized, value: UserSettings.shared.formatCurrency(stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
         
         // Pied de page
-        drawFooter(pageRect: pageRect, pageNumber: 1, totalPages: title.contains("Annuel") ? 13 : 2, theme: theme)
+        drawFooter(pageRect: pageRect, pageNumber: 1, totalPages: totalPages, theme: theme)
     }
     
-    private func drawAnnualSummaryPage(pageRect: CGRect, workDays: [WorkDay], year: Int, theme: PDFTheme) {
+    func drawAnnualSummaryPage(pageRect: CGRect, workDays: [WorkDay], year: Int, theme: PDFTheme) {
         let margins = UIEdgeInsets(top: 50, left: 50, bottom: 60, right: 50)
         let contentRect = pageRect.inset(by: margins)
         
         // Titre de la page
-        drawSectionTitle("Synthèse Graphique - \(year)", rect: CGRect(x: contentRect.minX, y: contentRect.minY, width: contentRect.width, height: 30), theme: theme)
+        drawSectionTitle("pdf.chartsSummary".localized(year), rect: CGRect(x: contentRect.minX, y: contentRect.minY, width: contentRect.width, height: 30), theme: theme)
         
         var yPosition = contentRect.minY + 40
         
@@ -261,7 +262,7 @@ class PDFService {
         drawFooter(pageRect: pageRect, pageNumber: 2, totalPages: 13, theme: theme)
     }
     
-    private func drawMonthPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, workDays: [WorkDay], pageNumber: Int, totalPages: Int, theme: PDFTheme, date: Date = Date()) {
+    func drawMonthPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, workDays: [WorkDay], pageNumber: Int, totalPages: Int, theme: PDFTheme, date: Date = Date()) {
         let margins = UIEdgeInsets(top: 50, left: 40, bottom: 60, right: 40)
         let contentRect = pageRect.inset(by: margins)
         
@@ -283,7 +284,7 @@ class PDFService {
         drawFooter(pageRect: pageRect, pageNumber: pageNumber, totalPages: totalPages, theme: theme)
     }
     
-    private func drawPageHeader(title: String, pageRect: CGRect, theme: PDFTheme) {
+    func drawPageHeader(title: String, pageRect: CGRect, theme: PDFTheme) {
         // Bande colorée en haut de page
         let headerHeight: CGFloat = 40
         let headerRect = CGRect(x: 0, y: 0, width: pageRect.width, height: headerHeight)
@@ -315,7 +316,7 @@ class PDFService {
         }
     }
     
-    private func drawMonthSummary(_ stats: PDFStats, rect: CGRect, theme: PDFTheme) {
+    func drawMonthSummary(_ stats: PDFStats, rect: CGRect, theme: PDFTheme) {
         // Arrière-plan
         let backgroundPath = UIBezierPath(roundedRect: rect, cornerRadius: 10)
         theme.backgroundColor.withAlphaComponent(0.1).setFill()
@@ -328,7 +329,7 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + padding, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: "briefcase.fill",
-            title: "Jours travaillés",
+            title: "pdf.workedDays".localized,
             value: "\(stats.workDays)",
             theme: theme
         )
@@ -337,7 +338,7 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + columnWidth + padding * 2, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: "clock.fill",
-            title: "Heures totales",
+            title: "pdf.totalHours".localized,
             value: stats.formattedTotalHours,
             theme: theme
         )
@@ -347,15 +348,16 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + columnWidth * 2 + padding * 3, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: stats.overtimeSeconds >= 0 ? "plus.circle.fill" : "minus.circle.fill",
-            title: "Heures supp.",
+            title: "pdf.overtimeShort".localized,
             value: stats.formattedOvertimeHours,
             valueColor: overtimeColor,
             theme: theme
         )
     }
     
-    private func drawDetailedTable(workDays: [WorkDay], startY: CGFloat, contentRect: CGRect, context: UIGraphicsPDFRendererContext, theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
-        let headers = ["Date", "Type", "Début", "Fin", "Pause", "Total", "Supp.", "Bonus", "Note"]
+    func drawDetailedTable(workDays: [WorkDay], startY: CGFloat, contentRect: CGRect, context: UIGraphicsPDFRendererContext, theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
+        let headers = ["pdf.table.date", "pdf.table.type", "pdf.table.start", "pdf.table.end", "pdf.table.break",
+                       "pdf.table.total", "pdf.table.overtime", "pdf.table.bonus", "pdf.table.note"].map(\.localized)
         let columnWidths: [CGFloat] = [0.15, 0.15, 0.1, 0.1, 0.1, 0.12, 0.12, 0.08, 0.08]
         
         let tableWidth = contentRect.width
@@ -395,7 +397,7 @@ class PDFService {
                 
                 // Nouvelle page
                 context.beginPage()
-                drawPageHeader(title: "Suite du tableau", pageRect: context.pdfContextBounds, theme: theme)
+                drawPageHeader(title: "pdf.table.continued".localized, pageRect: context.pdfContextBounds, theme: theme)
                 
                 // Réinitialiser yPosition
                 yPosition = startY
@@ -481,7 +483,7 @@ class PDFService {
         )
     }
     
-    private func drawTableHeader(headers: [String], columnWidths: [CGFloat], rect: CGRect, theme: PDFTheme) {
+    func drawTableHeader(headers: [String], columnWidths: [CGFloat], rect: CGRect, theme: PDFTheme) {
         // Arrière-plan de l'en-tête
         theme.primaryColor.setFill()
         UIBezierPath(rect: rect).fill()
@@ -513,7 +515,7 @@ class PDFService {
         }
     }
     
-    private func drawTotalRow(totalHours: Double, totalOvertime: Int, totalBonus: Double, rect: CGRect, columnWidths: [CGFloat], theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
+    func drawTotalRow(totalHours: Double, totalOvertime: Int, totalBonus: Double, rect: CGRect, columnWidths: [CGFloat], theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
         // Arrière-plan
         theme.primaryColor.withAlphaComponent(0.1).setFill()
         UIBezierPath(rect: rect).fill()
@@ -522,7 +524,7 @@ class PDFService {
         let boldFont = UIFont.systemFont(ofSize: 11, weight: .bold)
         
         // Texte "TOTAL"
-        drawCellText("TOTAL", rect: CGRect(x: rect.minX, y: rect.minY, width: tableWidth * 0.5, height: rect.height), alignment: .right, font: boldFont, color: theme.primaryColor)
+        drawCellText("pdf.table.totalRow".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: tableWidth * 0.5, height: rect.height), alignment: .right, font: boldFont, color: theme.primaryColor)
         
         // Total heures
         let totalHoursX = rect.minX + tableWidth * (columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4])
@@ -550,14 +552,16 @@ class PDFService {
         )
     }
     
-    private func drawFooter(pageRect: CGRect, pageNumber: Int, totalPages: Int, theme: PDFTheme) {
+    func drawFooter(pageRect: CGRect, pageNumber: Int, totalPages: Int, theme: PDFTheme) {
         guard theme.showPageNumbers else { return }
         
         let footerRect = CGRect(x: 0, y: pageRect.height - 40, width: pageRect.width, height: 30)
         
         // Date de génération
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
+        dateFormatter.locale = reportLocale
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
         let generationDate = dateFormatter.string(from: Date())
         
         let attributes: [NSAttributedString.Key: Any] = [
@@ -565,771 +569,12 @@ class PDFService {
             .foregroundColor: theme.textColor.withAlphaComponent(0.6)
         ]
         
-        let generatedText = "Généré le \(generationDate)"
+        let generatedText = "pdf.generatedOn".localized(generationDate)
         generatedText.draw(at: CGPoint(x: 50, y: footerRect.minY + 10), withAttributes: attributes)
         
         // Numéro de page
-        let pageText = "Page \(pageNumber) sur \(totalPages)"
+        let pageText = "pdf.pageOf".localized(pageNumber, totalPages)
         let pageTextSize = pageText.size(withAttributes: attributes)
         pageText.draw(at: CGPoint(x: pageRect.width - 50 - pageTextSize.width, y: footerRect.minY + 10), withAttributes: attributes)
-    }
-    
-    // MARK: - Drawing Charts
-    
-    private func drawMonthlyHoursChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Heures travaillées par mois", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
-        
-        let months = getMonthlyHoursData(workDays: workDays)
-        let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
-        
-        if months.isEmpty {
-            drawNoDataMessage(rect: chartRect, theme: theme)
-            return
-        }
-        
-        // Trouver le maximum pour l'échelle
-        let maxHours = months.map { $0.hours }.max() ?? 0
-        let roundedMax = ceil(maxHours / 10) * 10
-        
-        // Configuration des barres
-        let barWidth: CGFloat = min(40, (chartRect.width - 60) / CGFloat(months.count))
-        let barSpacing: CGFloat = min(20, barWidth * 0.5)
-        let chartWidth = CGFloat(months.count) * (barWidth + barSpacing) - barSpacing
-        let chartStartX = chartRect.minX + (chartRect.width - chartWidth) / 2
-        
-        // Dessiner l'axe Y
-        drawYAxis(rect: chartRect, maxValue: roundedMax, steps: 5, title: "Heures", theme: theme)
-        
-        // Dessiner chaque barre
-        for (index, month) in months.enumerated() {
-            let barHeight = (month.hours / roundedMax) * (chartRect.height - 40)
-            let barX = chartStartX + CGFloat(index) * (barWidth + barSpacing)
-            let barY = chartRect.maxY - 20 - barHeight
-            
-            let barRect = CGRect(x: barX, y: barY, width: barWidth, height: barHeight)
-            
-            // Dessiner la barre avec un dégradé
-            drawBarWithGradient(rect: barRect, startColor: theme.primaryColor, endColor: theme.primaryColor.withAlphaComponent(0.7))
-            
-            // Étiquette du mois
-            let monthLabel = month.shortName
-            let labelAttributes: [NSAttributedString.Key: Any] = [
-                .font: theme.smallFont,
-                .foregroundColor: theme.textColor,
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .center
-                    return style
-                }()
-            ]
-            
-            monthLabel.draw(in: CGRect(x: barX, y: chartRect.maxY - 15, width: barWidth, height: 15), withAttributes: labelAttributes)
-            
-            // Valeur au-dessus de la barre
-            let valueAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 8, weight: .medium),
-                .foregroundColor: theme.primaryColor,
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .center
-                    return style
-                }()
-            ]
-            
-            let valueText = String(format: "%.1f", month.hours)
-            valueText.draw(in: CGRect(x: barX, y: barY - 15, width: barWidth, height: 12), withAttributes: valueAttributes)
-        }
-    }
-    
-    private func drawWorkTypeDistributionChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Répartition par type d'activité", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
-        
-        let distribution = getWorkTypeDistribution(workDays: workDays)
-        let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
-        
-        if distribution.isEmpty {
-            drawNoDataMessage(rect: chartRect, theme: theme)
-            return
-        }
-        
-        // Dessiner un graphique en secteurs
-        let centerX = chartRect.minX + chartRect.width * 0.3
-        let centerY = chartRect.minY + (chartRect.height - 30) / 2
-        let radius: CGFloat = min(chartRect.width * 0.25, (chartRect.height - 30) / 2)
-        
-        var startAngle: CGFloat = 0
-        var legendY = chartRect.minY
-        
-        for (index, item) in distribution.enumerated() {
-            // Calculer l'angle
-            let angle = CGFloat(item.percentage) * 2 * .pi
-            
-            // Dessiner le secteur
-            let path = UIBezierPath()
-            path.move(to: CGPoint(x: centerX, y: centerY))
-            path.addArc(withCenter: CGPoint(x: centerX, y: centerY), radius: radius, startAngle: startAngle, endAngle: startAngle + angle, clockwise: true)
-            path.close()
-            
-            // Couleur du secteur
-            let itemColor = getColorForIndex(index, distribution.count, theme: theme)
-            itemColor.setFill()
-            path.fill()
-            
-            // Légendee
-            drawLegendItem(
-                text: "\(item.name): \(item.count) jour\(item.count > 1 ? "s" : "") (\(Int(item.percentage * 100))%)",
-                x: chartRect.minX + chartRect.width * 0.6,
-                y: legendY,
-                color: itemColor,
-                theme: theme
-            )
-            legendY += 20
-            
-            startAngle += angle
-        }
-    }
-    
-    private func drawOvertimeChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Évolution des heures supplémentaires", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
-        
-        let months = getMonthlyOvertimeData(workDays: workDays)
-        let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
-        
-        if months.isEmpty {
-            drawNoDataMessage(rect: chartRect, theme: theme)
-            return
-        }
-        
-        // Trouver le min et max pour l'échelle
-        let values = months.map { $0.overtime }
-        let maxOvertime = max(values.max() ?? 0, 0)
-        let minOvertime = min(values.min() ?? 0, 0)
-        let range = max(maxOvertime - minOvertime, 5)
-        
-        // Configuration du graphique en courbe
-        let plotWidth = chartRect.width - 60
-        let plotHeight = chartRect.height - 40
-        let plotStartX = chartRect.minX + 40
-        let plotStartY = chartRect.minY + 10
-        let zeroY = plotStartY + plotHeight * (maxOvertime / range)
-        
-        // Dessiner l'axe Y
-        drawYAxisWithRange(rect: chartRect, minValue: minOvertime, maxValue: maxOvertime, steps: 5, title: "Heures supp.", theme: theme)
-        
-        // Ligne zéro
-        let zeroPath = UIBezierPath()
-        zeroPath.move(to: CGPoint(x: plotStartX, y: zeroY))
-        zeroPath.addLine(to: CGPoint(x: plotStartX + plotWidth, y: zeroY))
-        theme.textColor.withAlphaComponent(0.3).setStroke()
-        zeroPath.lineWidth = 0.5
-        zeroPath.stroke()
-        
-        // Dessiner la courbe
-        let path = UIBezierPath()
-        let pointSpacing = plotWidth / CGFloat(months.count - 1)
-        
-        for (index, month) in months.enumerated() {
-            let x = plotStartX + CGFloat(index) * pointSpacing
-            let normalizedValue = month.overtime / range
-            let y = zeroY - normalizedValue * plotHeight
-            
-            if index == 0 {
-                path.move(to: CGPoint(x: x, y: y))
-            } else {
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
-            
-            // Point sur la courbe
-            let pointColor = month.overtime >= 0 ? theme.accentColor : theme.negativeColor
-            pointColor.setFill()
-            let pointRect = CGRect(x: x - 3, y: y - 3, width: 6, height: 6)
-            UIBezierPath(ovalIn: pointRect).fill()
-            
-            // Étiquette du mois
-            let monthLabel = month.shortName
-            let labelAttributes: [NSAttributedString.Key: Any] = [
-                .font: theme.smallFont,
-                .foregroundColor: theme.textColor,
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .center
-                    return style
-                }()
-            ]
-            
-            monthLabel.draw(in: CGRect(x: x - 15, y: chartRect.maxY - 15, width: 30, height: 15), withAttributes: labelAttributes)
-            
-            // Valeur au-dessus/dessous du point
-            let valueAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 8, weight: .medium),
-                .foregroundColor: pointColor,
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .center
-                    return style
-                }()
-            ]
-            
-            let valueText = String(format: "%.1f", month.overtime)
-            let valueY = month.overtime >= 0 ? y - 15 : y + 5
-            valueText.draw(in: CGRect(x: x - 15, y: valueY, width: 30, height: 12), withAttributes: valueAttributes)
-        }
-        
-        // Tracer la courbe
-        theme.primaryColor.setStroke()
-        path.lineWidth = 2
-        path.stroke()
-    }
-    
-    // MARK: - Helper Drawing Methods
-    
-    private func drawGradientBackground(pageRect: CGRect, theme: PDFTheme) {
-        let context = UIGraphicsGetCurrentContext()!
-        let colors = [
-            theme.backgroundColor.cgColor,
-            theme.backgroundColor.withAlphaComponent(0.8).cgColor
-        ]
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let colorLocations: [CGFloat] = [0.0, 1.0]
-        
-        let gradient = CGGradient(
-            colorsSpace: colorSpace,
-            colors: colors as CFArray,
-            locations: colorLocations
-        )!
-        
-        let startPoint = CGPoint(x: 0, y: 0)
-        let endPoint = CGPoint(x: 0, y: pageRect.height)
-        
-        context.drawLinearGradient(
-            gradient,
-            start: startPoint,
-            end: endPoint,
-            options: []
-        )
-    }
-    
-    private func drawCenteredText(_ text: String, rect: CGRect, font: UIFont, color: UIColor) {
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .center
-        
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: color,
-            .paragraphStyle: paragraphStyle
-        ]
-        
-        text.draw(in: rect, withAttributes: attributes)
-    }
-    
-    private func drawStatsBox(rect: CGRect, title: String, value: String, icon: String, color: UIColor) {
-        // Arrière-plan du cadre
-        let path = UIBezierPath(roundedRect: rect, cornerRadius: 10)
-        UIColor.white.setFill()
-        path.fill()
-        
-        // Ombre
-        color.withAlphaComponent(0.1).setFill()
-        let shadowPath = UIBezierPath(roundedRect: rect, cornerRadius: 10)
-        shadowPath.fill()
-        
-        // Bordure
-        color.withAlphaComponent(0.3).setStroke()
-        path.lineWidth = 1
-        path.stroke()
-        
-        // Icône
-        let _: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 24),
-            .foregroundColor: color
-        ]
-        drawCenteredText(icon, rect: CGRect(x: rect.minX, y: rect.minY + 15, width: rect.width, height: 30), font: UIFont.systemFont(ofSize: 24), color: color)
-        
-        // Valeur
-        drawCenteredText(value, rect: CGRect(x: rect.minX, y: rect.minY + 45, width: rect.width, height: 30), font: UIFont.systemFont(ofSize: 20, weight: .bold), color: color)
-        
-        // Titre
-        drawCenteredText(title, rect: CGRect(x: rect.minX, y: rect.minY + 70, width: rect.width, height: 20), font: UIFont.systemFont(ofSize: 12), color: UIColor.gray)
-    }
-    
-    private func drawSectionTitle(_ title: String, rect: CGRect, theme: PDFTheme) {
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 14, weight: .semibold),
-            .foregroundColor: theme.primaryColor
-        ]
-        
-        title.draw(in: rect, withAttributes: attributes)
-        
-        // Ligne sous le titre
-        let lineRect = CGRect(x: rect.minX, y: rect.maxY - 5, width: rect.width, height: 1)
-        theme.primaryColor.withAlphaComponent(0.3).setFill()
-        UIBezierPath(rect: lineRect).fill()
-    }
-    
-    private func drawStatItem(_ label: String, value: String, x: CGFloat, y: CGFloat, color: UIColor? = nil, theme: PDFTheme) {
-        let labelAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 12),
-            .foregroundColor: theme.textColor
-        ]
-        
-        let valueAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-            .foregroundColor: color ?? theme.primaryColor
-        ]
-        
-        label.draw(at: CGPoint(x: x, y: y), withAttributes: labelAttributes)
-        value.draw(at: CGPoint(x: x + 140, y: y), withAttributes: valueAttributes)
-    }
-    
-    private func drawCellText(_ text: String, rect: CGRect, alignment: NSTextAlignment, font: UIFont, color: UIColor) {
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = alignment
-        
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: color,
-            .paragraphStyle: paragraphStyle
-        ]
-        
-        let insetRect = rect.insetBy(dx: 5, dy: 0)
-        text.draw(in: insetRect, withAttributes: attributes)
-    }
-    
-    private func drawSummaryItem(rect: CGRect, icon: String, title: String, value: String, valueColor: UIColor? = nil, theme: PDFTheme) {
-        // Icône
-        let configuration = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
-        if let image = UIImage(systemName: icon, withConfiguration: configuration) {
-            let iconRect = CGRect(x: rect.minX, y: rect.minY, width: 20, height: 20)
-            image.draw(in: iconRect, blendMode: .normal, alpha: 1.0)
-        }
-        
-        // Titre
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 10),
-            .foregroundColor: theme.textColor.withAlphaComponent(0.7)
-        ]
-        
-        title.draw(at: CGPoint(x: rect.minX + 25, y: rect.minY), withAttributes: titleAttributes)
-        
-        // Valeur
-        let valueAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 14, weight: .medium),
-            .foregroundColor: valueColor ?? theme.primaryColor
-        ]
-        
-        value.draw(at: CGPoint(x: rect.minX + 25, y: rect.minY + 15), withAttributes: valueAttributes)
-    }
-    
-    private func drawYAxis(rect: CGRect, maxValue: Double, steps: Int, title: String, theme: PDFTheme) {
-        let axisX = rect.minX + 40
-        let axisTop = rect.minY + 10
-        let axisBottom = rect.maxY - 20
-        let axisHeight = axisBottom - axisTop
-        
-        // Axe vertical
-        let axisPath = UIBezierPath()
-        axisPath.move(to: CGPoint(x: axisX, y: axisTop))
-        axisPath.addLine(to: CGPoint(x: axisX, y: axisBottom))
-        theme.textColor.withAlphaComponent(0.3).setStroke()
-        axisPath.lineWidth = 1
-        axisPath.stroke()
-        
-        // Titre de l'axe
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: theme.smallFont,
-            .foregroundColor: theme.textColor,
-            .paragraphStyle: {
-                let style = NSMutableParagraphStyle()
-                style.alignment = .center
-                return style
-            }()
-        ]
-        
-        title.draw(in: CGRect(x: 0, y: axisTop, width: axisX - 5, height: 20), withAttributes: titleAttributes)
-        
-        // Graduations
-        for i in 0...steps {
-            let value = maxValue * Double(i) / Double(steps)
-            let y = axisBottom - (CGFloat(i) / CGFloat(steps)) * axisHeight
-            
-            // Ligne de graduation
-            let tickPath = UIBezierPath()
-            tickPath.move(to: CGPoint(x: axisX - 5, y: y))
-            tickPath.addLine(to: CGPoint(x: axisX, y: y))
-            theme.textColor.withAlphaComponent(0.3).setStroke()
-            tickPath.lineWidth = 1
-            tickPath.stroke()
-            
-            // Valeur de graduation
-            let valueText = String(format: "%.0f", value)
-            let valueAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 8),
-                .foregroundColor: theme.textColor.withAlphaComponent(0.7),
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .right
-                    return style
-                }()
-            ]
-            
-            valueText.draw(in: CGRect(x: axisX - 35, y: y - 5, width: 30, height: 10), withAttributes: valueAttributes)
-            
-            // Ligne horizontale
-            if i > 0 {
-                let gridPath = UIBezierPath()
-                gridPath.move(to: CGPoint(x: axisX, y: y))
-                gridPath.addLine(to: CGPoint(x: rect.maxX, y: y))
-                theme.textColor.withAlphaComponent(0.1).setStroke()
-                gridPath.lineWidth = 0.5
-                gridPath.stroke()
-            }
-        }
-    }
-    
-    private func drawYAxisWithRange(rect: CGRect, minValue: Double, maxValue: Double, steps: Int, title: String, theme: PDFTheme) {
-        let range = maxValue - minValue
-        let axisX = rect.minX + 40
-        let axisTop = rect.minY + 10
-        let axisBottom = rect.maxY - 20
-        let axisHeight = axisBottom - axisTop
-        
-        // Axe vertical
-        let axisPath = UIBezierPath()
-        axisPath.move(to: CGPoint(x: axisX, y: axisTop))
-        axisPath.addLine(to: CGPoint(x: axisX, y: axisBottom))
-        theme.textColor.withAlphaComponent(0.3).setStroke()
-        axisPath.lineWidth = 1
-        axisPath.stroke()
-        
-        // Titre de l'axe
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: theme.smallFont,
-            .foregroundColor: theme.textColor,
-            .paragraphStyle: {
-                let style = NSMutableParagraphStyle()
-                style.alignment = .center
-                return style
-            }()
-        ]
-        
-        title.draw(in: CGRect(x: 0, y: axisTop, width: axisX - 5, height: 20), withAttributes: titleAttributes)
-        
-        // Position zéro
-        _ = axisTop + (axisHeight * (maxValue / range))
-        
-        // Graduations
-        for i in 0...steps {
-            let ratio = Double(i) / Double(steps)
-            let value = minValue + range * ratio
-            let y = axisTop + CGFloat(ratio) * axisHeight
-            
-            // Ligne de graduation
-            let tickPath = UIBezierPath()
-            tickPath.move(to: CGPoint(x: axisX - 5, y: y))
-            tickPath.addLine(to: CGPoint(x: axisX, y: y))
-            theme.textColor.withAlphaComponent(0.3).setStroke()
-            tickPath.lineWidth = 1
-            tickPath.stroke()
-            
-            // Valeur de graduation
-            let valueText = String(format: "%.1f", value)
-            let valueAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 8),
-                .foregroundColor: theme.textColor.withAlphaComponent(0.7),
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .right
-                    return style
-                }()
-            ]
-            
-            valueText.draw(in: CGRect(x: axisX - 35, y: y - 5, width: 30, height: 10), withAttributes: valueAttributes)
-            
-            // Ligne horizontale
-            let gridPath = UIBezierPath()
-            gridPath.move(to: CGPoint(x: axisX, y: y))
-            gridPath.addLine(to: CGPoint(x: rect.maxX, y: y))
-            theme.textColor.withAlphaComponent(0.1).setStroke()
-            gridPath.lineWidth = 0.5
-            gridPath.stroke()
-        }
-    }
-    
-    private func drawBarWithGradient(rect: CGRect, startColor: UIColor, endColor: UIColor) {
-        let context = UIGraphicsGetCurrentContext()!
-        let colors = [startColor.cgColor, endColor.cgColor]
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let colorLocations: [CGFloat] = [0.0, 1.0]
-        
-        let gradient = CGGradient(
-            colorsSpace: colorSpace,
-            colors: colors as CFArray,
-            locations: colorLocations
-        )!
-        
-        let startPoint = CGPoint(x: rect.midX, y: rect.minY)
-        let endPoint = CGPoint(x: rect.midX, y: rect.maxY)
-        
-        context.saveGState()
-        context.addRect(rect)
-        context.clip()
-        
-        context.drawLinearGradient(
-            gradient,
-            start: startPoint,
-            end: endPoint,
-            options: []
-        )
-        
-        context.restoreGState()
-    }
-    
-    private func drawLegendItem(text: String, x: CGFloat, y: CGFloat, color: UIColor, theme: PDFTheme) {
-        // Carré de couleur
-        let squareSize: CGFloat = 10
-        let squareRect = CGRect(x: x, y: y + 2, width: squareSize, height: squareSize)
-        color.setFill()
-        UIBezierPath(rect: squareRect).fill()
-        
-        // Texte de légende
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: theme.smallFont,
-            .foregroundColor: theme.textColor
-        ]
-        
-        text.draw(at: CGPoint(x: x + squareSize + 5, y: y), withAttributes: attributes)
-    }
-    
-    private func drawNoDataMessage(rect: CGRect, theme: PDFTheme) {
-        let messageAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-            .foregroundColor: theme.textColor.withAlphaComponent(0.5),
-            .paragraphStyle: {
-                let style = NSMutableParagraphStyle()
-                style.alignment = .center
-                return style
-            }()
-        ]
-        
-        let message = "Aucune donnée disponible pour cette période"
-        message.draw(in: CGRect(x: rect.minX, y: rect.midY - 10, width: rect.width, height: 20), withAttributes: messageAttributes)
-    }
-    
-    // MARK: - Data Processing
-    
-    private func getColorForWorkDayType(_ type: WorkDayType, theme: PDFTheme) -> UIColor {
-        switch type {
-        case .work:
-            return theme.primaryColor
-        case .vacation, .halfDayVacation:
-            return theme.secondaryColor
-        case .sickLeave:
-            return theme.negativeColor
-        case .compensatory:
-            return theme.accentColor
-        default:
-            return theme.textColor
-        }
-    }
-    
-    private func getColorForIndex(_ index: Int, _ count: Int, theme: PDFTheme) -> UIColor {
-        let colors: [UIColor] = [
-            theme.primaryColor,
-            theme.secondaryColor,
-            theme.accentColor,
-            theme.negativeColor,
-            theme.primaryColor.withAlphaComponent(0.7),
-            theme.secondaryColor.withAlphaComponent(0.7),
-            theme.accentColor.withAlphaComponent(0.7)
-        ]
-        
-        return colors[index % colors.count]
-    }
-    
-    private func calculateStats(_ workDays: [WorkDay], for date: Date = Date(), useDecimalHours: Bool = UserSettings.shared.useDecimalHours) -> PDFStats {
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: date)
-        
-        let yearWorkDays = workDays.filter { calendar.component(.year, from: $0.date) == year }
-        
-        let workDaysCount = yearWorkDays.filter { $0.type == .work }.count
-        let vacationDays = yearWorkDays.reduce(0.0) { total, day in
-            if day.type == .vacation {
-                return total + 1
-            } else if day.type == .halfDayVacation {
-                return total + 0.5
-            }
-            return total
-        }
-        let sickDays = yearWorkDays.filter { $0.type == .sickLeave }.count
-        
-        var totalHours: Double = 0
-        var totalOvertime: Int = 0
-        let totalBonus = yearWorkDays.reduce(0.0) { $0 + $1.bonusAmount }
-        
-        for day in yearWorkDays {
-            if day.type == .work {
-                totalHours += day.totalHours
-            }
-            totalOvertime += day.overtimeSeconds
-        }
-        
-        let averageDailyHours = workDaysCount > 0 ? totalHours / Double(workDaysCount) : 0
-        
-        // Calculer les statistiques complètes de vacances avec report
-        // Utiliser TOUS les workDays pour le calcul du report
-        let settings = UserSettings.shared
-        let entitlement = Double(settings.annualVacationDays)
-        let startYear = calendar.component(.year, from: settings.vacationStartDate)
-        let vacationStatsTuple = VacationCalculations.remainingStats(for: year, workDays: workDays, annualEntitlement: entitlement)
-        
-        // Pour l'année de début, les droits sont 0 (tout est dans le solde initial / carryIn)
-        let annualForDisplay = (year == startYear) ? 0 : entitlement
-        let vacationStats = (used: vacationStatsTuple.used, remaining: vacationStatsTuple.remaining, carryIn: vacationStatsTuple.carryIn, annual: annualForDisplay)
-        
-        return PDFStats(
-            workDays: workDaysCount,
-            vacationDays: vacationDays,
-            sickDays: sickDays,
-            totalHours: totalHours,
-            formattedTotalHours: formatHours(totalHours, useDecimal: useDecimalHours),
-            overtimeSeconds: totalOvertime,
-            formattedOvertimeHours: formatSeconds(totalOvertime, useDecimal: useDecimalHours),
-            totalBonus: totalBonus,
-            averageDailyHours: averageDailyHours,
-            vacationStats: vacationStats
-        )
-    }
-    
-    private func getMonthlyHoursData(workDays: [WorkDay]) -> [MonthData] {
-        let calendar = Calendar.current
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM"
-        
-        var monthlyHours: [Int: Double] = [:]
-        
-        for workDay in workDays where workDay.type == .work {
-            let month = calendar.component(.month, from: workDay.date)
-            monthlyHours[month, default: 0] += workDay.totalHours
-        }
-        
-        var result: [MonthData] = []
-        
-        for month in 1...12 {
-            let date = calendar.date(from: DateComponents(year: 2023, month: month, day: 1))!
-            result.append(MonthData(
-                month: month,
-                name: dateFormatter.string(from: date),
-                shortName: dateFormatter.string(from: date),
-                hours: monthlyHours[month, default: 0],
-                overtime: 0
-            ))
-        }
-        
-        return result
-    }
-    
-    private func getMonthlyOvertimeData(workDays: [WorkDay]) -> [MonthData] {
-        let calendar = Calendar.current
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM"
-        
-        var monthlyOvertime: [Int: Double] = [:]
-        
-        for workDay in workDays {
-            let month = calendar.component(.month, from: workDay.date)
-            monthlyOvertime[month, default: 0] += Double(workDay.overtimeSeconds) / 3600.0
-        }
-        
-        var result: [MonthData] = []
-        
-        for month in 1...12 {
-            let date = calendar.date(from: DateComponents(year: 2023, month: month, day: 1))!
-            result.append(MonthData(
-                month: month,
-                name: dateFormatter.string(from: date),
-                shortName: dateFormatter.string(from: date),
-                hours: 0,
-                overtime: monthlyOvertime[month, default: 0]
-            ))
-        }
-        
-        return result
-    }
-    
-    private func getWorkTypeDistribution(workDays: [WorkDay]) -> [TypeDistribution] {
-        var typeCount: [WorkDayType: Int] = [:]
-        
-        let activeWorkDays = workDays
-        
-        for workDay in activeWorkDays {
-            typeCount[workDay.type, default: 0] += 1
-        }
-        
-        let totalDays = activeWorkDays.count
-        
-        var result: [TypeDistribution] = []
-        
-        for (type, count) in typeCount where count > 0 {
-            result.append(TypeDistribution(
-                type: type,
-                name: type.localizedName,
-                count: count,
-                percentage: Double(count) / Double(totalDays)
-            ))
-        }
-        
-        return result.sorted { $0.count > $1.count }
-    }
-    
-    // MARK: - Formatting Utils
-    
-    private func formatMonth(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: date).capitalized
-    }
-    
-    private func monthName(month: Int) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.monthSymbols[month - 1].capitalized
-    }
-    
-    /// Formate des heures en utilisant le paramètre du thème
-    private func formatHours(_ hours: Double, useDecimal: Bool) -> String {
-        if useDecimal {
-            return String(format: "%.2f h", hours)
-        } else {
-            return WorkTimeCalculations.formattedTimeInterval(hours * 3600)
-        }
-    }
-    
-    /// Formate des secondes en utilisant le paramètre du thème
-    private func formatSeconds(_ seconds: Int, useDecimal: Bool) -> String {
-        if useDecimal {
-            let value = Double(seconds) / 3600.0
-            return String(format: "%.2f h", value)
-        } else {
-            return WorkTimeCalculations.formattedTimeInterval(Double(seconds))
-        }
-    }
-    
-    // MARK: - Supporting Structs
-    
-    private struct MonthData {
-        let month: Int
-        let name: String
-        let shortName: String
-        let hours: Double
-        let overtime: Double
-    }
-    
-    private struct TypeDistribution {
-        let type: WorkDayType
-        let name: String
-        let count: Int
-        let percentage: Double
     }
 }
