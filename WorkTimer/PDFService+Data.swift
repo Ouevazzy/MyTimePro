@@ -102,6 +102,7 @@ extension PDFService {
     func getMonthlyHoursData(workDays: [WorkDay]) -> [MonthData] {
         let calendar = Calendar.current
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = reportLocale
         dateFormatter.dateFormat = "MMM"
         
         var monthlyHours: [Int: Double] = [:]
@@ -130,6 +131,7 @@ extension PDFService {
     func getMonthlyOvertimeData(workDays: [WorkDay]) -> [MonthData] {
         let calendar = Calendar.current
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = reportLocale
         dateFormatter.dateFormat = "MMM"
         
         var monthlyOvertime: [Int: Double] = [:]
@@ -181,17 +183,27 @@ extension PDFService {
     }
     
     // MARK: - Formatting Utils
+
+    /// Langue du rapport : celle de l'app, pour que dates et textes concordent.
+    var reportLocale: Locale {
+        Locale(identifier: Bundle.main.preferredLocalizations.first ?? "fr")
+    }
+
+    /// « 1 jour » / « 3 jours » dans la langue de l'app.
+    func daysText(_ count: Int) -> String {
+        (count == 1 ? "pdf.days.one" : "pdf.days.other").localized(count)
+    }
     
     func formatMonth(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = reportLocale
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: date).capitalized
     }
     
     func monthName(month: Int) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = reportLocale
         return formatter.monthSymbols[month - 1].capitalized
     }
     

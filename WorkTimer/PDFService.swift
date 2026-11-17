@@ -58,8 +58,8 @@ class PDFService {
         let calendar = Calendar.current
         
         let title = annual ?
-            "Rapport Annuel \(calendar.component(.year, from: date))" :
-            "Rapport Mensuel \(formatMonth(date))"
+            "pdf.title.annual".localized(String(calendar.component(.year, from: date))) :
+            "pdf.title.monthly".localized(formatMonth(date))
         
         let pdfMetaData = [
             kCGPDFContextCreator: reportTheme.companyName,
@@ -81,7 +81,7 @@ class PDFService {
             // Page de titre et résumé
             context.beginPage()
             let stats = calculateStats(workDays, for: date, useDecimalHours: reportTheme.useDecimalHours)
-            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, theme: reportTheme)
+            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, totalPages: annual ? 13 : 2, theme: reportTheme)
             
             if annual {
                 let targetYear = calendar.component(.year, from: date)
@@ -127,7 +127,7 @@ class PDFService {
     
     // MARK: - Drawing Methods
     
-    func drawCoverPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, date: Date, stats: PDFStats, theme: PDFTheme) {
+    func drawCoverPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, date: Date, stats: PDFStats, totalPages: Int, theme: PDFTheme) {
         let margins = UIEdgeInsets(top: 50, left: 50, bottom: 60, right: 50)
         let contentRect = pageRect.inset(by: margins)
         
@@ -156,8 +156,9 @@ class PDFService {
         
         // Date du rapport
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = reportLocale
         dateFormatter.dateStyle = .long
-        drawCenteredText("Généré le \(dateFormatter.string(from: Date()))", rect: CGRect(x: 0, y: yPosition, width: pageRect.width, height: 20), font: theme.subtitleFont, color: theme.textColor.withAlphaComponent(0.7))
+        drawCenteredText("pdf.generatedOn".localized(dateFormatter.string(from: Date())), rect: CGRect(x: 0, y: yPosition, width: pageRect.width, height: 20), font: theme.subtitleFont, color: theme.textColor.withAlphaComponent(0.7))
         yPosition += 60
         
         // Statistiques clés dans des boîtes
@@ -167,7 +168,7 @@ class PDFService {
         // Jours travaillés
         drawStatsBox(
             rect: CGRect(x: contentRect.minX, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Jours travaillés",
+            title: "pdf.workedDays".localized,
             value: "\(stats.workDays)",
             icon: "📊",
             color: theme.primaryColor
@@ -176,7 +177,7 @@ class PDFService {
         // Heures totales
         drawStatsBox(
             rect: CGRect(x: contentRect.minX + boxSize.width + boxSpacing, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Heures totales",
+            title: "pdf.totalHours".localized,
             value: stats.formattedTotalHours,
             icon: "⏱",
             color: theme.primaryColor
@@ -185,7 +186,7 @@ class PDFService {
         // Bonus
         drawStatsBox(
             rect: CGRect(x: contentRect.minX + (boxSize.width + boxSpacing) * 2, y: yPosition, width: boxSize.width, height: boxSize.height),
-            title: "Bonus",
+            title: "pdf.bonus".localized,
             value: UserSettings.shared.formatCurrency(stats.totalBonus),
             icon: "💰",
             color: theme.secondaryColor
@@ -194,7 +195,7 @@ class PDFService {
         yPosition += boxSize.height + 30
         
         // Section des statistiques détaillées
-        drawSectionTitle("Résumé", rect: CGRect(x: contentRect.minX, y: yPosition, width: contentRect.width, height: 30), theme: theme)
+        drawSectionTitle("pdf.summary".localized, rect: CGRect(x: contentRect.minX, y: yPosition, width: contentRect.width, height: 30), theme: theme)
         yPosition += 40
         
         let columnWidth = contentRect.width / 2
@@ -202,37 +203,37 @@ class PDFService {
         
         // Colonne 1
         var itemY = yPosition
-        drawStatItem("Jours travaillés:", value: "\(stats.workDays) jours", x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.workedDays".localized, value: daysText(stats.workDays), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
         // Statistiques détaillées de vacances avec report
-        drawStatItem("Congés utilisés:", value: String(format: "%.1f jours", stats.vacationStats.used), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationUsed".localized, value: "pdf.days.decimal".localized(stats.vacationStats.used), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Droits annuels:", value: String(format: "%.1f jours", stats.vacationStats.annual), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationAnnual".localized, value: "pdf.days.decimal".localized(stats.vacationStats.annual), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Report:", value: String(format: "%.1f jours", stats.vacationStats.carryIn), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.carryIn".localized, value: "pdf.days.decimal".localized(stats.vacationStats.carryIn), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Solde restant:", value: String(format: "%.1f jours", stats.vacationStats.remaining), x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.vacationRemaining".localized, value: "pdf.days.decimal".localized(stats.vacationStats.remaining), x: contentRect.minX + 20, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Jours de maladie:", value: "\(stats.sickDays) jours", x: contentRect.minX + 20, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.sickDays".localized, value: daysText(stats.sickDays), x: contentRect.minX + 20, y: itemY, theme: theme)
         
         // Colonne 2
         itemY = yPosition
-        drawStatItem("Heures moyennes/jour:", value: String(format: "%.2f h", stats.averageDailyHours), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.averageDaily".localized, value: String(format: "%.2f h", stats.averageDailyHours), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Heures supplémentaires:", value: stats.formattedOvertimeHours, x: contentRect.minX + columnWidth, y: itemY,
+        drawStatItem("pdf.summary.overtime".localized, value: stats.formattedOvertimeHours, x: contentRect.minX + columnWidth, y: itemY,
             color: stats.overtimeSeconds >= 0 ? theme.accentColor : theme.negativeColor, theme: theme)
         itemY += lineHeight
         
-        drawStatItem("Total bonus:", value: UserSettings.shared.formatCurrency(stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
+        drawStatItem("pdf.summary.totalBonus".localized, value: UserSettings.shared.formatCurrency(stats.totalBonus), x: contentRect.minX + columnWidth, y: itemY, theme: theme)
         
         // Pied de page
-        drawFooter(pageRect: pageRect, pageNumber: 1, totalPages: title.contains("Annuel") ? 13 : 2, theme: theme)
+        drawFooter(pageRect: pageRect, pageNumber: 1, totalPages: totalPages, theme: theme)
     }
     
     func drawAnnualSummaryPage(pageRect: CGRect, workDays: [WorkDay], year: Int, theme: PDFTheme) {
@@ -240,7 +241,7 @@ class PDFService {
         let contentRect = pageRect.inset(by: margins)
         
         // Titre de la page
-        drawSectionTitle("Synthèse Graphique - \(year)", rect: CGRect(x: contentRect.minX, y: contentRect.minY, width: contentRect.width, height: 30), theme: theme)
+        drawSectionTitle("pdf.chartsSummary".localized(year), rect: CGRect(x: contentRect.minX, y: contentRect.minY, width: contentRect.width, height: 30), theme: theme)
         
         var yPosition = contentRect.minY + 40
         
@@ -328,7 +329,7 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + padding, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: "briefcase.fill",
-            title: "Jours travaillés",
+            title: "pdf.workedDays".localized,
             value: "\(stats.workDays)",
             theme: theme
         )
@@ -337,7 +338,7 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + columnWidth + padding * 2, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: "clock.fill",
-            title: "Heures totales",
+            title: "pdf.totalHours".localized,
             value: stats.formattedTotalHours,
             theme: theme
         )
@@ -347,7 +348,7 @@ class PDFService {
         drawSummaryItem(
             rect: CGRect(x: rect.minX + columnWidth * 2 + padding * 3, y: rect.minY + padding, width: columnWidth, height: rect.height - padding * 2),
             icon: stats.overtimeSeconds >= 0 ? "plus.circle.fill" : "minus.circle.fill",
-            title: "Heures supp.",
+            title: "pdf.overtimeShort".localized,
             value: stats.formattedOvertimeHours,
             valueColor: overtimeColor,
             theme: theme
@@ -355,7 +356,8 @@ class PDFService {
     }
     
     func drawDetailedTable(workDays: [WorkDay], startY: CGFloat, contentRect: CGRect, context: UIGraphicsPDFRendererContext, theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
-        let headers = ["Date", "Type", "Début", "Fin", "Pause", "Total", "Supp.", "Bonus", "Note"]
+        let headers = ["pdf.table.date", "pdf.table.type", "pdf.table.start", "pdf.table.end", "pdf.table.break",
+                       "pdf.table.total", "pdf.table.overtime", "pdf.table.bonus", "pdf.table.note"].map(\.localized)
         let columnWidths: [CGFloat] = [0.15, 0.15, 0.1, 0.1, 0.1, 0.12, 0.12, 0.08, 0.08]
         
         let tableWidth = contentRect.width
@@ -395,7 +397,7 @@ class PDFService {
                 
                 // Nouvelle page
                 context.beginPage()
-                drawPageHeader(title: "Suite du tableau", pageRect: context.pdfContextBounds, theme: theme)
+                drawPageHeader(title: "pdf.table.continued".localized, pageRect: context.pdfContextBounds, theme: theme)
                 
                 // Réinitialiser yPosition
                 yPosition = startY
@@ -522,7 +524,7 @@ class PDFService {
         let boldFont = UIFont.systemFont(ofSize: 11, weight: .bold)
         
         // Texte "TOTAL"
-        drawCellText("TOTAL", rect: CGRect(x: rect.minX, y: rect.minY, width: tableWidth * 0.5, height: rect.height), alignment: .right, font: boldFont, color: theme.primaryColor)
+        drawCellText("pdf.table.totalRow".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: tableWidth * 0.5, height: rect.height), alignment: .right, font: boldFont, color: theme.primaryColor)
         
         // Total heures
         let totalHoursX = rect.minX + tableWidth * (columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4])
@@ -557,7 +559,9 @@ class PDFService {
         
         // Date de génération
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm"
+        dateFormatter.locale = reportLocale
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
         let generationDate = dateFormatter.string(from: Date())
         
         let attributes: [NSAttributedString.Key: Any] = [
@@ -565,11 +569,11 @@ class PDFService {
             .foregroundColor: theme.textColor.withAlphaComponent(0.6)
         ]
         
-        let generatedText = "Généré le \(generationDate)"
+        let generatedText = "pdf.generatedOn".localized(generationDate)
         generatedText.draw(at: CGPoint(x: 50, y: footerRect.minY + 10), withAttributes: attributes)
         
         // Numéro de page
-        let pageText = "Page \(pageNumber) sur \(totalPages)"
+        let pageText = "pdf.pageOf".localized(pageNumber, totalPages)
         let pageTextSize = pageText.size(withAttributes: attributes)
         pageText.draw(at: CGPoint(x: pageRect.width - 50 - pageTextSize.width, y: footerRect.minY + 10), withAttributes: attributes)
     }

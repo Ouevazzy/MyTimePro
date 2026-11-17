@@ -11,7 +11,7 @@ extension PDFService {
     // MARK: - Drawing Charts
     
     func drawMonthlyHoursChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Heures travaillées par mois", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
+        drawSectionTitle("pdf.chart.monthlyHours".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
         
         let months = getMonthlyHoursData(workDays: workDays)
         let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
@@ -32,7 +32,7 @@ extension PDFService {
         let chartStartX = chartRect.minX + (chartRect.width - chartWidth) / 2
         
         // Dessiner l'axe Y
-        drawYAxis(rect: chartRect, maxValue: roundedMax, steps: 5, title: "Heures", theme: theme)
+        drawYAxis(rect: chartRect, maxValue: roundedMax, steps: 5, title: "pdf.chart.hours".localized, theme: theme)
         
         // Dessiner chaque barre
         for (index, month) in months.enumerated() {
@@ -76,7 +76,7 @@ extension PDFService {
     }
     
     func drawWorkTypeDistributionChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Répartition par type d'activité", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
+        drawSectionTitle("pdf.chart.typeDistribution".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
         
         let distribution = getWorkTypeDistribution(workDays: workDays)
         let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
@@ -111,7 +111,7 @@ extension PDFService {
             
             // Légendee
             drawLegendItem(
-                text: "\(item.name): \(item.count) jour\(item.count > 1 ? "s" : "") (\(Int(item.percentage * 100))%)",
+                text: "\(item.name): \(daysText(item.count)) (\(Int(item.percentage * 100))%)",
                 x: chartRect.minX + chartRect.width * 0.6,
                 y: legendY,
                 color: itemColor,
@@ -124,7 +124,7 @@ extension PDFService {
     }
     
     func drawOvertimeChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("Évolution des heures supplémentaires", rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
+        drawSectionTitle("pdf.chart.overtimeTrend".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
         
         let months = getMonthlyOvertimeData(workDays: workDays)
         let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
@@ -148,7 +148,7 @@ extension PDFService {
         let zeroY = plotStartY + plotHeight * (maxOvertime / range)
         
         // Dessiner l'axe Y
-        drawYAxisWithRange(rect: chartRect, minValue: minOvertime, maxValue: maxOvertime, steps: 5, title: "Heures supp.", theme: theme)
+        drawYAxisWithRange(rect: chartRect, minValue: minOvertime, maxValue: maxOvertime, steps: 5, title: "pdf.overtimeShort".localized, theme: theme)
         
         // Ligne zéro
         let zeroPath = UIBezierPath()

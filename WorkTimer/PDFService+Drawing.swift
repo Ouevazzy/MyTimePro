@@ -338,7 +338,7 @@ extension PDFService {
             }()
         ]
         
-        let message = "Aucune donnée disponible pour cette période"
+        let message = "pdf.noData".localized
         message.draw(in: CGRect(x: rect.minX, y: rect.midY - 10, width: rect.width, height: 20), withAttributes: messageAttributes)
     }
 }
