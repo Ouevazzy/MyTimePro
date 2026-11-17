@@ -333,12 +333,10 @@ final class WorkTimerUITests: XCTestCase {
     // MARK: - Performance Tests
     
     func testLaunchPerformance() throws {
-        if #available(iOS 13.0, *) {
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                let measuredApp = XCUIApplication()
-                measuredApp.launchArguments = ["UI_TESTING", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
-                measuredApp.launch()
-            }
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            let measuredApp = XCUIApplication()
+            measuredApp.launchArguments = ["UI_TESTING", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
+            measuredApp.launch()
         }
     }
     

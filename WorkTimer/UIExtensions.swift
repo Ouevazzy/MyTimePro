@@ -44,33 +44,6 @@ struct Haptic {
     }
 }
 
-// MARK: - Animated Button
-struct AnimatedButton<Content: View>: View {
-    let action: () -> Void
-    let content: () -> Content
-    @State private var isPressed = false
-    
-    init(action: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
-        self.action = action
-        self.content = content
-    }
-    
-    var body: some View {
-        content()
-            .scaleEffect(isPressed ? 0.95 : 1.0)
-            .opacity(isPressed ? 0.9 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPressed)
-            .onTapGesture {
-                isPressed = true
-                Task {
-                    try? await Task.sleep(for: .milliseconds(100))
-                    isPressed = false
-                    action()
-                }
-            }
-    }
-}
-
 // MARK: - Pressable Button Style
 struct PressableButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {

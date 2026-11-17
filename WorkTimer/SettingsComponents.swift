@@ -6,11 +6,6 @@ enum SettingsSection {
     case workTime, display, features, privacy, export, about, reset, subscription
 }
 
-enum AppTheme: String, CaseIterable, Identifiable {
-    case system, light, dark
-    var id: String { self.rawValue }
-}
-
 enum ExportType: Identifiable {
     case monthly, annual
     var id: Int {

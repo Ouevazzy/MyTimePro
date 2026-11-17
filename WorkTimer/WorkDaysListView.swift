@@ -915,36 +915,6 @@ struct MonthlyStatsHeader: View {
     }
 }
 
-struct StatItem: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    @Environment(\.colorScheme) var colorScheme
-    
-    var body: some View {
-        VStack(spacing: 6) {
-            // Icône style Apple Settings
-            Image(systemName: icon)
-                .font(.system(size: DS.Font.iconSmall, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: DS.IconSize.inline, height: DS.IconSize.inline)
-                .background(color, in: RoundedRectangle(cornerRadius: DS.IconRadius.inline))
-
-            Text(value)
-                .font(.system(.subheadline, design: .rounded))
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
-            
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 4)
-    }
-}
-
 struct TypeFilterButton: View {
     let type: WorkDayType?
     @Binding var selectedType: WorkDayType?

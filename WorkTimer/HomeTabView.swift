@@ -464,48 +464,6 @@ struct CardView<Content: View>: View {
     }
 }
 
-// MARK: - Shared Components
-
-struct StatsComponent: View {
-    let title: String
-    let value: String
-    let valueColor: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(DS.Colors.secondaryText)
-            Text(value)
-                .font(.system(.title3, design: .rounded))
-                .foregroundStyle(valueColor)
-                .fontWeight(.medium)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title): \(value)")
-    }
-}
-
-struct VacationStatsComponent: View {
-    let title: String
-    let value: Double
-    let valueColor: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(DS.Colors.secondaryText)
-            Text(String(format: "%.1f %@", value, "time.days.short".localized))
-                .font(.system(.title3, design: .rounded))
-                .foregroundStyle(valueColor)
-                .fontWeight(.medium)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(String(format: "accessibility.days".localized, title, String(format: "%.1f", value)))
-    }
-}
-
 // MARK: - Preview
 #Preview {
     NavigationStack {
