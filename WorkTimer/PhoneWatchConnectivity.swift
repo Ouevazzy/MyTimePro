@@ -92,24 +92,30 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
         guard let command = message[WatchKeys.command] as? String else { return }
         Task { @MainActor in
             guard let context = modelContext else { return }
-            switch command {
-            case "start":
-                let at = (message[WatchKeys.start] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
-                if !TimerManager.shared.isActive { TimerManager.shared.start(at: at) }
-            case "pause":
-                TimerManager.shared.pause()
-            case "resume":
-                TimerManager.shared.resume()
-            case "stop":
-                let at = (message[WatchKeys.end] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
-                TimerManager.shared.stopAndSave(in: context, at: at)
-            case "createDay":
-                applyCreateDay(message, in: context)
-            default:
-                break
-            }
+            apply(command, message: message, in: context)
             SiriSummaryCacheService().refresh(using: context)
             pushSummary()
+        }
+    }
+
+    /// Applique une commande de la montre. Séparé du transport pour être testé.
+    @MainActor
+    func apply(_ command: String, message: [String: Any], in context: ModelContext) {
+        switch command {
+        case "start":
+            let at = (message[WatchKeys.start] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
+            if !TimerManager.shared.isActive { TimerManager.shared.start(at: at) }
+        case "pause":
+            TimerManager.shared.pause()
+        case "resume":
+            TimerManager.shared.resume()
+        case "stop":
+            let at = (message[WatchKeys.end] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
+            TimerManager.shared.stopAndSave(in: context, at: at)
+        case "createDay":
+            applyCreateDay(message, in: context)
+        default:
+            break
         }
     }
 

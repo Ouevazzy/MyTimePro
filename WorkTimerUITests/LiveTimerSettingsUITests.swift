@@ -22,6 +22,9 @@ final class LiveTimerSettingsUITests: XCTestCase {
     }
 
     func testShowTimerToggleHidesHomeCard() throws {
+        // Le réglage est conservé entre deux lancements : on part d'un état connu.
+        setShowTimer(true)
+        app.tabBars.buttons["Accueil"].tap()
         let clockIn = app.buttons["timer.clockIn"]
         XCTAssertTrue(clockIn.waitForExistence(timeout: 8), "La carte chrono doit être visible au départ")
 
