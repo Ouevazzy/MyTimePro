@@ -110,6 +110,9 @@ struct PaywallView: View {
             PaywallFeatureRow(icon: "star.fill", color: .yellow,
                               title: "swissHolidays.title".localized,
                               subtitle: "paywall.feature.holidays.subtitle".localized)
+            PaywallFeatureRow(icon: "checklist", color: .orange,
+                              title: "entryCheck.title".localized,
+                              subtitle: "paywall.feature.entryCheck.subtitle".localized)
             PaywallFeatureRow(icon: "mic.fill", color: .purple,
                               title: "paywall.feature.siri.title".localized,
                               subtitle: "paywall.feature.siri.subtitle".localized)

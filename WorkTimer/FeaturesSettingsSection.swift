@@ -10,6 +10,7 @@ struct FeaturesSettingsSection: View {
     @State private var showCharts = false
     @State private var showSiriSettings = false
     @State private var showSwissHolidays = false
+    @State private var showEntryCheck = false
     @State private var showPaywall = false
 
     var body: some View {
@@ -47,6 +48,14 @@ struct FeaturesSettingsSection: View {
                     if store.isPro { showSwissHolidays = true } else { showPaywall = true }
                 }
                 FeatureButton(
+                    title: "entryCheck.title".localized,
+                    subtitle: "entryCheck.subtitle".localized,
+                    icon: "checklist", color: .orange,
+                    isPro: !store.isPro
+                ) {
+                    if store.isPro { showEntryCheck = true } else { showPaywall = true }
+                }
+                FeatureButton(
                     title: "settings.siri".localized,
                     subtitle: "settings.siri.subtitle".localized,
                     icon: "mic.fill", color: .purple,
@@ -70,6 +79,9 @@ struct FeaturesSettingsSection: View {
         }
         .sheet(isPresented: $showSwissHolidays) {
             NavigationStack { SwissHolidaysView() }
+        }
+        .sheet(isPresented: $showEntryCheck) {
+            NavigationStack { EntryCheckView() }
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()

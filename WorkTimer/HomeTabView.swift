@@ -21,6 +21,9 @@ struct HomeTabView: View {
     @State private var selectedMonth: Int
     @State private var selectedWeek: Date
     @State private var animateCards = false
+    @AppStorage("entryCheck.showOnHome") private var showEntryCheck = true
+    @State private var entryCheckCount = 0
+    @State private var showEntryCheckSheet = false
 
     // Stats en cache — calculées via FetchDescriptor, jamais itérées dans body
     @State private var yearlyStats: (totalHours: Double, overtimeSeconds: Int) = (0, 0)
@@ -51,6 +54,10 @@ struct HomeTabView: View {
                 ) {
                     LiveTimerCard()
                         .cardAppear(index: 0, animate: animateCards, reduceMotion: reduceMotion)
+                }
+
+                if showEntryCheck && entryCheckCount > 0 {
+                    EntryCheckCard(count: entryCheckCount) { showEntryCheckSheet = true }
                 }
 
                 heroCard
@@ -107,6 +114,9 @@ struct HomeTabView: View {
         .refreshable {
             updateCurrentPeriod()
             loadStats()
+        }
+        .sheet(isPresented: $showEntryCheckSheet, onDismiss: loadStats) {
+            NavigationStack { EntryCheckView() }
         }
         .overlay(alignment: .topLeading) {
             Color.clear
@@ -203,6 +213,17 @@ struct HomeTabView: View {
         }
 
         updateVacationStats()
+        updateEntryCheck()
+    }
+
+    private func updateEntryCheck() {
+        guard StoreManager.shared.isPro, showEntryCheck else {
+            entryCheckCount = 0
+            return
+        }
+        let ignored = EntryCheck.ignored()
+        let issues = (try? EntryCheck.load(in: modelContext, region: settings.activeHolidayRegion)) ?? []
+        entryCheckCount = issues.filter { !ignored.contains($0.id) }.count
     }
 
     private func fetchWorkDays(from startDate: Date, to endDate: Date) -> [WorkDay] {

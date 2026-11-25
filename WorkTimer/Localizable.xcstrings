@@ -7333,6 +7333,450 @@
         }
       }
     },
+    "entryCheck.disclaimer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette liste est une aide : elle ne garantit pas le respect de la loi. L'enregistrement du temps de travail incombe à l'employeur. Une pause peut compter comme travail si vous ne pouvez pas quitter votre place."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This list is an aid: it does not guarantee legal compliance. Recording working time is the employer's duty. A break may count as work if you cannot leave your workplace."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
+          }
+        }
+      }
+    },
+    "entryCheck.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à vérifier"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to check"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts zu prüfen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts zu prüfen"
+          }
+        }
+      }
+    },
+    "entryCheck.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez un jour pour le compléter, balayez-le pour l'ignorer. Les %lld derniers jours sont examinés, sauf aujourd'hui, les absences, les jours non travaillés et les jours fériés du canton choisi."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a day to complete it, swipe to ignore it. The last %lld days are checked, except today, absences, days off, and the holidays of the selected canton."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen Sie auf einen Tag, um ihn zu ergänzen, wischen Sie, um ihn zu ignorieren. Geprüft werden die letzten %lld Tage, außer heute, Abwesenheiten, arbeitsfreie Tage und Feiertage des gewählten Kantons."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen Sie auf einen Tag, um ihn zu ergänzen, wischen Sie, um ihn zu ignorieren. Geprüft werden die letzten %lld Tage, ausser heute, Absenzen, arbeitsfreie Tage und Feiertage des gewählten Kantons."
+          }
+        }
+      }
+    },
+    "entryCheck.home" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld jour à vérifier"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld jours à vérifier"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day to check"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days to check"
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tag zu prüfen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tage zu prüfen"
+                }
+              }
+            }
+          }
+        },
+        "de-CH" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tag zu prüfen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tage zu prüfen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "entryCheck.ignore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignore"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorieren"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorieren"
+          }
+        }
+      }
+    },
+    "entryCheck.missingDay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune saisie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No entry"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Eintrag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Eintrag"
+          }
+        }
+      }
+    },
+    "entryCheck.missingEnd" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure de début ou de fin manquante"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start or end time missing"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginn oder Ende fehlt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginn oder Ende fehlt"
+          }
+        }
+      }
+    },
+    "entryCheck.restoreIgnored" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Réafficher %lld jour ignoré"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Réafficher %lld jours ignorés"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Show %lld ignored day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Show %lld ignored days"
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierten Tag anzeigen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierte Tage anzeigen"
+                }
+              }
+            }
+          }
+        },
+        "de-CH" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierten Tag anzeigen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierte Tage anzeigen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "entryCheck.shortBreak" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause de %lld min, minimum %lld min (art. 15 LTr)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min break, minimum %lld min (Labour Act, art. 15)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
+          }
+        }
+      }
+    },
+    "entryCheck.showOnHome" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel sur l'accueil"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder on Home"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinweis auf der Übersicht"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinweis auf der Übersicht"
+          }
+        }
+      }
+    },
+    "entryCheck.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours, fins et pauses à compléter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days, end times, and breaks to complete"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tage, Endzeiten und Pausen ergänzen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tage, Endzeiten und Pausen ergänzen"
+          }
+        }
+      }
+    },
+    "entryCheck.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contrôle de saisie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entry Check"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfassungskontrolle"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfassungskontrolle"
+          }
+        }
+      }
+    },
     "error.cloudKit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10954,6 +11398,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Graphiques avancés"
+          }
+        }
+      }
+    },
+    "paywall.feature.entryCheck.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repérez les jours, fins et pauses oubliés"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spot missing days, end times, and breaks"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergessene Tage, Endzeiten und Pausen finden"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergessene Tage, Endzeiten und Pausen finden"
           }
         }
       }
