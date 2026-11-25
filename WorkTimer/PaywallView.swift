@@ -104,6 +104,9 @@ struct PaywallView: View {
             PaywallFeatureRow(icon: "chart.bar.fill", color: .blue,
                               title: "paywall.feature.charts.title".localized,
                               subtitle: "paywall.feature.charts.subtitle".localized)
+            PaywallFeatureRow(icon: "star.fill", color: .yellow,
+                              title: "swissHolidays.title".localized,
+                              subtitle: "paywall.feature.holidays.subtitle".localized)
             PaywallFeatureRow(icon: "mic.fill", color: .purple,
                               title: "paywall.feature.siri.title".localized,
                               subtitle: "paywall.feature.siri.subtitle".localized)

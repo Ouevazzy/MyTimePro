@@ -154,7 +154,7 @@ struct CalendarView: View {
         .dsScreenBackground(.purple)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if calendarViewMode == .month {
-                CalendarSelectionPreview(date: selectedDate, entries: findWorkDays(for: selectedDate))
+                selectionPreview
                     .padding(.horizontal)
                     .padding(.vertical, DS.Spacing.sm)
                     .background(Color(.systemGroupedBackground))
@@ -242,6 +242,9 @@ struct CalendarView: View {
                 // Chercher un WorkDay pour la date sélectionnée
                 selectedWorkDay = findWorkDay(for: normalizedDate)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .swissHolidaysAdded)) { _ in
+                calendarDataRevision += 1
+            }
             .onChange(of: focusedDate) { _, _ in
                 applyFocusedDateIfNeeded()
             }
@@ -256,6 +259,34 @@ struct CalendarView: View {
     }
 
     // MARK: - Composants d'interface
+
+    private var selectedHoliday: SwissHolidayDay? {
+        UserSettings.shared.activeHolidayRegion.flatMap {
+            SwissHolidayCalendar.holiday(on: selectedDate, region: $0)
+        }
+    }
+
+    private var selectionPreview: some View {
+        let entries = findWorkDays(for: selectedDate)
+        let holiday = selectedHoliday
+        let importer = SwissHolidayImporter(context: modelContext)
+        let addable = holiday.flatMap { entries.isEmpty && importer.canAdd($0) ? $0 : nil }
+        return CalendarSelectionPreview(
+            date: selectedDate,
+            entries: entries,
+            holiday: holiday,
+            onAddHoliday: addable.map { day in
+                {
+                    do {
+                        try importer.add([day])
+                        Haptic.notification(.success)
+                    } catch {
+                        ErrorManager.shared.handle(error, context: "SwissHolidayAdd")
+                    }
+                }
+            }
+        )
+    }
 
     private var calendarTopBar: some View {
         HStack(spacing: DS.Spacing.sm) {
@@ -474,6 +505,7 @@ struct CalendarView: View {
                         showWeekNumbers: showWeekNumbers,
                         eventDisplayMode: eventDisplayMode,
                         workDaysVersion: workDaysVersion,
+                        holidayRegion: UserSettings.shared.activeHolidayRegion,
                         calendar: calendar,
                         findWorkDays: findWorkDays(for:),
                         onSelect: { date, workDay in
@@ -600,10 +632,17 @@ struct CalendarView: View {
 
                 Spacer()
 
-                Text(formatDate(selectedDate))
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(formatDate(selectedDate))
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    if let selectedHoliday {
+                        Label(selectedHoliday.title, systemImage: "star")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             .padding(.horizontal)
             .padding(.vertical, DS.Spacing.sm)

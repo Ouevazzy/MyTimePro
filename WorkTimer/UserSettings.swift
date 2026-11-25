@@ -21,6 +21,7 @@ final class UserSettings {
         static let useDecimalHours = "useDecimalHours"
         static let hourlyRate = "hourlyRate"
         static let showLiveTimer = "showLiveTimer"
+        static let holidayRegionID = "holidayRegionID"
         static let hasLaunchedBefore = "hasLaunchedBefore"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
         
@@ -174,6 +175,13 @@ final class UserSettings {
         }
     }
     
+    /// Région des jours fériés suisses (`SwissHolidayRegion.rawValue`), vide si aucune.
+    var holidayRegionID: String {
+        didSet {
+            iCloudStore?.set(holidayRegionID, forKey: Keys.holidayRegionID)
+        }
+    }
+
     // MARK: - État de l'application
     var hasCompletedOnboarding: Bool {
         didSet {
@@ -244,6 +252,7 @@ final class UserSettings {
         self.useDecimalHours     = false
         self.hourlyRate          = 0.0
         self.showLiveTimer       = true
+        self.holidayRegionID     = ""
         self.hasCompletedOnboarding = false
 
         // Charger les valeurs sauvegardées d'iCloud
@@ -310,6 +319,7 @@ final class UserSettings {
         if iCloudStore.object(forKey: Keys.showLiveTimer) != nil {
             self.showLiveTimer = iCloudStore.bool(forKey: Keys.showLiveTimer)
         }
+        self.holidayRegionID = iCloudStore.string(forKey: Keys.holidayRegionID) ?? ""
         self.hasCompletedOnboarding = iCloudStore.bool(forKey: Keys.hasCompletedOnboarding)
     }
     
@@ -423,6 +433,7 @@ final class UserSettings {
         useDecimalHours = false
         hourlyRate = 0.0
         showLiveTimer = true
+        holidayRegionID = ""
         hasCompletedOnboarding = false
         lastStartTime = defaultStartTime
         lastEndTime = defaultEndTime

@@ -125,6 +125,7 @@ struct MonthSectionView: View, Equatable {
     let eventDisplayMode: CalendarEventDisplayMode
     /// Incrémenté à chaque nouveau fetch : force le re-rendu quand les données changent.
     let workDaysVersion: Int
+    let holidayRegion: SwissHolidayRegion?
     let calendar: Calendar
     let findWorkDays: (Date) -> [WorkDay]
     let onSelect: (Date, WorkDay?) -> Void
@@ -140,14 +141,25 @@ struct MonthSectionView: View, Equatable {
         lhs.today == rhs.today &&
         lhs.showWeekNumbers == rhs.showWeekNumbers &&
         lhs.eventDisplayMode == rhs.eventDisplayMode &&
-        lhs.workDaysVersion == rhs.workDaysVersion
+        lhs.workDaysVersion == rhs.workDaysVersion &&
+        lhs.holidayRegion == rhs.holidayRegion
     }
 
     private var isCurrentMonth: Bool {
         calendar.isDate(month, equalTo: today, toGranularity: .month)
     }
 
+    /// Jours fériés du mois, calculés une fois par rendu de section.
+    private var monthHolidays: [SwissHolidayDay] {
+        guard let holidayRegion else { return [] }
+        let year = SwissHolidayCalendar.gregorian.component(.year, from: month)
+        return holidayRegion.holidays(in: year).filter {
+            calendar.isDate($0.date, equalTo: month, toGranularity: .month)
+        }
+    }
+
     var body: some View {
+        let holidays = monthHolidays
         VStack(alignment: .leading, spacing: DS.Spacing.xs) {
             // Le mois courant est teinté, façon Calendrier Apple.
             Text(title)
@@ -175,7 +187,7 @@ struct MonthSectionView: View, Equatable {
 
                         ForEach(slots[weekStart..<min(weekStart + 7, slots.count)]) { slot in
                             if let date = slot.date {
-                                dayCell(for: date)
+                                dayCell(for: date, holiday: holidays.first { calendar.isDate($0.date, inSameDayAs: date) })
                             } else {
                                 // Cellule vide
                                 Color.clear
@@ -189,7 +201,7 @@ struct MonthSectionView: View, Equatable {
         .padding(.horizontal)
     }
 
-    private func dayCell(for date: Date) -> some View {
+    private func dayCell(for date: Date, holiday: SwissHolidayDay?) -> some View {
         let workDays = findWorkDays(date)
         let workDay = workDays.first
         let isSelected = selectedDate.map { calendar.isDate(date, inSameDayAs: $0) } ?? false
@@ -204,7 +216,8 @@ struct MonthSectionView: View, Equatable {
                 isSelected: isSelected,
                 isToday: isToday,
                 isWeekend: calendar.isDateInWeekend(date),
-                eventDisplayMode: eventDisplayMode
+                eventDisplayMode: eventDisplayMode,
+                isHoliday: holiday != nil
             )
         }
         .buttonStyle(.plain)
@@ -232,7 +245,7 @@ struct MonthSectionView: View, Equatable {
         }
         .accessibilityIdentifier("calendar-day-\(CalendarGridLayout.dateIdentity(for: date, calendar: calendar))")
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel(for: date, workDays: workDays, isToday: isToday))
+        .accessibilityLabel(accessibilityLabel(for: date, workDays: workDays, isToday: isToday, holiday: holiday))
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction {
             onSelect(date, workDay)
@@ -252,11 +265,15 @@ struct MonthSectionView: View, Equatable {
         return String(calendar.component(.weekOfYear, from: date))
     }
 
-    private func accessibilityLabel(for date: Date, workDays: [WorkDay], isToday: Bool) -> String {
+    private func accessibilityLabel(for date: Date, workDays: [WorkDay], isToday: Bool, holiday: SwissHolidayDay?) -> String {
         var parts = [date.formatted(.dateTime.weekday(.wide).day().month(.wide).year())]
 
         if isToday {
             parts.append("calendar.today".localized)
+        }
+
+        if let holiday {
+            parts.append(holiday.title)
         }
 
         if !workDays.isEmpty {

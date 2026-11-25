@@ -44,6 +44,8 @@ struct ImprovedCalendarCell: View {
     let isToday: Bool
     var isWeekend: Bool = false
     var eventDisplayMode: CalendarEventDisplayMode = .compact
+    /// Jour férié du canton, pas encore saisi.
+    var isHoliday: Bool = false
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -127,6 +129,13 @@ struct ImprovedCalendarCell: View {
                     }
                     .padding(.horizontal, 1)
                 }
+            } else if isHoliday {
+                // Étoile vide : férié non saisi (pleine une fois la journée ajoutée).
+                Image(systemName: "star")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(DS.Colors.secondaryText)
+                    .frame(height: eventDisplayMode == .compact ? 14 : 17)
+                    .accessibilityHidden(true)
             } else {
                 Color.clear
                     .frame(height: eventDisplayMode == .compact ? 14 : 17)

@@ -4,6 +4,9 @@ import SwiftUI
 struct CalendarSelectionPreview: View {
     let date: Date
     let entries: [WorkDay]
+    var holiday: SwissHolidayDay? = nil
+    /// Ajoute le jour férié ; nil si l'ajout n'a pas lieu d'être.
+    var onAddHoliday: (() -> Void)? = nil
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var totalHours: Double {
@@ -35,6 +38,22 @@ struct CalendarSelectionPreview: View {
                     dateLabel
                     Spacer(minLength: DS.Spacing.sm)
                     entryCount
+                }
+            }
+
+            if let holiday {
+                HStack {
+                    Label(holiday.title, systemImage: "star")
+                        .font(.caption.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("calendar.preview.holiday")
+                    if let onAddHoliday {
+                        Spacer(minLength: DS.Spacing.sm)
+                        Button("swissHolidays.add".localized, action: onAddHoliday)
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .accessibilityIdentifier("calendar.preview.addHoliday")
+                    }
                 }
             }
 

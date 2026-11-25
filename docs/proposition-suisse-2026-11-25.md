@@ -1,6 +1,6 @@
 # Vendre WorkTimer en Suisse : état des lieux et propositions (25.11.2026)
 
-Rien de la partie « Propositions » n'est codé.
+La proposition 1 (jours fériés par canton) est codée. Les propositions 2 et 3 ne le sont pas.
 
 ## État des lieux
 
