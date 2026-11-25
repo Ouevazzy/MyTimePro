@@ -320,6 +320,35 @@
         }
       }
     },
+    "watch.days.short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f j"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f d"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f T"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f T"
+          }
+        }
+      }
+    },
     "watch.daytype.comp" : {
       "extractionState" : "manual",
       "localizations" : {

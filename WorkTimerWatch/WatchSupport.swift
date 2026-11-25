@@ -73,6 +73,6 @@ enum WatchFormat {
     }
 
     static func days(_ value: Double) -> String {
-        String(format: "%.1f j", value)
+        String(format: "watch.days.short".loc, value)
     }
 }
