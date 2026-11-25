@@ -7,6 +7,7 @@ struct ExportSettingsSection: View {
     @Binding var exportFormat: ExportFormat
     @Binding var userCompany: String
     @State private var showPaywall = false
+    @State private var showTimesheet = false
 
     var body: some View {
         SettingsCard(
@@ -21,12 +22,16 @@ struct ExportSettingsSection: View {
             VStack(spacing: DS.Spacing.xl) {
                 formatPicker
                 exportButtons
+                timesheetButton
                 customizationRow
             }
             .padding()
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
+        }
+        .sheet(isPresented: $showTimesheet) {
+            NavigationStack { TimesheetExportView(format: $exportFormat) }
         }
     }
 
@@ -56,6 +61,17 @@ struct ExportSettingsSection: View {
                 subtitle: "settings.export.annual.subtitle".localized,
                 action: { if store.isPro { exportType = .annual } else { showPaywall = true } }
             )
+        }
+    }
+
+    private var timesheetButton: some View {
+        FeatureButton(
+            title: "timesheet.title".localized,
+            subtitle: "timesheet.subtitle".localized,
+            icon: "signature", color: .green,
+            isPro: !store.isPro
+        ) {
+            if store.isPro { showTimesheet = true } else { showPaywall = true }
         }
     }
 

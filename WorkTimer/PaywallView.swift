@@ -101,6 +101,9 @@ struct PaywallView: View {
             PaywallFeatureRow(icon: "doc.fill", color: .green,
                               title: "paywall.feature.export.title".localized,
                               subtitle: "paywall.feature.export.subtitle".localized)
+            PaywallFeatureRow(icon: "signature", color: .green,
+                              title: "timesheet.title".localized,
+                              subtitle: "paywall.feature.timesheet.subtitle".localized)
             PaywallFeatureRow(icon: "chart.bar.fill", color: .blue,
                               title: "paywall.feature.charts.title".localized,
                               subtitle: "paywall.feature.charts.subtitle".localized)

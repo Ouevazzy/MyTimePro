@@ -1,6 +1,6 @@
 # Vendre WorkTimer en Suisse : état des lieux et propositions (25.11.2026)
 
-La proposition 1 (jours fériés par canton) est codée. Les propositions 2 et 3 ne le sont pas.
+Les propositions 1 (jours fériés par canton) et 2 (feuille d'heures) sont codées. La 3 ne l'est pas.
 
 ## État des lieux
 
@@ -16,4 +16,4 @@ La proposition 1 (jours fériés par canton) est codée. Les propositions 2 et 3
 2. **Feuille d'heures pour l'employeur.** PDF et CSV par semaine ou par mois : début, fin, pauses, total par jour et par semaine, absences, heures supplémentaires, lignes de signature.
 3. **Contrôle de saisie.** Rappel des jours travaillés sans saisie, des fins de journée et des pauses manquantes, avec ouverture directe du jour à compléter. L'obligation légale incombe à l'employeur, l'app ne doit pas laisser croire l'inverse ni promettre une conformité.
 
-Sources : kmu.admin.ch (saisie du temps de travail), seco.admin.ch (enregistrement de la durée du travail, annexe des jours fériés). Le texte de l'art. 73 OLT 1 reste à relire sur Fedlex avant de coder.
+Sources : kmu.admin.ch (saisie du temps de travail), seco.admin.ch (enregistrement de la durée du travail, annexe des jours fériés). Art. 73, 73a et 73b OLT 1 relus sur Fedlex (RS 822.111) le 25.11.2026. Limite connue : l'art. 73 al. 1 let. e demande l'horaire des pauses d'une demi-heure ou plus, l'app n'enregistre que leur durée.

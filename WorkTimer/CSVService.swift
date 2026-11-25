@@ -71,7 +71,7 @@ class CSVService {
     
     // MARK: - Helpers
     
-    private func csv(_ rows: [[String]]) -> String {
+    func csv(_ rows: [[String]]) -> String {
         rows.map(csvLine).joined(separator: "\n") + "\n"
     }
 
