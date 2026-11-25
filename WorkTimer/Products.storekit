@@ -21,6 +21,16 @@
           "description" : "Accès à vie à toutes les fonctionnalités Pro de WorkTimer",
           "displayName" : "WorkTimer Pro À vie",
           "locale" : "fr_FR"
+        },
+        {
+          "description" : "Lifetime access to all WorkTimer Pro features",
+          "displayName" : "WorkTimer Pro Lifetime",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Lebenslanger Zugriff auf alle Pro-Funktionen von WorkTimer",
+          "displayName" : "WorkTimer Pro Lebenslang",
+          "locale" : "de"
         }
       ],
       "productID" : "com.worktimer.pro.lifetime",
@@ -36,7 +46,7 @@
     "_developerTeamID" : "U4M6G8S4VP",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 800297690.93242097,
+    "_lastSynchronizedDate" : 800297690.932421,
     "_locale" : "fr_FR",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "FRA",
@@ -61,6 +71,16 @@
               "description" : "Accès à toutes les fonctionnalités Pro de WorkTimer",
               "displayName" : "WorkTimer Pro Mensuel",
               "locale" : "fr_FR"
+            },
+            {
+              "description" : "Access to all WorkTimer Pro features",
+              "displayName" : "WorkTimer Pro Monthly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Zugriff auf alle Pro-Funktionen von WorkTimer",
+              "displayName" : "WorkTimer Pro Monatlich",
+              "locale" : "de"
             }
           ],
           "productID" : "com.worktimer.pro.subscription.monthly",
@@ -81,6 +101,16 @@
               "description" : "Accès à toutes les fonctionnalités Pro de WorkTimer",
               "displayName" : "WorkTimer Pro Annuel",
               "locale" : "fr_FR"
+            },
+            {
+              "description" : "Access to all WorkTimer Pro features",
+              "displayName" : "WorkTimer Pro Annual",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Zugriff auf alle Pro-Funktionen von WorkTimer",
+              "displayName" : "WorkTimer Pro Jährlich",
+              "locale" : "de"
             }
           ],
           "productID" : "com.worktimer.pro.annual",

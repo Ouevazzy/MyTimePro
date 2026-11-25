@@ -1,0 +1,64 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "NSSiriUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer verwendet Siri, damit Sie Ihre Arbeitszeiten erfassen und Statistiken per Sprache abrufen können."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer verwendet Siri, damit Sie Ihre Arbeitszeiten erfassen und Statistiken per Sprache abrufen können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer uses Siri to let you record your hours and check your statistics by voice."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer utilise Siri pour vous permettre de pointer vos heures et de consulter vos statistiques par la voix."
+          }
+        }
+      }
+    },
+    "NSUserNotificationsUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer sendet Erinnerungen, damit Sie Ihre Arbeitszeiten erfassen."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer sendet Erinnerungen, damit Sie Ihre Arbeitszeiten erfassen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer sends reminders to record your working hours."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WorkTimer vous envoie des rappels pour enregistrer vos heures de travail."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

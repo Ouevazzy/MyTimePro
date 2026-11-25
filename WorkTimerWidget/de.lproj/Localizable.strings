@@ -1,7 +1,0 @@
-"widget.displayName" = "WorkTimer";
-"widget.description" = "Wochenstunden, Überstunden und verbleibender Urlaub.";
-"widget.thisWeek" = "Diese Woche";
-"widget.overtime" = "Überstunden";
-"widget.vacationRemaining" = "Resturlaub";
-
-"widget.openApp" = "WorkTimer öffnen";

@@ -200,9 +200,7 @@ struct WorkDaysListView: View {
                 performBatchDelete()
             }
         } message: {
-            let count = selectedWorkDays.count
-            let plural = count > 1 ? "delete.confirm.days".localized : "delete.confirm.day".localized
-            Text("delete.confirm.message".localized(count, plural))
+            Text("delete.confirm.message".localized(selectedWorkDays.count))
         }
         .sheet(isPresented: $showingFilters) {
             NavigationStack {

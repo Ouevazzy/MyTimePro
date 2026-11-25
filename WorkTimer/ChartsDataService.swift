@@ -86,7 +86,7 @@ enum ChartsDataService {
             return WeeklyHoursData(
                 id: key,
                 weekNumber: week,
-                weekLabel: "S\(week)",
+                weekLabel: "calendar.week.short".localized(week),
                 totalHours: data.hours,
                 overtime: Double(data.overtime) / 3600.0,
                 standardHours: standardWeeklyHours

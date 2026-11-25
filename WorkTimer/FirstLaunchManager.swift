@@ -36,10 +36,10 @@ struct FirstLaunchInfoView: View {
     @Environment(\.colorScheme) var colorScheme
     
     private let features: [(icon: String, title: String, description: String, colors: [Color])] = [
-        ("clock.badge.checkmark", "Suivi du temps", "Enregistrez facilement vos heures de travail, pauses et heures supplémentaires", [.blue, .cyan]),
-        ("calendar.badge.clock", "Gestion des congés", "Suivez vos congés, RTT et absences en un coup d'œil", [.orange, .yellow]),
-        ("icloud.fill", "Synchronisation iCloud", "Vos données sont synchronisées et sécurisées sur tous vos appareils", [.purple, .pink]),
-        ("chart.bar.fill", "Statistiques détaillées", "Analysez vos heures avec des graphiques et rapports exportables", [.green, .mint])
+        ("clock.badge.checkmark", "firstLaunch.time.title".localized, "firstLaunch.time.text".localized, [.blue, .cyan]),
+        ("calendar.badge.clock", "firstLaunch.leave.title".localized, "firstLaunch.leave.text".localized, [.orange, .yellow]),
+        ("icloud.fill", "firstLaunch.icloud.title".localized, "firstLaunch.icloud.text".localized, [.purple, .pink]),
+        ("chart.bar.fill", "firstLaunch.stats.title".localized, "firstLaunch.stats.text".localized, [.green, .mint])
     ]
     
     var body: some View {
@@ -61,7 +61,7 @@ struct FirstLaunchInfoView: View {
                 // Header
                 HStack {
                     Spacer()
-                    Button("Passer") {
+                    Button("firstLaunch.skip".localized) {
                         isPresented = false
                     }
                     .foregroundStyle(.secondary)
@@ -103,7 +103,7 @@ struct FirstLaunchInfoView: View {
                     }
                 }) {
                     HStack(spacing: 8) {
-                        Text(currentPage < features.count - 1 ? "Suivant" : "Commencer")
+                        Text(currentPage < features.count - 1 ? "firstLaunch.next".localized : "firstLaunch.start".localized)
                             .fontWeight(.semibold)
                         
                         Image(systemName: currentPage < features.count - 1 ? "arrow.right" : "checkmark")

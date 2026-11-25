@@ -153,7 +153,7 @@ struct WorkTimeSettingsSection: View {
                         }))
                             .labelsHidden()
                             .tint(index < 5 ? .blue : .orange)
-                            .accessibilityLabel("Travailler le \(weekDays[index])")
+                            .accessibilityLabel("settings.workTime.accessibility.workOn".localized(weekDays[index]))
                     }
                     .padding(.vertical, 6).padding(.horizontal, 10)
                     .background(RoundedRectangle(cornerRadius: 10)
@@ -241,7 +241,7 @@ struct WorkTimeSettingsSection: View {
                         ))
                         .labelsHidden()
                         .tint(index < 5 ? .blue : .orange)
-                        .accessibilityLabel("Travailler le \(weekDays[index])")
+                        .accessibilityLabel("settings.workTime.accessibility.workOn".localized(weekDays[index]))
                     }
                     .padding(.vertical, 6).padding(.horizontal, 10)
                     .background(RoundedRectangle(cornerRadius: 10)

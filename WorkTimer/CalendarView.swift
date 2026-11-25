@@ -594,7 +594,7 @@ struct CalendarView: View {
             Divider()
 
             HStack(alignment: .firstTextBaseline) {
-                Text("S\(calendar.component(.weekOfYear, from: selectedDate))")
+                Text("calendar.week.short".localized(calendar.component(.weekOfYear, from: selectedDate)))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 

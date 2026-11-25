@@ -498,7 +498,7 @@ struct SettingsView: View {
             SiriSummaryCacheService().refresh(using: modelContext)
         } catch {
             modelContext.rollback()
-            ErrorManager.shared.handleDataError("Erreur suppression: \(error.localizedDescription)")
+            ErrorManager.shared.handleDataError("error.deletion".localized(error.localizedDescription))
         }
     }
 
@@ -509,8 +509,8 @@ struct SettingsView: View {
 
     private func sendSupportEmail() {
         let version = Bundle.main.appVersionString
-        let subject = "Support WorkTimer"
-        let body = "Bonjour,\n\nDécrivez votre problème ici.\n\nVersion: \(version)\n"
+        let subject = "settings.support.mail.subject".localized
+        let body = "settings.support.mail.body".localized(version)
         let enc = CharacterSet.urlQueryAllowed
         guard let url = URL(string: "mailto:timeflowpro@gmail.com?subject=\(subject.addingPercentEncoding(withAllowedCharacters: enc) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: enc) ?? "")") else { return }
         openURL(url)

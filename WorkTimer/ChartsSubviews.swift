@@ -71,7 +71,7 @@ struct WeeklyChartView: View {
                     .accessibilityValue(WorkTimeCalculations.formattedHoursRounded(item.totalHours))
 
                     // Ligne de référence pour les heures standard
-                    RuleMark(y: .value("Standard", item.standardHours))
+                    RuleMark(y: .value("settings.workTime.weeklyHours".localized, item.standardHours))
                         .foregroundStyle(.orange.opacity(0.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
                         .accessibilityHidden(true)
@@ -187,7 +187,7 @@ struct DailyChartView: View {
                         x: .value("charts.axis.day".localized, item.date, unit: .day),
                         y: .value("charts.axis.hours".localized, animate ? item.hours : 0)
                     )
-                    .foregroundStyle(by: .value("Type", item.type.displayName))
+                    .foregroundStyle(by: .value("workDay.type".localized, item.type.displayName))
                     .cornerRadius(2)
                     .accessibilityLabel(item.date.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                     .accessibilityValue("\(item.type.displayName), \(WorkTimeCalculations.formattedHoursRounded(item.hours))")
@@ -256,7 +256,7 @@ struct DistributionChartView: View {
                         innerRadius: .ratio(0.5),
                         angularInset: 2
                     )
-                    .foregroundStyle(by: .value("Type", item.type.displayName))
+                    .foregroundStyle(by: .value("workDay.type".localized, item.type.displayName))
                     .cornerRadius(4)
                     .accessibilityLabel(item.type.displayName)
                     .accessibilityValue("\(item.count)")

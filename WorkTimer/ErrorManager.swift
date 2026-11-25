@@ -13,34 +13,34 @@ enum AppError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .networkError(let message):
-            return "Erreur réseau : \(message)"
+            return "error.network".localized(message)
         case .dataError(let message):
-            return "Erreur de données : \(message)"
+            return "error.data".localized(message)
         case .cloudKitError(let message):
-            return "Erreur iCloud : \(message)"
+            return "error.cloudKit".localized(message)
         case .validationError(let message):
-            return "Erreur de validation : \(message)"
+            return "error.validation".localized(message)
         case .exportError(let message):
-            return "Erreur d'export : \(message)"
+            return "error.export".localized(message)
         case .unknown(let error):
-            return "Erreur : \(error.localizedDescription)"
+            return "error.unknown".localized(error.localizedDescription)
         }
     }
     
     var recoverySuggestion: String? {
         switch self {
         case .networkError:
-            return "Vérifiez votre connexion internet et réessayez."
+            return "error.suggestion.network".localized
         case .dataError:
-            return "Essayez de redémarrer l'application."
+            return "error.suggestion.data".localized
         case .cloudKitError:
-            return "Vérifiez votre connexion iCloud dans les Réglages."
+            return "error.suggestion.cloudKit".localized
         case .validationError:
-            return "Vérifiez les informations saisies."
+            return "error.suggestion.validation".localized
         case .exportError:
-            return "Vérifiez l'espace disponible et réessayez."
+            return "error.suggestion.export".localized
         case .unknown:
-            return "Si le problème persiste, contactez le support."
+            return "error.suggestion.unknown".localized
         }
     }
     
@@ -209,7 +209,7 @@ struct ErrorToast: View {
                 .foregroundStyle(error.color)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(error.errorDescription ?? "Erreur")
+                Text(error.errorDescription ?? "error.title".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                 

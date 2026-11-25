@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Raccourci de localisation pour l'app montre (clés dans WorkTimerWatch/*.lproj).
+/// Raccourci de localisation pour l'app montre (clés dans WorkTimerWatch/Localizable.xcstrings).
 extension String {
     var loc: String { NSLocalizedString(self, comment: "") }
 }

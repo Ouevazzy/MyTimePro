@@ -518,7 +518,7 @@ struct AddEditWorkDayView: View {
         let previousType = workDay.type
 
         guard draft.makeValidatedWorkDay() != nil else {
-            ErrorManager.shared.handleValidationError("Les données saisies ne sont pas valides")
+            ErrorManager.shared.handleValidationError("error.invalidData".localized)
             return
         }
 

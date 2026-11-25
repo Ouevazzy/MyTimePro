@@ -115,7 +115,7 @@ struct ChartsView: View {
     private var headerSection: some View {
         VStack(spacing: 12) {
             // Sélecteur de type de graphique
-            Picker("Type", selection: $selectedChartType) {
+            Picker("charts.type.label".localized, selection: $selectedChartType) {
                 ForEach(ChartType.allCases, id: \.self) { type in
                     Text(type.title).tag(type)
                 }
