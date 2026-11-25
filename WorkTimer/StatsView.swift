@@ -75,8 +75,8 @@ struct StatsView: View {
                                 formattedVacation: formatVacationWithHours(monthStat.vacationDays),
                                 formattedSickDays: formatWholeDays(monthStat.sickDays),
                                 formattedBonus: settings.formatCurrency(monthStat.totalBonus),
-                                formattedEarnings: settings.isHourlyRateEnabled
-                                    ? settings.formatCurrency(monthStat.totalHours * settings.hourlyRate + monthStat.totalBonus)
+                                formattedEarnings: (settings.isHourlyRateEnabled || monthStat.grossEarnings > monthStat.totalBonus)
+                                    ? settings.formatCurrency(monthStat.grossEarnings)
                                     : nil,
                                 overtimeSeconds: monthStat.overtimeSeconds
                             )
@@ -138,12 +138,12 @@ struct StatsView: View {
                 StatSummaryRow(icon: "cross", title: "stats.sickDays".localized, value: formatWholeDays(yearlyStats.sickDays))
                 Divider()
                 StatSummaryRow(icon: "banknote", title: "stats.bonus".localized, value: settings.formatCurrency(yearlyStats.totalBonus))
-                if settings.isHourlyRateEnabled {
+                if settings.isHourlyRateEnabled || yearlyStats.grossEarnings > yearlyStats.totalBonus {
                     Divider()
                     StatSummaryRow(
                         icon: "banknote",
                         title: "stats.earnings".localized,
-                        value: settings.formatCurrency(yearlyStats.totalHours * settings.hourlyRate + yearlyStats.totalBonus)
+                        value: settings.formatCurrency(yearlyStats.grossEarnings)
                     )
                 }
             }

@@ -215,7 +215,7 @@
 "sync.status.failed" = "Failed: %@";
 "sync.action" = "Sync";
 "sync.details" = "Details";
-"sync.lastSync" = "Last Sync:";
+"sync.lastSync" = "iCloud account checked";
 "sync.restore.title" = "Restore from iCloud?";
 "sync.restore.message" = "This action will download all available data from iCloud. Existing data will be merged with iCloud data.";
 
@@ -285,7 +285,7 @@
 "charts.weeklyHours" = "Hours per Week";
 "charts.monthlyHours" = "Hours per Month";
 "charts.last30Days" = "Last 30 Days";
-"charts.distribution" = "Day Distribution";
+"charts.distribution" = "Entry distribution";
 "charts.noData" = "No Data";
 "charts.noDataHelp" = "Add work days to display this chart";
 "charts.summary" = "Summary %d";
@@ -303,12 +303,12 @@
 "charts.accessibility.weekly" = "Weekly hours chart, %d weeks shown";
 "charts.accessibility.monthly" = "Monthly hours chart for %d";
 "charts.accessibility.daily" = "Last 30 days chart, %d days shown";
-"charts.accessibility.distribution" = "Work day type distribution chart";
+"charts.accessibility.distribution" = "Entry distribution";
 
 // MARK: - Sync Details
 "sync.title" = "Sync";
 "sync.section.detailed" = "Detailed Status";
-"sync.lastSync.label" = "Last Sync";
+"sync.lastSync.label" = "iCloud account checked";
 "sync.lastSync.never" = "Never";
 "sync.error.label" = "Error";
 "sync.error.network" = "Network connection issue";
@@ -334,7 +334,7 @@
 // MARK: - Cloud Status
 "cloud.icloud.label" = "iCloud";
 "cloud.icloud.title" = "iCloud Sync";
-"cloud.lastSync.label" = "Last Sync:";
+"cloud.lastSync.label" = "iCloud account checked";
 "cloud.sync.button" = "Sync";
 "cloud.details.button" = "Details";
 "cloud.section.status" = "Status";
@@ -831,3 +831,8 @@
 "cloud.msg.freeSpace" = "Free up space in iCloud";
 "cloud.msg.offlineResume" = "Offline – iCloud will resume automatically";
 "cloud.msg.noNetwork" = "No network connection available";
+
+"settings.contract.effective" = "Changes effective from";
+
+"workdays.readError" = "Could not load entries.";
+"paywall.restore.none" = "No active purchase was found for this account.";

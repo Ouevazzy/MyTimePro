@@ -4,10 +4,10 @@ import SwiftUI
 final class UserSettings {
     
     // MARK: - Singleton
-    static let shared = UserSettings()
+    static let shared = UserSettings(store: .default)
     
     // MARK: - iCloud Store
-    private let iCloudStore = NSUbiquitousKeyValueStore.default
+    private let iCloudStore: NSUbiquitousKeyValueStore?
     
     // MARK: - Enum pour les clés
     private enum Keys {
@@ -33,10 +33,52 @@ final class UserSettings {
         static let initialVacationDays = "initialVacationDays"
     }
     
+    private struct PreviousContract: Codable {
+        let endDay: Int // Exclusive local calendar date, YYYYMMDD.
+        let hours: [Double]
+        let rate: Double
+    }
+
+    private var previousContracts: [PreviousContract] = []
+    private static let historyKey = "workContractHistory.v1"
+
+    private func dayKey(_ date: Date, calendar: Calendar = .current) -> Int {
+        let c = calendar.dateComponents([.year, .month, .day], from: date)
+        return (c.year ?? 0) * 10000 + (c.month ?? 0) * 100 + (c.day ?? 0)
+    }
+
+    var latestContractStart: Date {
+        guard let key = previousContracts.last?.endDay else { return .distantPast }
+        return Calendar.current.date(from: DateComponents(year: key / 10000, month: key / 100 % 100, day: key % 100)) ?? .distantPast
+    }
+
+    func editContract(effective date: Date, _ edit: () -> Void) {
+        let key = dayKey(date)
+        guard key >= (previousContracts.last?.endDay ?? 0) else { return }
+        func hours() -> [Double] {
+            (0..<7).map { Self.expectedHours(weekdayIndex: $0, useCustom: useCustomDailyHours,
+                dailyHours: dailyHoursByWeekday, workingDays: workingDays, standardDailyHours: standardDailyHours) }
+        }
+        let previous = PreviousContract(endDay: key, hours: hours(), rate: hourlyRate)
+        edit()
+        guard previous.hours != hours() || previous.rate != hourlyRate else { return }
+        if previousContracts.last?.endDay != key {
+            previousContracts.append(previous)
+            if let data = try? JSONEncoder().encode(previousContracts) {
+                iCloudStore?.set(data, forKey: Self.historyKey)
+            }
+        }
+    }
+
+    func hourlyRate(for date: Date) -> Double {
+        let key = dayKey(date)
+        return previousContracts.first { key < $0.endDay }?.rate ?? hourlyRate
+    }
+
     // MARK: - Paramètres de temps de travail
     var weeklyHours: Double {
         didSet {
-            iCloudStore.set(weeklyHours, forKey: Keys.weeklyHours)
+            iCloudStore?.set(weeklyHours, forKey: Keys.weeklyHours)
             updateDailyHours()
         }
     }
@@ -46,7 +88,7 @@ final class UserSettings {
             guard workingDays != oldValue else { return }
             do {
                 let encoded = try JSONEncoder().encode(workingDays)
-                iCloudStore.set(encoded, forKey: Keys.workingDays)
+                iCloudStore?.set(encoded, forKey: Keys.workingDays)
             } catch {
                 AppLogger.error("Failed to encode workingDays", category: AppLogger.general, error: error)
             }
@@ -56,7 +98,7 @@ final class UserSettings {
     
     var standardDailyHours: Double {
         didSet {
-            iCloudStore.set(standardDailyHours, forKey: Keys.standardDailyHours)
+            iCloudStore?.set(standardDailyHours, forKey: Keys.standardDailyHours)
         }
     }
 
@@ -71,7 +113,7 @@ final class UserSettings {
             }
             guard dailyHoursByWeekday != oldValue else { return }
             if let encoded = try? JSONEncoder().encode(dailyHoursByWeekday) {
-                iCloudStore.set(encoded, forKey: Keys.dailyHoursByWeekday)
+                iCloudStore?.set(encoded, forKey: Keys.dailyHoursByWeekday)
             }
             if useCustomDailyHours { syncDerivedFromDailyHours() }
         }
@@ -81,7 +123,7 @@ final class UserSettings {
     var useCustomDailyHours: Bool {
         didSet {
             guard useCustomDailyHours != oldValue else { return }
-            iCloudStore.set(useCustomDailyHours, forKey: Keys.useCustomDailyHours)
+            iCloudStore?.set(useCustomDailyHours, forKey: Keys.useCustomDailyHours)
             if useCustomDailyHours {
                 syncDerivedFromDailyHours()
             } else {
@@ -92,27 +134,27 @@ final class UserSettings {
     
     var annualVacationDays: Int {
         didSet {
-            iCloudStore.set(annualVacationDays, forKey: Keys.annualVacationDays)
+            iCloudStore?.set(annualVacationDays, forKey: Keys.annualVacationDays)
         }
     }
     
     // MARK: - Paramètres de gestion des vacances
     var vacationStartDate: Date {
         didSet {
-            iCloudStore.set(vacationStartDate.timeIntervalSince1970, forKey: Keys.vacationStartDate)
+            iCloudStore?.set(vacationStartDate.timeIntervalSince1970, forKey: Keys.vacationStartDate)
         }
     }
     
     var initialVacationDays: Double {
         didSet {
-            iCloudStore.set(initialVacationDays, forKey: Keys.initialVacationDays)
+            iCloudStore?.set(initialVacationDays, forKey: Keys.initialVacationDays)
         }
     }
     
     // MARK: - Préférences d'affichage
     var useDecimalHours: Bool {
         didSet {
-            iCloudStore.set(useDecimalHours, forKey: Keys.useDecimalHours)
+            iCloudStore?.set(useDecimalHours, forKey: Keys.useDecimalHours)
         }
     }
 
@@ -120,7 +162,7 @@ final class UserSettings {
     /// Taux horaire brut. 0 = désactivé (aucun calcul de rémunération affiché).
     var hourlyRate: Double {
         didSet {
-            iCloudStore.set(hourlyRate, forKey: Keys.hourlyRate)
+            iCloudStore?.set(hourlyRate, forKey: Keys.hourlyRate)
         }
     }
 
@@ -128,46 +170,46 @@ final class UserSettings {
     /// s'il saisit uniquement ses heures à la main.
     var showLiveTimer: Bool {
         didSet {
-            iCloudStore.set(showLiveTimer, forKey: Keys.showLiveTimer)
+            iCloudStore?.set(showLiveTimer, forKey: Keys.showLiveTimer)
         }
     }
     
     // MARK: - État de l'application
     var hasCompletedOnboarding: Bool {
         didSet {
-            iCloudStore.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding)
+            iCloudStore?.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding)
         }
     }
     
     // MARK: - Dernières heures utilisées
     var lastStartTime: Date {
         get {
-            let timeInterval = iCloudStore.double(forKey: Keys.lastStartTimeInterval)
+            let timeInterval = iCloudStore?.double(forKey: Keys.lastStartTimeInterval) ?? 0
             return timeInterval == 0 ? defaultStartTime : Date(timeIntervalSince1970: timeInterval)
         }
         set {
-            iCloudStore.set(newValue.timeIntervalSince1970, forKey: Keys.lastStartTimeInterval)
+            iCloudStore?.set(newValue.timeIntervalSince1970, forKey: Keys.lastStartTimeInterval)
         }
     }
     
     var lastEndTime: Date {
         get {
-            let timeInterval = iCloudStore.double(forKey: Keys.lastEndTimeInterval)
+            let timeInterval = iCloudStore?.double(forKey: Keys.lastEndTimeInterval) ?? 0
             return timeInterval == 0 ? defaultEndTime : Date(timeIntervalSince1970: timeInterval)
         }
         set {
-            iCloudStore.set(newValue.timeIntervalSince1970, forKey: Keys.lastEndTimeInterval)
+            iCloudStore?.set(newValue.timeIntervalSince1970, forKey: Keys.lastEndTimeInterval)
         }
     }
 
     /// Dernière durée de pause utilisée (en secondes). Par défaut 3600 (1h).
     var lastBreakDuration: TimeInterval {
         get {
-            let value = iCloudStore.double(forKey: Keys.lastBreakDuration)
+            let value = iCloudStore?.double(forKey: Keys.lastBreakDuration) ?? 0
             return value > 0 ? value : 3600
         }
         set {
-            iCloudStore.set(newValue, forKey: Keys.lastBreakDuration)
+            iCloudStore?.set(newValue, forKey: Keys.lastBreakDuration)
         }
     }
     
@@ -189,7 +231,8 @@ final class UserSettings {
     }
     
     // MARK: - Initialisation privée (Singleton)
-    private init() {
+    init(store: NSUbiquitousKeyValueStore?) {
+        self.iCloudStore = store
         self.weeklyHours         = defaultWeeklyHours
         self.workingDays         = defaultWorkingDays
         self.standardDailyHours  = defaultDailyHours
@@ -210,6 +253,7 @@ final class UserSettings {
         updateDailyHours()
         
         // Observer les changements iCloud depuis d'autres appareils
+        guard let iCloudStore else { return }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(iCloudStoreDidChangeExternally(_:)),
@@ -222,28 +266,27 @@ final class UserSettings {
     
     // MARK: - Méthodes privées
     private func loadFromiCloud() {
-        if iCloudStore.object(forKey: Keys.weeklyHours) != nil {
-            self.weeklyHours = iCloudStore.double(forKey: Keys.weeklyHours)
+        guard let iCloudStore else { return }
+        previousContracts = iCloudStore.data(forKey: Self.historyKey)
+            .flatMap { try? JSONDecoder().decode([PreviousContract].self, from: $0) } ?? []
+        // Setters also maintain derived values. Capture all inputs before any
+        // setter can overwrite the custom weekday hours during startup.
+        let stored = iCloudStore.dictionaryRepresentation
+        let savedWeek = (stored[Keys.dailyHoursByWeekday] as? Data).flatMap {
+            try? JSONDecoder().decode([Double].self, from: $0)
         }
-        
-        if let data = iCloudStore.data(forKey: Keys.workingDays),
-           let decoded = try? JSONDecoder().decode([Bool].self, from: data) {
-            self.workingDays = decoded
+        if let value = stored[Keys.weeklyHours] as? Double { weeklyHours = value }
+        if let data = stored[Keys.workingDays] as? Data,
+           let decoded = try? JSONDecoder().decode([Bool].self, from: data), decoded.count == 7 {
+            workingDays = decoded
         }
-        
-        if iCloudStore.object(forKey: Keys.standardDailyHours) != nil {
-            self.standardDailyHours = iCloudStore.double(forKey: Keys.standardDailyHours)
+        if let value = stored[Keys.standardDailyHours] as? Double { standardDailyHours = value }
+        useCustomDailyHours = stored[Keys.useCustomDailyHours] as? Bool ?? false
+        if useCustomDailyHours, let savedWeek {
+            dailyHoursByWeekday = Self.normalizedWeek(savedWeek)
+            syncDerivedFromDailyHours()
         }
 
-        if let data = iCloudStore.data(forKey: Keys.dailyHoursByWeekday),
-           let decoded = try? JSONDecoder().decode([Double].self, from: data) {
-            self.dailyHoursByWeekday = Self.normalizedWeek(decoded)
-        }
-
-        if iCloudStore.object(forKey: Keys.useCustomDailyHours) != nil {
-            self.useCustomDailyHours = iCloudStore.bool(forKey: Keys.useCustomDailyHours)
-        }
-        
         if iCloudStore.object(forKey: Keys.annualVacationDays) != nil {
             let raw = Int(iCloudStore.longLong(forKey: Keys.annualVacationDays))
             self.annualVacationDays = max(0, min(365, raw))
@@ -352,7 +395,11 @@ final class UserSettings {
     /// Heures de travail attendues pour la date donnée, selon le mode actif.
     /// Comportement identique au précédent en mode uniforme.
     func expectedDailyHours(for date: Date, calendar: Calendar = .current) -> Double {
-        Self.expectedHours(
+        let key = dayKey(date, calendar: calendar)
+        if let previous = previousContracts.first(where: { key < $0.endDay }) {
+            return previous.hours[Self.weekdayIndex(for: date, calendar: calendar)]
+        }
+        return Self.expectedHours(
             weekdayIndex: Self.weekdayIndex(for: date, calendar: calendar),
             useCustom: useCustomDailyHours,
             dailyHours: dailyHoursByWeekday,
@@ -363,6 +410,8 @@ final class UserSettings {
     
     // MARK: - Méthodes publiques
     func resetToDefaults() {
+        previousContracts = []
+        iCloudStore?.removeObject(forKey: Self.historyKey)
         weeklyHours = defaultWeeklyHours
         workingDays = defaultWorkingDays
         standardDailyHours = defaultDailyHours

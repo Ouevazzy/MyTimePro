@@ -77,54 +77,40 @@ class PDFService {
         
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
         
+        let period = annual ? Calendar.Component.year : .month
+        let days = workDays.filter { calendar.isDate($0.date, equalTo: date, toGranularity: period) }
+        let byMonth = Dictionary(grouping: days) { calendar.component(.month, from: $0.date) }
+        let months = annual ? byMonth.keys.sorted() : [calendar.component(.month, from: date)]
+        let showCharts = annual && reportTheme.includeSummaryCharts
+        let capacity = max(1, Int((pageHeight - 60 - 180) / Self.tableRowHeight) - 3)
+        let totalPages = months.reduce(showCharts ? 2 : 1) { count, month in
+            count + max(1, ((byMonth[month]?.count ?? 0) + capacity - 1) / capacity)
+        }
         return renderer.pdfData { context in
-            // Page de titre et résumé
             context.beginPage()
-            let stats = calculateStats(workDays, for: date, useDecimalHours: reportTheme.useDecimalHours)
-            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, totalPages: annual ? 13 : 2, theme: reportTheme)
-            
-            if annual {
-                let targetYear = calendar.component(.year, from: date)
-                
-                // Filtrer les workDays pour l'année cible (pour les graphiques et statistiques)
-                let yearWorkDays = workDays.filter { workDay in
-                    calendar.component(.year, from: workDay.date) == targetYear
-                }
-                
-                // Ajout d'une page de synthèse annuelle avec graphiques
-                if reportTheme.includeSummaryCharts {
-                    context.beginPage()
-                    drawAnnualSummaryPage(pageRect: pageRect, workDays: yearWorkDays, year: targetYear, theme: reportTheme)
-                }
-                
-                // Générer une page par mois
-                for month in 1...12 {
-                    let monthWorkDays = workDays.filter { workDay in
-                        let components = calendar.dateComponents([.year, .month], from: workDay.date)
-                        return components.year == targetYear && components.month == month
-                    }.sorted(by: { $0.date < $1.date })
-                    
-                    if !monthWorkDays.isEmpty {
-                        context.beginPage()
-                        let monthTitle = "\(monthName(month: month)) \(calendar.component(.year, from: date))"
-                        drawMonthPage(context, pageRect: pageRect, title: monthTitle, workDays: monthWorkDays, pageNumber: month + 1, totalPages: 13, theme: reportTheme, date: date)
-                    }
-                }
-            } else {
-                // Rapport mensuel: filtrer les workDays pour le mois et l'année sélectionnés
-                let targetYear = calendar.component(.year, from: date)
-                let targetMonth = calendar.component(.month, from: date)
-                let monthWorkDays = workDays.filter { workDay in
-                    let components = calendar.dateComponents([.year, .month], from: workDay.date)
-                    return components.year == targetYear && components.month == targetMonth
-                }.sorted(by: { $0.date < $1.date })
-                
+            let stats = calculateStats(days, for: date, useDecimalHours: reportTheme.useDecimalHours, vacationHistory: workDays)
+            drawCoverPage(context, pageRect: pageRect, title: title, date: date, stats: stats, totalPages: totalPages, theme: reportTheme)
+            var page = 1
+            let year = calendar.component(.year, from: date)
+            if showCharts {
                 context.beginPage()
-                drawMonthPage(context, pageRect: pageRect, title: title, workDays: monthWorkDays, pageNumber: 2, totalPages: 2, theme: reportTheme, date: date)
+                page += 1
+                drawAnnualSummaryPage(pageRect: pageRect, workDays: days, year: year, theme: reportTheme)
+                drawFooter(pageRect: pageRect, pageNumber: page, totalPages: totalPages, theme: reportTheme)
+            }
+            for month in months {
+                context.beginPage()
+                page += 1
+                let monthDays = (byMonth[month] ?? []).sorted { ($0.startTime ?? $0.date) < ($1.startTime ?? $1.date) }
+                let monthTitle = annual ? "\(monthName(month: month)) \(year)" : title
+                drawMonthPage(context, pageRect: pageRect, title: monthTitle, workDays: monthDays,
+                              pageNumber: &page, totalPages: totalPages, capacity: capacity, theme: reportTheme, date: date)
             }
         }
     }
-    
+
+    private static let tableRowHeight: CGFloat = 28
+
     // MARK: - Drawing Methods
     
     func drawCoverPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, date: Date, stats: PDFStats, totalPages: Int, theme: PDFTheme) {
@@ -259,10 +245,10 @@ class PDFService {
         drawOvertimeChart(workDays: workDays, rect: CGRect(x: contentRect.minX, y: yPosition, width: contentRect.width, height: 180), theme: theme)
         
         // Pied de page
-        drawFooter(pageRect: pageRect, pageNumber: 2, totalPages: 13, theme: theme)
+
     }
     
-    func drawMonthPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, workDays: [WorkDay], pageNumber: Int, totalPages: Int, theme: PDFTheme, date: Date = Date()) {
+    func drawMonthPage(_ context: UIGraphicsPDFRendererContext, pageRect: CGRect, title: String, workDays: [WorkDay], pageNumber: inout Int, totalPages: Int, capacity: Int, theme: PDFTheme, date: Date = Date()) {
         let margins = UIEdgeInsets(top: 50, left: 40, bottom: 60, right: 40)
         let contentRect = pageRect.inset(by: margins)
         
@@ -278,7 +264,10 @@ class PDFService {
         yPosition += 80
         
         // Tableau des jours
-        drawDetailedTable(workDays: workDays, startY: yPosition, contentRect: contentRect, context: context, theme: theme, useDecimalHours: theme.useDecimalHours)
+        drawDetailedTable(workDays: workDays, startY: yPosition, contentRect: contentRect, context: context, theme: theme, useDecimalHours: theme.useDecimalHours, capacity: capacity) {
+            drawFooter(pageRect: pageRect, pageNumber: pageNumber, totalPages: totalPages, theme: theme)
+            pageNumber += 1
+        }
         
         // Pied de page
         drawFooter(pageRect: pageRect, pageNumber: pageNumber, totalPages: totalPages, theme: theme)
@@ -355,13 +344,13 @@ class PDFService {
         )
     }
     
-    func drawDetailedTable(workDays: [WorkDay], startY: CGFloat, contentRect: CGRect, context: UIGraphicsPDFRendererContext, theme: PDFTheme, useDecimalHours: Bool = UserSettings.shared.useDecimalHours) {
+    func drawDetailedTable(workDays: [WorkDay], startY: CGFloat, contentRect: CGRect, context: UIGraphicsPDFRendererContext, theme: PDFTheme, useDecimalHours: Bool, capacity: Int, finishPage: () -> Void) {
         let headers = ["pdf.table.date", "pdf.table.type", "pdf.table.start", "pdf.table.end", "pdf.table.break",
                        "pdf.table.total", "pdf.table.overtime", "pdf.table.bonus", "pdf.table.note"].map(\.localized)
         let columnWidths: [CGFloat] = [0.15, 0.15, 0.1, 0.1, 0.1, 0.12, 0.12, 0.08, 0.08]
         
         let tableWidth = contentRect.width
-        let rowHeight: CGFloat = 28
+        let rowHeight = Self.tableRowHeight
         var yPosition = startY
         
         // En-tête du tableau
@@ -383,7 +372,7 @@ class PDFService {
         // Lignes du tableau
         for workDay in workDays {
             // Vérifier si on a besoin d'une nouvelle page
-            if yPosition > contentRect.maxY - rowHeight * 3 {
+            if rowIndex > 0 && rowIndex.isMultiple(of: capacity) {
                 // Dessiner ligne totale sur la page courante
                 drawTotalRow(
                     totalHours: totalHours,
@@ -395,6 +384,7 @@ class PDFService {
                     useDecimalHours: useDecimalHours
                 )
                 
+                finishPage()
                 // Nouvelle page
                 context.beginPage()
                 drawPageHeader(title: "pdf.table.continued".localized, pageRect: context.pdfContextBounds, theme: theme)

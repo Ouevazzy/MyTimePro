@@ -113,6 +113,24 @@ struct WatchCommandTests {
         #expect(day.totalHours > 1.9 && day.totalHours < 2.1)
     }
 
+    @Test("La pause hors connexion utilise les heures de la montre")
+    func offlinePauseUsesEventTimes() throws {
+        let context = try makeContext()
+        let timer = TimerManager.shared
+        timer.reset()
+        defer { timer.reset() }
+        let start = at(7).timeIntervalSince1970
+        let bridge = PhoneWatchConnectivity.shared
+        bridge.apply("start", message: [WatchKeys.start: start], in: context)
+        for (command, hour) in [("pause", 12), ("resume", 13), ("stop", 17)] {
+            bridge.apply(command, message: [WatchKeys.start: start, WatchKeys.end: at(hour).timeIntervalSince1970,
+                                           "timerCommandID": UUID().uuidString], in: context)
+        }
+        let day = try #require(allDays(context).first)
+        #expect(day.breakDuration == 3600)
+        #expect(day.totalHours == 9)
+    }
+
     @Test("Une commande inconnue ne change rien")
     func unknownCommandIsIgnored() throws {
         let context = try makeContext()

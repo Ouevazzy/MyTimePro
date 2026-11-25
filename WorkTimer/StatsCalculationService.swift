@@ -16,6 +16,7 @@ struct YearStats {
     let sickDays: Int
     let totalHours: Double
     let overtimeSeconds: Int
+    var grossEarnings: Double = 0
     let totalBonus: Double
 
     static let empty = YearStats(workDays: 0, vacationDays: 0, sickDays: 0,
@@ -30,6 +31,7 @@ struct MonthStats: Identifiable {
     let sickDays: Int
     let totalHours: Double
     let overtimeSeconds: Int
+    var grossEarnings: Double = 0
     let totalBonus: Double
 
     var hasActivity: Bool {
@@ -60,6 +62,7 @@ private struct StatsAccumulator {
     var sickDays = 0
     var totalHours = 0.0
     var overtimeSeconds = 0
+    var grossEarnings = 0.0
     var totalBonus = 0.0
 
     mutating func add(_ day: WorkDay) {
@@ -78,6 +81,7 @@ private struct StatsAccumulator {
 
         totalHours += day.totalHours
         overtimeSeconds += day.overtimeSeconds
+        grossEarnings += day.grossEarnings
         totalBonus += day.bonusAmount
     }
 
@@ -87,6 +91,7 @@ private struct StatsAccumulator {
                   sickDays: sickDays,
                   totalHours: totalHours,
                   overtimeSeconds: overtimeSeconds,
+                  grossEarnings: grossEarnings,
                   totalBonus: totalBonus)
     }
 
@@ -97,6 +102,7 @@ private struct StatsAccumulator {
                    sickDays: sickDays,
                    totalHours: totalHours,
                    overtimeSeconds: overtimeSeconds,
+                   grossEarnings: grossEarnings,
                    totalBonus: totalBonus)
     }
 }
@@ -167,6 +173,7 @@ enum StatsCalculationService {
                                      sickDays: cachedMonth.sickDays,
                                      totalHours: cachedMonth.totalHours,
                                      overtimeSeconds: cachedMonth.overtimeSeconds,
+                                     grossEarnings: cachedMonth.grossEarnings,
                                      totalBonus: cachedMonth.totalBonus))
         }
 
@@ -176,6 +183,7 @@ enum StatsCalculationService {
                       sickDays: cachedYear.sickDays,
                       totalHours: cachedYear.totalHours,
                       overtimeSeconds: cachedYear.overtimeSeconds,
+                      grossEarnings: cachedYear.grossEarnings,
                       totalBonus: cachedYear.totalBonus),
             months
         )
@@ -190,6 +198,7 @@ enum StatsCalculationService {
                                sickDays: result.year.sickDays,
                                totalHours: result.year.totalHours,
                                overtimeSeconds: result.year.overtimeSeconds,
+                               grossEarnings: result.year.grossEarnings,
                                totalBonus: result.year.totalBonus)
 
         for month in result.months {
@@ -200,6 +209,7 @@ enum StatsCalculationService {
                                     sickDays: month.sickDays,
                                     totalHours: month.totalHours,
                                     overtimeSeconds: month.overtimeSeconds,
+                                    grossEarnings: month.grossEarnings,
                                     totalBonus: month.totalBonus)
         }
     }

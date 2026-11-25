@@ -40,7 +40,7 @@ extension PDFService {
         return colors[index % colors.count]
     }
     
-    func calculateStats(_ workDays: [WorkDay], for date: Date = Date(), useDecimalHours: Bool = UserSettings.shared.useDecimalHours) -> PDFStats {
+    func calculateStats(_ workDays: [WorkDay], for date: Date = Date(), useDecimalHours: Bool = UserSettings.shared.useDecimalHours, vacationHistory: [WorkDay]? = nil) -> PDFStats {
         let calendar = Calendar.current
         let year = calendar.component(.year, from: date)
         
@@ -79,7 +79,7 @@ extension PDFService {
         let settings = UserSettings.shared
         let entitlement = Double(settings.annualVacationDays)
         let startYear = calendar.component(.year, from: settings.vacationStartDate)
-        let vacationStatsTuple = VacationCalculations.remainingStats(for: year, workDays: workDays, annualEntitlement: entitlement)
+        let vacationStatsTuple = VacationCalculations.remainingStats(for: year, workDays: vacationHistory ?? workDays, annualEntitlement: entitlement)
         
         // Pour l'année de début, les droits sont 0 (tout est dans le solde initial / carryIn)
         let annualForDisplay = (year == startYear) ? 0 : entitlement

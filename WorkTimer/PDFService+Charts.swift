@@ -76,7 +76,7 @@ extension PDFService {
     }
     
     func drawWorkTypeDistributionChart(workDays: [WorkDay], rect: CGRect, theme: PDFTheme) {
-        drawSectionTitle("pdf.chart.typeDistribution".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
+        drawSectionTitle("charts.distribution".localized, rect: CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 20), theme: theme)
         
         let distribution = getWorkTypeDistribution(workDays: workDays)
         let chartRect = CGRect(x: rect.minX, y: rect.minY + 30, width: rect.width, height: rect.height - 30)
@@ -111,7 +111,7 @@ extension PDFService {
             
             // Légendee
             drawLegendItem(
-                text: "\(item.name): \(daysText(item.count)) (\(Int(item.percentage * 100))%)",
+                text: "\(item.name): \(item.count) (\(Int(item.percentage * 100))%)",
                 x: chartRect.minX + chartRect.width * 0.6,
                 y: legendY,
                 color: itemColor,

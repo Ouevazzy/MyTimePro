@@ -70,7 +70,7 @@ final class WorkDay {
         let calendar = Calendar.current
         var standardSeconds = 0
 
-        if type == .work || type == .compensatory {
+        if type == .work || type == .compensatory || type == .training {
             standardSeconds = Int(round(settings.expectedDailyHours(for: date, calendar: calendar) * 3600))
         }
 
@@ -138,7 +138,7 @@ final class WorkDay {
     /// Rémunération brute estimée : heures travaillées × taux horaire global + bonus.
     /// Le taux est global (défini dans les réglages) ; 0 si non configuré.
     var grossEarnings: Double {
-        let base = type.isWorkDay ? totalHours * UserSettings.shared.hourlyRate : 0
+        let base = type.isWorkDay ? totalHours * UserSettings.shared.hourlyRate(for: date) : 0
         return base + bonusAmount
     }
 

@@ -63,7 +63,6 @@ enum ChartsDataService {
     /// Agrège les heures par semaine de l'année (12 dernières semaines présentes).
     static func weeklyData(from workDays: [WorkDay]) -> [WeeklyHoursData] {
         let calendar = Calendar.current
-        let standardWeeklyHours = UserSettings.shared.weeklyHours
         let yearWorkDays = workDays.filter { $0.type == .work }
 
         // Clé composite année+semaine : les 29–31 décembre (weekOfYear == 1 de
@@ -81,6 +80,9 @@ enum ChartsDataService {
         return weeklyDict.keys.sorted().suffix(12).map { key in
             let data = weeklyDict[key]!
             let week = key % 100
+            let weekStart = calendar.date(from: DateComponents(weekOfYear: week, yearForWeekOfYear: key / 100))!
+            let standardWeeklyHours = (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
+                .reduce(0.0) { $0 + UserSettings.shared.expectedDailyHours(for: $1, calendar: calendar) }
             return WeeklyHoursData(
                 id: key,
                 weekNumber: week,

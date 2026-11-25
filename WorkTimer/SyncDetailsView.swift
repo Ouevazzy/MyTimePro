@@ -28,7 +28,7 @@ struct SyncDetailsView: View {
                 HStack {
                     Text("sync.lastSync.label".localized)
                     Spacer()
-                    if let lastSync = cloudService.lastSyncDate {
+                    if let lastSync = cloudService.lastAccountCheckDate {
                         Text(lastSync.formatted(.relative(presentation: .named)))
                             .foregroundStyle(.secondary)
                     } else {

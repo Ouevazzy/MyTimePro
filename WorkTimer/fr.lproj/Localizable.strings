@@ -215,7 +215,7 @@
 "sync.status.failed" = "Échec: %@";
 "sync.action" = "Synchroniser";
 "sync.details" = "Détails";
-"sync.lastSync" = "Dernière synchronisation:";
+"sync.lastSync" = "Compte iCloud vérifié";
 "sync.restore.title" = "Restaurer depuis iCloud ?";
 "sync.restore.message" = "Cette action va télécharger toutes les données disponibles sur iCloud. Les données existantes seront fusionnées avec celles d'iCloud.";
 
@@ -285,7 +285,7 @@
 "charts.weeklyHours" = "Heures par semaine";
 "charts.monthlyHours" = "Heures par mois";
 "charts.last30Days" = "30 derniers jours";
-"charts.distribution" = "Répartition des journées";
+"charts.distribution" = "Répartition des saisies";
 "charts.noData" = "Aucune donnée";
 "charts.noDataHelp" = "Ajoutez des journées de travail pour afficher ce graphique";
 "charts.summary" = "Résumé %d";
@@ -303,12 +303,12 @@
 "charts.accessibility.weekly" = "Graphique des heures par semaine, %d semaines affichées";
 "charts.accessibility.monthly" = "Graphique des heures par mois pour l'année %d";
 "charts.accessibility.daily" = "Graphique des 30 derniers jours, %d jours affichés";
-"charts.accessibility.distribution" = "Graphique de répartition des types de journées";
+"charts.accessibility.distribution" = "Répartition des saisies";
 
 // MARK: - Sync Details
 "sync.title" = "Synchronisation";
 "sync.section.detailed" = "Statut détaillé";
-"sync.lastSync.label" = "Dernière synchronisation";
+"sync.lastSync.label" = "Compte iCloud vérifié";
 "sync.lastSync.never" = "Jamais";
 "sync.error.label" = "Erreur";
 "sync.error.network" = "Problème de connexion réseau";
@@ -334,7 +334,7 @@
 // MARK: - Cloud Status
 "cloud.icloud.label" = "iCloud";
 "cloud.icloud.title" = "Synchronisation iCloud";
-"cloud.lastSync.label" = "Dernière synchronisation:";
+"cloud.lastSync.label" = "Compte iCloud vérifié";
 "cloud.sync.button" = "Synchroniser";
 "cloud.details.button" = "Détails";
 "cloud.section.status" = "Statut";
@@ -831,3 +831,8 @@
 "cloud.msg.freeSpace" = "Libérez de l'espace dans iCloud";
 "cloud.msg.offlineResume" = "Hors ligne - iCloud reprendra automatiquement";
 "cloud.msg.noNetwork" = "Aucune connexion réseau disponible";
+
+"settings.contract.effective" = "Modifications applicables dès le";
+
+"workdays.readError" = "Impossible de charger les journées.";
+"paywall.restore.none" = "Aucun achat actif trouvé pour ce compte.";

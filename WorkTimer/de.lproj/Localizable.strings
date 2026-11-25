@@ -163,7 +163,7 @@
 "charts.weeklyHours" = "Stunden pro Woche";
 "charts.monthlyHours" = "Stunden pro Monat";
 "charts.last30Days" = "Letzte 30 Tage";
-"charts.distribution" = "Verteilung";
+"charts.distribution" = "Verteilung der Einträge";
 "charts.summary" = "Zusammenfassung %d";
 "charts.noData" = "Keine Daten";
 "charts.noDataHelp" = "Fügen Sie Arbeitstage hinzu, um dieses Diagramm anzuzeigen";
@@ -182,7 +182,7 @@
 "charts.accessibility.weekly" = "Diagramm der Wochenstunden, %d Wochen angezeigt";
 "charts.accessibility.monthly" = "Diagramm der Monatsstunden für %d";
 "charts.accessibility.daily" = "Diagramm der letzten 30 Tage, %d Tage angezeigt";
-"charts.accessibility.distribution" = "Diagramm zur Verteilung der Tagestypen";
+"charts.accessibility.distribution" = "Verteilung der Einträge";
 
 // MARK: - CSV Export
 "csv.title" = "CSV-Export";
@@ -638,7 +638,7 @@
 "cloud.info.devices.title" = "Ihre Daten auf allen Geräten";
 "cloud.info.restore.text" = "Wenn Sie die App löschen und neu installieren, werden Ihre Daten automatisch aus iCloud wiederhergestellt.";
 "cloud.info.restore.title" = "Automatische Wiederherstellung";
-"cloud.lastSync.label" = "Letzte Synchronisierung:";
+"cloud.lastSync.label" = "iCloud-Konto geprüft";
 "cloud.reset" = "Synchronisierung zurücksetzen";
 "cloud.reset.confirm" = "Zurücksetzen";
 "cloud.reset.message" = "Dadurch wird die Synchronisierung vollständig zurückgesetzt. Ihre lokalen Daten bleiben erhalten.";
@@ -766,8 +766,8 @@
 "sync.error.label" = "Fehler";
 "sync.error.network" = "Problem mit der Netzwerkverbindung";
 "sync.error.quota" = "Nicht genügend iCloud-Speicher";
-"sync.lastSync" = "Letzte Synchronisierung:";
-"sync.lastSync.label" = "Letzte Synchronisierung";
+"sync.lastSync" = "iCloud-Konto geprüft";
+"sync.lastSync.label" = "iCloud-Konto geprüft";
 "sync.lastSync.never" = "Nie";
 "sync.reset" = "Synchronisierung zurücksetzen";
 "sync.reset.confirm" = "Zurücksetzen";
@@ -945,3 +945,8 @@
 "cloud.msg.freeSpace" = "Geben Sie Speicher in iCloud frei";
 "cloud.msg.offlineResume" = "Offline – iCloud wird automatisch fortgesetzt";
 "cloud.msg.noNetwork" = "Keine Netzwerkverbindung verfügbar";
+
+"settings.contract.effective" = "Änderungen gültig ab";
+
+"workdays.readError" = "Einträge konnten nicht geladen werden.";
+"paywall.restore.none" = "Für dieses Konto wurde kein aktiver Kauf gefunden.";

@@ -55,7 +55,7 @@ struct ModernCloudStatusView: View {
             }
             
             // Dernière synchronisation
-            if let lastSync = cloudService.lastSyncDate {
+            if let lastSync = cloudService.lastAccountCheckDate {
                 HStack {
                     Text("cloud.lastSync.label".localized)
                         .font(.caption)
@@ -180,7 +180,7 @@ struct CloudStatusDetailsView: View {
                             .foregroundStyle(cloudService.syncStatus.color)
                     }
 
-                    if let lastSync = cloudService.lastSyncDate {
+                    if let lastSync = cloudService.lastAccountCheckDate {
                         HStack {
                             Label("sync.lastSync.label".localized, systemImage: "clock")
                             Spacer()

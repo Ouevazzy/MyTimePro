@@ -74,7 +74,7 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
             WatchKeys.timerPaused: timer.state == .paused,
             WatchKeys.timerPausedAccumulated: timer.pausedAccumulated,
             WatchKeys.useDecimalHours: UserSettings.shared.useDecimalHours,
-            WatchKeys.hourlyRate: UserSettings.shared.hourlyRate,
+            WatchKeys.hourlyRate: UserSettings.shared.hourlyRate(for: Date()),
             WatchKeys.currencyCode: Locale.current.currency?.identifier ?? "EUR"
         ]
         payload[WatchKeys.timerStart] = timer.startDate?.timeIntervalSince1970 ?? 0
@@ -83,6 +83,7 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
         // recevoir l'état inchangé pour annuler son affichage optimiste.
         payload["sentAt"] = Date().timeIntervalSince1970
 
+        payload["lastTimerCommandID"] = UserDefaults.standard.string(forKey: "watch.lastTimerCommandID")
         try? session.updateApplicationContext(payload)
     }
 
@@ -92,7 +93,15 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
         guard let command = message[WatchKeys.command] as? String else { return }
         Task { @MainActor in
             guard let context = modelContext else { return }
-            apply(command, message: message, in: context)
+            if command == "createDay", let id = message["submissionID"] as? String {
+                let saved = applyCreateDay(message, in: context)
+                WCSession.default.transferUserInfo(["submissionID": id, "saved": saved])
+            } else {
+                apply(command, message: message, in: context)
+                if let id = message["timerCommandID"] as? String {
+                    UserDefaults.standard.set(id, forKey: "watch.lastTimerCommandID")
+                }
+            }
             SiriSummaryCacheService().refresh(using: context)
             pushSummary()
         }
@@ -101,14 +110,20 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
     /// Applique une commande de la montre. Séparé du transport pour être testé.
     @MainActor
     func apply(_ command: String, message: [String: Any], in context: ModelContext) {
+        let eventTime = (message[WatchKeys.end] as? Double).map(Date.init(timeIntervalSince1970:)) ?? Date()
+        if command != "start", message["timerCommandID"] != nil,
+           let start = message[WatchKeys.start] as? Double {
+            guard let active = TimerManager.shared.startDate,
+                  abs(active.timeIntervalSince1970 - start) < 0.001 else { return }
+        }
         switch command {
         case "start":
             let at = (message[WatchKeys.start] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
             if !TimerManager.shared.isActive { TimerManager.shared.start(at: at) }
         case "pause":
-            TimerManager.shared.pause()
+            TimerManager.shared.pause(at: eventTime)
         case "resume":
-            TimerManager.shared.resume()
+            TimerManager.shared.resume(at: eventTime)
         case "stop":
             let at = (message[WatchKeys.end] as? Double).map { Date(timeIntervalSince1970: $0) } ?? Date()
             TimerManager.shared.stopAndSave(in: context, at: at)
@@ -120,7 +135,8 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
     }
 
     @MainActor
-    private func applyCreateDay(_ message: [String: Any], in context: ModelContext) {
+    @discardableResult
+    private func applyCreateDay(_ message: [String: Any], in context: ModelContext) -> Bool {
         let typeRaw = message[WatchKeys.type] as? String ?? WorkDayType.work.rawValue
         let type = WorkDayType(rawValue: typeRaw) ?? .work
         let dayDate: Date = (message[WatchKeys.date] as? Double)
@@ -131,10 +147,10 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
 
         if type.isWorkDay {
             guard let startTI = message[WatchKeys.start] as? Double,
-                  let endTI = message[WatchKeys.end] as? Double else { return }
+                  let endTI = message[WatchKeys.end] as? Double else { return false }
             let start = Date(timeIntervalSince1970: startTI)
             let end = Date(timeIntervalSince1970: endTI)
-            guard end > start else { return }
+            guard end > start else { return false }
             let breakSeconds = message[WatchKeys.breakSeconds] as? Double ?? 0
             workDay.updateData(startTime: start, endTime: end, breakDuration: breakSeconds)
             workDay.bonusAmount = max(0, message[WatchKeys.bonus] as? Double ?? 0)
@@ -144,16 +160,18 @@ final class PhoneWatchConnectivity: NSObject, WCSessionDelegate {
 
         // Un même message peut arriver deux fois (renvoi après un échec
         // d'envoi direct, double appui) : on n'ajoute pas une copie exacte.
-        if isDuplicate(workDay, in: context) { return }
+        if isDuplicate(workDay, in: context) { return true }
 
         do {
             context.insert(workDay)
             _ = try WorkDay.reconcileDailyOvertime(in: context, for: [dayDate], calendar: calendar)
             try context.save()
             StatsCache.shared.onWorkDayChanged(workDay, previousDate: dayDate, previousType: type)
+            return true
         } catch {
             context.rollback()
             ErrorManager.shared.handle(error, context: "WatchCreateDay")
+            return false
         }
     }
 

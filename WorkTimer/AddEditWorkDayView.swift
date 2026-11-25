@@ -363,7 +363,7 @@ struct AddEditWorkDayView: View {
                             .fontWeight(.medium)
                             .foregroundStyle(.blue)
                     }
-                    if settings.isHourlyRateEnabled {
+                    if settings.hourlyRate(for: date) > 0 {
                         HStack {
                             Label("stats.earnings".localized, systemImage: "banknote")
                                 .foregroundStyle(.secondary)
@@ -429,7 +429,7 @@ struct AddEditWorkDayView: View {
     /// Rémunération estimée du brouillon courant : heures nettes × taux horaire + bonus.
     private var calculatedEarnings: Double {
         let hours = (currentDraft.netWorkedSeconds ?? 0) / 3600.0
-        return hours * settings.hourlyRate + bonusAmount
+        return hours * settings.hourlyRate(for: date) + bonusAmount
     }
 
     private var currentDraft: WorkDayFormDraft {

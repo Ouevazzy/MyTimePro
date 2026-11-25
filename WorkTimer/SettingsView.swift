@@ -265,24 +265,9 @@ struct SettingsView: View {
 
                     redeemCodeButton
 
-                    // Restore purchases
-                    Button(action: {
-                        Task {
-                            await StoreManager.shared.restorePurchases()
-                        }
-                    }) {
-                        HStack(spacing: DS.Spacing.sm) {
-                            Image(systemName: "arrow.counterclockwise")
-                                .foregroundStyle(.blue)
-                            Text("paywall.restore".localized)
-                                .font(.subheadline)
-                            Spacer()
-                        }
+                    RestorePurchasesButton()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(DS.Spacing.md)
-                        .background(Color(.tertiarySystemGroupedBackground),
-                                    in: RoundedRectangle(cornerRadius: DS.Radius.medium))
-                    }
-                    .foregroundStyle(.primary)
                     .buttonStyle(.pressable)
                 }
 

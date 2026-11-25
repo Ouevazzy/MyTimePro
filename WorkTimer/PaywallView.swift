@@ -227,12 +227,7 @@ struct PaywallView: View {
     // MARK: - Footer
 
     private var restoreButton: some View {
-        Button("paywall.restore".localized) {
-            Task {
-                await store.restorePurchases()
-                if store.isPro { dismiss() }
-            }
-        }
+        RestorePurchasesButton { dismiss() }
         .font(.footnote)
         .foregroundStyle(.secondary)
     }
@@ -433,4 +428,34 @@ struct PaywallFeatureRow: View {
 
 #Preview {
     PaywallView()
+}
+
+struct RestorePurchasesButton: View {
+    var onSuccess: () -> Void = {}
+    @State private var restoring = false
+    @State private var message: String?
+
+    var body: some View {
+        Button {
+            restoring = true
+            Task {
+                let result = await StoreManager.shared.restorePurchases()
+                restoring = false
+                switch result {
+                case .restored: onSuccess()
+                case .noPurchase: message = "paywall.restore.none".localized
+                case .failed(let error): message = error
+                }
+            }
+        } label: {
+            if restoring { ProgressView() }
+            else { Label("paywall.restore".localized, systemImage: "arrow.counterclockwise") }
+        }
+        .disabled(restoring)
+        .alert("paywall.restore".localized, isPresented: Binding(
+            get: { message != nil }, set: { if !$0 { message = nil } }
+        )) {
+            Button("OK") { message = nil }
+        } message: { Text(message ?? "") }
+    }
 }

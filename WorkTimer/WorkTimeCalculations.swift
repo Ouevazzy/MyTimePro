@@ -33,7 +33,9 @@ class WorkTimeCalculations {
             let workedSeconds = Int(round(
                 workedEntries.reduce(0.0) { $0 + $1.totalHours } * 3600
             ))
-            return workedSeconds - standardSeconds
+            let halfDays = min(2, activeEntries.filter { $0.type == .halfDayVacation }.count)
+            let target = Int((Double(standardSeconds) * (1 - Double(halfDays) / 2)).rounded())
+            return workedSeconds - target
         }
 
         if activeEntries.contains(where: { $0.type == .compensatory }) {

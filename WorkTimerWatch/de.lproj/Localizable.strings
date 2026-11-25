@@ -27,3 +27,6 @@
 "watch.daytype.sick" = "Krank";
 "watch.daytype.holiday" = "Feiertag";
 "watch.daytype.comp" = "Zeitausgleich";
+
+"watch.add.pending" = "Letzter Eintrag wartet auf das iPhone";
+"watch.add.failed" = "Speichern auf dem iPhone fehlgeschlagen";

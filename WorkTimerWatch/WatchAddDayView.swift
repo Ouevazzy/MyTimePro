@@ -16,7 +16,7 @@ struct WatchAddDayView: View {
     @State private var breakMinutes = 60
     @State private var type: WatchDayType = .work
     @State private var bonus = 0
-    @State private var justSaved = false
+
 
     private var isValid: Bool {
         guard type.isWork else { return true }
@@ -53,13 +53,15 @@ struct WatchAddDayView: View {
             Button {
                 save()
             } label: {
-                Label(justSaved ? "watch.add.saved".loc : "watch.add.save".loc,
-                      systemImage: justSaved ? "checkmark.circle.fill" : "square.and.arrow.down")
+                Label("watch.add.save".loc, systemImage: "square.and.arrow.down")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(justSaved ? .green : .blue)
-            .disabled(!isValid || justSaved)
+            .disabled(!isValid)
+            if !link.submissionStatus.isEmpty {
+                Text(("watch.add." + link.submissionStatus).loc)
+                    .font(.footnote)
+            }
         }
         .navigationTitle("watch.tab.add".loc)
     }
@@ -78,11 +80,7 @@ struct WatchAddDayView: View {
             bonus: Double(bonus)
         )
 
-        withAnimation { justSaved = true }
-        Task {
-            try? await Task.sleep(for: .seconds(1.5))
-            withAnimation { justSaved = false }
-        }
+
     }
 
     /// Plage de travail du jour choisi. Une fin avant le début désigne

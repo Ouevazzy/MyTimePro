@@ -388,7 +388,7 @@ struct DiagnosticsView: View {
         // Grouper par date et type (jour uniquement, sans l'heure)
         var grouped: [String: [WorkDay]] = [:]
         for workDay in yearWorkDays {
-            let key = "\(Self.duplicateKeyFormatter.string(from: workDay.date)):\(workDay.type.rawValue)"
+            let key = "\(Self.duplicateKeyFormatter.string(from: workDay.date)):\(workDay.type.rawValue):\(workDay.startTime?.timeIntervalSince1970 ?? 0):\(workDay.endTime?.timeIntervalSince1970 ?? 0):\(workDay.breakDuration):\(workDay.bonusAmount):\(workDay.note ?? "")"
             grouped[key, default: []].append(workDay)
         }
         

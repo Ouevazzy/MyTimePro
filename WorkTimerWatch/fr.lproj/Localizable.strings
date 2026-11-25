@@ -27,3 +27,6 @@
 "watch.daytype.sick" = "Maladie";
 "watch.daytype.holiday" = "Férié";
 "watch.daytype.comp" = "Récup";
+
+"watch.add.pending" = "Dernier envoi en attente de l’iPhone";
+"watch.add.failed" = "Échec de l’enregistrement sur l’iPhone";

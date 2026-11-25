@@ -11,6 +11,7 @@ struct WorkTimeSettingsSection: View {
     @Binding var activeSection: SettingsSection?
     @Binding var showConfetti: Bool
 
+    @State private var effectiveDate = Date()
     @State private var showingHoursPicker = false
     @State private var weeklyHours: Double = UserSettings.shared.weeklyHours
     @State private var showVacationDetails = false
@@ -53,6 +54,8 @@ struct WorkTimeSettingsSection: View {
             }
         ) {
             VStack(spacing: 20) {
+                DatePicker("settings.contract.effective".localized, selection: $effectiveDate,
+                           in: settings.latestContractStart..., displayedComponents: .date)
                 scheduleModeRow
                 if settings.useCustomDailyHours {
                     perDayHoursRow
@@ -73,14 +76,16 @@ struct WorkTimeSettingsSection: View {
                 ImprovedWeeklyHoursPickerView(
                     hours: $weeklyHours, isPresented: $showingHoursPicker,
                     onSave: { newValue in
-                        settings.weeklyHours = newValue
-                        settings.standardDailyHours = calculatedDailyHours
+                        settings.editContract(effective: effectiveDate) {
+                            settings.weeklyHours = newValue
+                            settings.standardDailyHours = calculatedDailyHours
+                        }
                     }
                 )
             }
         }
         .sheet(isPresented: $showVacationDetails) { VacationsView() }
-        .onAppear { scheduleBaseline = scheduleSignature }
+        .onAppear { scheduleBaseline = scheduleSignature; effectiveDate = max(Date(), settings.latestContractStart) }
         .onChange(of: activeSection) { oldValue, newValue in
             if oldValue == .workTime && newValue != .workTime {
                 autoRecalculateIfNeeded()
@@ -98,14 +103,15 @@ struct WorkTimeSettingsSection: View {
     private var scheduleSignature: String {
         let days = settings.dailyHoursByWeekday.map { String(format: "%.4f", $0) }.joined(separator: ",")
         let working = settings.workingDays.map { $0 ? "1" : "0" }.joined()
-        return "\(settings.useCustomDailyHours)|\(settings.weeklyHours)|\(settings.standardDailyHours)|\(working)|\(days)"
+        return "\(settings.useCustomDailyHours)|\(settings.weeklyHours)|\(settings.standardDailyHours)|\(working)|\(days)|\(settings.hourlyRate)"
     }
 
     private func autoRecalculateIfNeeded() {
         guard scheduleSignature != scheduleBaseline else { return }
         scheduleBaseline = scheduleSignature
         Task { @MainActor in
-            _ = try? WorkDay.recalculateOvertime(in: modelContext)
+            do { _ = try WorkDay.recalculateOvertime(in: modelContext) }
+            catch { modelContext.rollback(); ErrorManager.shared.handle(error, context: "RecalculateOvertime") }
             StatsCache.shared.invalidateAll()
             SiriSummaryCacheService().refresh(using: modelContext)
         }
@@ -139,12 +145,14 @@ struct WorkTimeSettingsSection: View {
                             .foregroundStyle(index < 5 ? .blue : .orange).frame(width: 22)
                         Text(weekDays[index])
                         Spacer()
-                        Toggle(weekDays[index], isOn: $settings.workingDays[index])
-                            .labelsHidden()
-                            .tint(index < 5 ? .blue : .orange)
-                            .onChange(of: settings.workingDays[index]) { _, _ in
+                        Toggle(weekDays[index], isOn: Binding(get: { settings.workingDays[index] }, set: { on in
+                            settings.editContract(effective: effectiveDate) {
+                                settings.workingDays[index] = on
                                 settings.standardDailyHours = calculatedDailyHours
                             }
+                        }))
+                            .labelsHidden()
+                            .tint(index < 5 ? .blue : .orange)
                             .accessibilityLabel("Travailler le \(weekDays[index])")
                     }
                     .padding(.vertical, 6).padding(.horizontal, 10)
@@ -180,7 +188,7 @@ struct WorkTimeSettingsSection: View {
                 get: { settings.useCustomDailyHours },
                 set: { newValue in
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        settings.useCustomDailyHours = newValue
+                        settings.editContract(effective: effectiveDate) { settings.useCustomDailyHours = newValue }
                     }
                 }
             )) {
@@ -280,7 +288,7 @@ struct WorkTimeSettingsSection: View {
         while week.count < 7 { week.append(0) }
         guard index >= 0 && index < 7 else { return }
         week[index] = max(0, min(24, hours))
-        settings.dailyHoursByWeekday = week
+        settings.editContract(effective: effectiveDate) { settings.dailyHoursByWeekday = week }
     }
 
     private func setDayWorking(_ index: Int, on: Bool) {
@@ -366,7 +374,9 @@ struct WorkTimeSettingsSection: View {
             Text("settings.workTime.hourlyRate".localized).font(.headline)
             TextField(
                 "settings.workTime.hourlyRate".localized,
-                value: $settings.hourlyRate,
+                value: Binding(get: { settings.hourlyRate }, set: { rate in
+                    settings.editContract(effective: effectiveDate) { settings.hourlyRate = max(0, rate) }
+                }),
                 format: .currency(code: Locale.current.currency?.identifier ?? "EUR")
             )
             .keyboardType(.decimalPad)

@@ -16,6 +16,7 @@ final class StatsCache {
         let sickDays: Int
         let totalHours: Double
         let overtimeSeconds: Int
+        var grossEarnings: Double = 0
         let totalBonus: Double
         let timestamp: Date
         
@@ -33,6 +34,7 @@ final class StatsCache {
         let sickDays: Int
         let totalHours: Double
         let overtimeSeconds: Int
+        var grossEarnings: Double = 0
         let totalBonus: Double
         let timestamp: Date
 
@@ -80,6 +82,7 @@ final class StatsCache {
         sickDays: Int,
         totalHours: Double,
         overtimeSeconds: Int,
+        grossEarnings: Double = 0,
         totalBonus: Double
     ) {
         yearlyCache[year] = YearlyStatsCache(
@@ -89,6 +92,7 @@ final class StatsCache {
             sickDays: sickDays,
             totalHours: totalHours,
             overtimeSeconds: overtimeSeconds,
+            grossEarnings: grossEarnings,
             totalBonus: totalBonus,
             timestamp: Date()
         )
@@ -119,6 +123,7 @@ final class StatsCache {
         sickDays: Int = 0,
         totalHours: Double,
         overtimeSeconds: Int,
+        grossEarnings: Double = 0,
         totalBonus: Double
     ) {
         let key = "\(year)-\(month)"
@@ -130,6 +135,7 @@ final class StatsCache {
             sickDays: sickDays,
             totalHours: totalHours,
             overtimeSeconds: overtimeSeconds,
+            grossEarnings: grossEarnings,
             totalBonus: totalBonus,
             timestamp: Date()
         )
@@ -265,6 +271,7 @@ extension StatsCache {
             sickDays: sickDays,
             totalHours: totalHours,
             overtimeSeconds: overtimeSeconds,
+            grossEarnings: yearWorkDays.reduce(0) { $0 + $1.grossEarnings },
             totalBonus: totalBonus
         )
         
@@ -294,6 +301,7 @@ extension StatsCache {
         }
 
         var workedDates: Set<Date> = []; var vacationDays = 0.0; var sickDays = 0
+        var grossEarnings = 0.0
         var totalHours = 0.0; var overtimeSeconds = 0; var totalBonus = 0.0
         for day in monthWorkDays {
             switch day.type {
@@ -304,6 +312,7 @@ extension StatsCache {
             default: break
             }
             overtimeSeconds += day.overtimeSeconds
+            grossEarnings += day.grossEarnings
             totalBonus += day.bonusAmount
         }
 
@@ -316,6 +325,7 @@ extension StatsCache {
             sickDays: sickDays,
             totalHours: totalHours,
             overtimeSeconds: overtimeSeconds,
+            grossEarnings: grossEarnings,
             totalBonus: totalBonus
         )
         

@@ -66,6 +66,8 @@ struct WorkDaysListView: View {
     @State private var filteredWorkDays: [WorkDay] = []
     @State private var groupedWorkDays: [Date: [WorkDay]] = [:]
     @State private var workDaySections: [WorkDayListSection] = []
+    @State private var readFailed = false
+    @State private var lastLoadedMonth: WorkDayMonthSelection?
     @State private var isFilteringData = false
     @State private var cachedMonthlyStats: (totalHours: Double, overtimeSeconds: Int, totalBonus: Double) = (0, 0, 0)
     @State private var loadTask: Task<Void, Never>?
@@ -101,14 +103,20 @@ struct WorkDaysListView: View {
         VStack(spacing: 0) {
             monthNavigationHeader
             
-            if !isSearching {
+            if !isSearching && (!readFailed || visibleMonth == lastLoadedMonth) {
                 MonthlyStatsHeader(stats: cachedMonthlyStats)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
 
+            if readFailed {
+                Text("workdays.readError".localized)
+                Button("action.retry".localized) { filterWorkDaysAsync() }
+            }
             if isFilteringData {
                 ProgressView("loading".localized)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if readFailed && (lastLoadedMonth != visibleMonth || noResults) {
+                Spacer()
             } else if noResults {
                 emptyStateView
             } else {
@@ -487,6 +495,8 @@ struct WorkDaysListView: View {
                     return
                 }
 
+                readFailed = false
+                lastLoadedMonth = requestedMonth
                 monthWorkDays = filtered
                 cachedMonthlyStats = monthlyStats(from: filtered)
                 applyCurrentFilters(to: filtered)
@@ -496,11 +506,7 @@ struct WorkDaysListView: View {
 
             } catch {
                 AppLogger.error("WorkDays fetch failed", category: AppLogger.general, error: error)
-                self.monthWorkDays = []
-                self.filteredWorkDays = []
-                self.groupedWorkDays = [:]
-                self.workDaySections = []
-                self.cachedMonthlyStats = (0, 0, 0)
+                self.readFailed = true
                 self.isFilteringData = false
             }
         }

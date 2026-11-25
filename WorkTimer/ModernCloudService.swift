@@ -10,7 +10,7 @@ final class ModernCloudService {
     static let shared = ModernCloudService()
 
     private(set) var syncStatus: SyncStatus = .idle
-    private(set) var lastSyncDate: Date?
+    private(set) var lastAccountCheckDate: Date?
     private(set) var userMessage: String?
 
     private let containerIdentifier = "iCloud.jordan-payez.MyTimePro"
@@ -128,7 +128,7 @@ final class ModernCloudService {
         do {
             let status = try await CKContainer(identifier: containerIdentifier).accountStatus()
             apply(accountStatus: status)
-            lastSyncDate = Date()
+            lastAccountCheckDate = Date()
         } catch {
             handleSyncError(error)
         }

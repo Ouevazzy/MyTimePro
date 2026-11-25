@@ -11,6 +11,7 @@ struct WorkTimerEntry: TimelineEntry {
     let weeklyHours: Double
     let overtimeSeconds: Int
     let vacationBalance: Double
+    var needsRefresh = false
     let isPlaceholder: Bool
 
     static let placeholder = WorkTimerEntry(
@@ -23,8 +24,10 @@ struct WorkTimerEntry: TimelineEntry {
 
     static func fromSharedDefaults() -> WorkTimerEntry {
         guard let defaults = UserDefaults(suiteName: appGroupID),
-              defaults.object(forKey: "widget.updatedAt") != nil else {
-            return .placeholder
+              let updatedAt = defaults.object(forKey: "widget.updatedAt") as? Double,
+              Calendar.current.isDate(Date(timeIntervalSince1970: updatedAt), equalTo: .now, toGranularity: .weekOfYear),
+              Calendar.current.isDate(Date(timeIntervalSince1970: updatedAt), equalTo: .now, toGranularity: .year) else {
+            return WorkTimerEntry(date: .now, weeklyHours: 0, overtimeSeconds: 0, vacationBalance: 0, needsRefresh: true, isPlaceholder: false)
         }
         return WorkTimerEntry(
             date: .now,
@@ -42,7 +45,7 @@ struct WorkTimerProvider: TimelineProvider {
     func placeholder(in context: Context) -> WorkTimerEntry { .placeholder }
 
     func getSnapshot(in context: Context, completion: @escaping (WorkTimerEntry) -> Void) {
-        completion(.fromSharedDefaults())
+        completion(context.isPreview ? .placeholder : .fromSharedDefaults())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WorkTimerEntry>) -> Void) {
@@ -77,6 +80,16 @@ struct WorkTimerWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        if entry.needsRefresh {
+            Label("widget.openApp", systemImage: "clock")
+                .font(.caption)
+                .containerBackground(.fill.tertiary, for: .widget)
+        } else {
+            familyView
+        }
+    }
+
+    @ViewBuilder private var familyView: some View {
         switch family {
         case .accessoryCircular:
             circularView

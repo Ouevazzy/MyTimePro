@@ -91,12 +91,19 @@ final class StoreManager {
         }
     }
 
-    func restorePurchases() async {
+    enum RestoreResult {
+        case restored, noPurchase, failed(String)
+    }
+
+    @discardableResult
+    func restorePurchases() async -> RestoreResult {
         do {
             try await AppStore.sync()
             await refreshPurchaseStatus()
+            return isPro ? .restored : .noPurchase
         } catch {
             AppLogger.error("StoreKit: restauration échouée", category: AppLogger.data, error: error)
+            return .failed(error.localizedDescription)
         }
     }
 

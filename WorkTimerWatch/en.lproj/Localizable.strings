@@ -27,3 +27,6 @@
 "watch.daytype.sick" = "Sick";
 "watch.daytype.holiday" = "Holiday";
 "watch.daytype.comp" = "Comp";
+
+"watch.add.pending" = "Last entry awaiting iPhone";
+"watch.add.failed" = "Could not save on iPhone";

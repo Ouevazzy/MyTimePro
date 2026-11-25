@@ -54,11 +54,24 @@ final class WatchLink: NSObject, WCSessionDelegate {
 
     var isReachable: Bool = false
 
+    var lastSubmission = UserDefaults.standard.string(forKey: "watch.lastSubmission")
+    var submissionStatus = UserDefaults.standard.string(forKey: "watch.submissionStatus") ?? ""
+    private var pendingTimerID = UserDefaults.standard.string(forKey: "watch.pendingTimerID")
+
     private override init() { super.init() }
 
     func activate() {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
+        if pendingTimerID != nil, let state = UserDefaults.standard.dictionary(forKey: "watch.pendingTimerState") {
+            let start = state["start"] as? Double ?? 0
+            let pause = state["pause"] as? Double ?? 0
+            timerActive = start > 0
+            timerStart = timerActive ? Date(timeIntervalSince1970: start) : nil
+            timerPaused = pause > 0
+            pauseStartedAt = timerPaused ? Date(timeIntervalSince1970: pause) : nil
+            pausedAccumulated = state["accumulated"] as? Double ?? 0
+        }
         session.delegate = self
         session.activate()
     }
@@ -85,36 +98,44 @@ final class WatchLink: NSObject, WCSessionDelegate {
         timerPaused = false
         pausedAccumulated = 0
         pauseStartedAt = nil
-        send([WatchKeys.command: "start", WatchKeys.start: now.timeIntervalSince1970])
+        sendTimer("start", at: now, sessionStart: now)
     }
 
     func pauseTimer() {
         guard timerActive, !timerPaused else { return }
         timerPaused = true
-        pauseStartedAt = Date()
-        send([WatchKeys.command: "pause"])
+        let now = Date()
+        pauseStartedAt = now
+        sendTimer("pause", at: now, sessionStart: timerStart)
     }
 
     func resumeTimer() {
         guard let pauseStart = pauseStartedAt else { return }
-        pausedAccumulated += max(0, Date().timeIntervalSince(pauseStart))
+        let now = Date()
+        pausedAccumulated += max(0, now.timeIntervalSince(pauseStart))
         pauseStartedAt = nil
         timerPaused = false
-        send([WatchKeys.command: "resume"])
+        sendTimer("resume", at: now, sessionStart: timerStart)
     }
 
     func stopTimer() {
         let now = Date()
+        let start = timerStart
         timerActive = false
         timerStart = nil
         timerPaused = false
         pausedAccumulated = 0
         pauseStartedAt = nil
-        send([WatchKeys.command: "stop", WatchKeys.end: now.timeIntervalSince1970])
+        sendTimer("stop", at: now, sessionStart: start)
     }
 
     func createDay(date: Date, type: String, start: Date, end: Date, breakSeconds: TimeInterval, bonus: Double) {
-        send([
+        let id = UUID().uuidString
+        lastSubmission = id
+        UserDefaults.standard.set(id, forKey: "watch.lastSubmission")
+        setSubmissionStatus("pending")
+        WCSession.default.transferUserInfo([
+            "submissionID": id,
             WatchKeys.command: "createDay",
             WatchKeys.date: date.timeIntervalSince1970,
             WatchKeys.type: type,
@@ -125,15 +146,34 @@ final class WatchLink: NSObject, WCSessionDelegate {
         ])
     }
 
-    private func send(_ message: [String: Any]) {
-        guard WCSession.isSupported() else { return }
-        let session = WCSession.default
-        if session.isReachable {
-            session.sendMessage(message, replyHandler: nil, errorHandler: { _ in
-                session.transferUserInfo(message)
-            })
-        } else {
-            session.transferUserInfo(message)
+    private func sendTimer(_ command: String, at date: Date, sessionStart: Date?) {
+        guard let sessionStart else { return }
+        let id = UUID().uuidString
+        pendingTimerID = id
+        UserDefaults.standard.set(id, forKey: "watch.pendingTimerID")
+        // One ordered transport also preserves pause/resume order across reconnection.
+        WCSession.default.transferUserInfo([
+            WatchKeys.command: command, "timerCommandID": id,
+            WatchKeys.start: sessionStart.timeIntervalSince1970,
+            WatchKeys.end: date.timeIntervalSince1970
+        ])
+        let state: [String: Any] = [
+            "start": timerStart?.timeIntervalSince1970 ?? 0,
+            "pause": pauseStartedAt?.timeIntervalSince1970 ?? 0,
+            "accumulated": pausedAccumulated
+        ]
+        UserDefaults.standard.set(state, forKey: "watch.pendingTimerState")
+    }
+
+    private func setSubmissionStatus(_ status: String) {
+        submissionStatus = status
+        UserDefaults.standard.set(status, forKey: "watch.submissionStatus")
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        guard let id = userInfo["submissionID"] as? String, let saved = userInfo["saved"] as? Bool else { return }
+        Task { @MainActor in
+            if lastSubmission == id { setSubmissionStatus(saved ? "saved" : "failed") }
         }
     }
 
@@ -148,6 +188,11 @@ final class WatchLink: NSObject, WCSessionDelegate {
             if let v = context[WatchKeys.currencyCode] as? String { currencyCode = v }
             if let v = context[WatchKeys.hourlyRate] as? Double { hourlyRate = v }
 
+            if let pendingTimerID {
+                guard context["lastTimerCommandID"] as? String == pendingTimerID else { return }
+                self.pendingTimerID = nil
+                UserDefaults.standard.removeObject(forKey: "watch.pendingTimerID")
+            }
             if let active = context[WatchKeys.timerActive] as? Bool {
                 timerActive = active
                 let startTI = context[WatchKeys.timerStart] as? Double ?? 0
