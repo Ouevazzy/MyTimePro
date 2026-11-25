@@ -1,6 +1,7 @@
 import UIKit
 import CloudKit
 import BackgroundTasks
+import os.log
 
 /// Garantit que BGTaskScheduler ne reçoit qu'une seule complétion, même si
 /// l'expiration arrive pendant que l'opération asynchrone se termine.
@@ -15,6 +16,22 @@ private final class BackgroundTaskFinisher: @unchecked Sendable {
         didFinish = true
         task.setTaskCompleted(success: success)
         return true
+    }
+}
+
+/// Sursis demandé à iOS, rendu une seule fois.
+@MainActor
+private final class BackgroundActivity {
+    private var id = UIBackgroundTaskIdentifier.invalid
+
+    func begin() {
+        id = UIApplication.shared.beginBackgroundTask { [weak self] in self?.end() }
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
     }
 }
 
@@ -84,11 +101,21 @@ class ModernAppDelegate: NSObject, UIApplicationDelegate {
         syncRequest.earliestBeginDate = Date(timeIntervalSinceNow: 3600)
         syncRequest.requiresNetworkConnectivity = true
 
-        do {
-            try BGTaskScheduler.shared.submit(syncRequest)
-            AppLogger.info("Background sync task scheduled", category: AppLogger.cloudKit)
-        } catch {
-            AppLogger.error("Failed to schedule background sync task", category: AppLogger.cloudKit, error: error)
+        submit(syncRequest, name: "sync", category: AppLogger.cloudKit)
+    }
+
+    /// La demande est asynchrone : on demande à iOS de ne pas suspendre l'app avant sa fin.
+    private func submit(_ request: BGProcessingTaskRequest, name: String, category: OSLog) {
+        Task { @MainActor in
+            let activity = BackgroundActivity()
+            activity.begin()
+            do {
+                try await BGTaskScheduler.shared.submitTaskRequest(request)
+                AppLogger.info("Background \(name) task scheduled", category: category)
+            } catch {
+                AppLogger.error("Failed to schedule background \(name) task", category: category, error: error)
+            }
+            activity.end()
         }
     }
 
@@ -97,12 +124,7 @@ class ModernAppDelegate: NSObject, UIApplicationDelegate {
         cleanupRequest.earliestBeginDate = Date(timeIntervalSinceNow: 86400)
         cleanupRequest.requiresNetworkConnectivity = false
 
-        do {
-            try BGTaskScheduler.shared.submit(cleanupRequest)
-            AppLogger.info("Background cleanup task scheduled", category: AppLogger.data)
-        } catch {
-            AppLogger.error("Failed to schedule background cleanup task", category: AppLogger.data, error: error)
-        }
+        submit(cleanupRequest, name: "cleanup", category: AppLogger.data)
     }
 
     private func handleSyncTask(task: BGProcessingTask) {

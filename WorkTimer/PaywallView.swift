@@ -59,7 +59,7 @@ struct PaywallView: View {
             } message: {
                 Text(pendingMessage ?? "")
             }
-            .offerCodeRedemption(isPresented: $showOfferCodeRedemption) { result in
+            .offerCodeRedemption(options: [], isPresented: $showOfferCodeRedemption) { result in
                 handleOfferCodeRedemption(result)
             }
         }
@@ -334,11 +334,14 @@ struct PaywallView: View {
         }
     }
 
-    private func handleOfferCodeRedemption(_ result: Result<Void, Error>) {
+    private func handleOfferCodeRedemption(_ result: Result<VerificationResult<StoreKit.Transaction>, Error>) {
         switch result {
-        case .success:
+        case .success(let verification):
             Task { @MainActor in
-                await store.refreshAfterExternalRedemption()
+                guard await store.completeRedemption(verification) else {
+                    errorMessage = "paywall.error.verification".localized
+                    return
+                }
                 if store.isPro {
                     showSuccess = true
                     try? await Task.sleep(for: .seconds(2))

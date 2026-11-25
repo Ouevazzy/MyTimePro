@@ -79,7 +79,7 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showDiagnostics) { DiagnosticsView() }
         .sheet(isPresented: $showPaywall) { PaywallView() }
-        .offerCodeRedemption(isPresented: $showOfferCodeRedemption) { result in
+        .offerCodeRedemption(options: [], isPresented: $showOfferCodeRedemption) { result in
             handleOfferCodeRedemption(result)
         }
         .sheet(item: $exportType) { type in
@@ -345,11 +345,14 @@ struct SettingsView: View {
         openURL(url)
     }
 
-    private func handleOfferCodeRedemption(_ result: Result<Void, Error>) {
+    private func handleOfferCodeRedemption(_ result: Result<VerificationResult<StoreKit.Transaction>, Error>) {
         switch result {
-        case .success:
+        case .success(let verification):
             Task { @MainActor in
-                await StoreManager.shared.refreshAfterExternalRedemption()
+                guard await StoreManager.shared.completeRedemption(verification) else {
+                    subscriptionErrorMessage = "paywall.error.verification".localized
+                    return
+                }
                 guard StoreManager.shared.isPro else { return }
 
                 withAnimation(DS.Animation.appear) {

@@ -386,16 +386,13 @@ struct InfoRow: View {
 }
 
 // MARK: - Preview
-struct ModernCloudStatusView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack {
-            ModernCloudStatusView()
-                .padding()
-            
-            FirstSyncInfoView(isPresented: .constant(true))
-                .frame(maxHeight: 550)
-        }
-        .background(Color(.systemGroupedBackground))
-        .previewLayout(.sizeThatFits)
+#Preview(traits: .sizeThatFitsLayout) {
+    VStack {
+        ModernCloudStatusView()
+            .padding()
+
+        FirstSyncInfoView(isPresented: .constant(true))
+            .frame(maxHeight: 550)
     }
+    .background(Color(.systemGroupedBackground))
 }

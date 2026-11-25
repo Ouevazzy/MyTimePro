@@ -110,8 +110,9 @@ final class StoreManager {
         }
     }
 
-    func refreshAfterExternalRedemption() async {
-        await refreshPurchaseStatus()
+    /// Termine l'achat issu d'un code. Faux si Apple ne l'a pas vérifié.
+    func completeRedemption(_ result: VerificationResult<Transaction>) async -> Bool {
+        await handle(result)
     }
 
     func refreshPurchaseStatus() async {
