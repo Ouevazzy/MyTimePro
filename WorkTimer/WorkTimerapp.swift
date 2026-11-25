@@ -129,6 +129,8 @@ struct WorkTimerApp: App {
                     switch newPhase {
                     case .active:
                         NotificationService.shared.clearBadge()
+                        // Une expiration (essai, abonnement) n'émet aucune transaction.
+                        Task { await StoreManager.shared.refreshPurchaseStatus() }
                         SiriSummaryCacheService().refresh(using: container.mainContext)
                     case .background:
                         // ⚠️ PAS de save automatique au background.

@@ -117,7 +117,13 @@
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Annual Pro",
           "subscriptionGroupID" : "AF7DDB67-ABE8-4287-847C-1CF0DE0B1435",
-          "type" : "RecurringSubscription"
+          "type" : "RecurringSubscription",
+          "introductoryOffer" : {
+            "internalID" : "5D1E7C42",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P2W"
+          }
         }
       ]
     }

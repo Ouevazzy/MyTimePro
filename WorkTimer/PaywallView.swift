@@ -19,6 +19,7 @@ struct PaywallView: View {
                     featuresList
                     planPicker
                     purchaseButton
+                    trialTerms
                     redeemCodeButton
                     restoreButton
                     legalLinks
@@ -158,7 +159,8 @@ struct PaywallView: View {
                         product: product,
                         isSelected: selectedID == product.id,
                         badge: planBadge(for: product.id),
-                        detail: planDetail(for: product)
+                        detail: planDetail(for: product),
+                        trial: store.trialDuration(for: product).map { "paywall.trial.free".localized($0) }
                     ) {
                         withAnimation(DS.Animation.micro) { selectedID = product.id }
                     }
@@ -186,6 +188,22 @@ struct PaywallView: View {
         .buttonStyle(.glassProminent)
         .tint(.orange)
         .disabled(isPurchasing || store.products.isEmpty)
+        .accessibilityIdentifier("paywall.purchase")
+    }
+
+    /// Prix après l'essai, toujours lisible à côté du bouton.
+    @ViewBuilder
+    private var trialTerms: some View {
+        if let product = selectedProduct, let trial = store.trialDuration(for: product) {
+            Text("paywall.trial.terms".localized(trial, product.displayPrice, periodLabel(for: product.id)))
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .accessibilityIdentifier("paywall.trial.terms")
+        }
+    }
+
+    private var selectedProduct: Product? {
+        store.products.first { $0.id == selectedID }
     }
 
     private var redeemCodeButton: some View {
@@ -224,8 +242,11 @@ struct PaywallView: View {
     }
 
     private var purchaseLabel: String {
-        guard let product = store.products.first(where: { $0.id == selectedID }) else {
+        guard let product = selectedProduct else {
             return "paywall.purchase.choosePlan".localized
+        }
+        if store.trialDuration(for: product) != nil {
+            return "paywall.trial.button".localized
         }
         let format = product.id == StoreManager.lifetimeID
             ? "paywall.purchase.lifetime".localized
@@ -256,13 +277,23 @@ struct PaywallView: View {
     private var legalNote: some View {
         Text(selectedID == StoreManager.lifetimeID
              ? "paywall.legal.lifetime".localized
-             : "paywall.legal.subscription".localized)
+             : subscriptionLegal)
             .font(.caption2)
-            .foregroundStyle(.tertiary)
+            .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
     }
 
+    private var subscriptionLegal: String {
+        let legal = "paywall.legal.subscription".localized
+        guard let product = selectedProduct, store.trialDuration(for: product) != nil else { return legal }
+        return "paywall.trial.legal".localized + " " + legal
+    }
+
     // MARK: - Helpers
+
+    private func periodLabel(for id: String) -> String {
+        id == StoreManager.monthlyID ? "paywall.plan.perMonth".localized : "paywall.plan.perYear".localized
+    }
 
     private func planBadge(for id: String) -> String? {
         switch id {
@@ -328,6 +359,7 @@ private struct PlanCard: View {
     let isSelected: Bool
     let badge: String?
     let detail: String?
+    let trial: String?
     let action: () -> Void
 
     var body: some View {
@@ -353,6 +385,10 @@ private struct PlanCard: View {
                     }
                     if let detail {
                         Text(detail)
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    if let trial {
+                        Text(trial)
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }

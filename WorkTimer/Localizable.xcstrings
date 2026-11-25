@@ -3083,28 +3083,28 @@
     "cloud.firstSync.securityDesc" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihre Daten sind über iCloud Ende-zu-Ende-verschlüsselt."
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ihre Daten sind über iCloud Ende-zu-Ende-verschlüsselt."
+            "value" : "Vos données sont protégées par le chiffrement d'Apple dans votre compte iCloud."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your data is end-to-end encrypted via iCloud."
+            "value" : "Your data is protected by Apple's encryption in your iCloud account."
           }
         },
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos données sont chiffrées de bout en bout via iCloud."
+            "value" : "Ihre Daten sind in Ihrem iCloud-Konto durch die Verschlüsselung von Apple geschützt."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ihre Daten sind in Ihrem iCloud-Konto durch die Verschlüsselung von Apple geschützt."
           }
         }
       }
@@ -12417,6 +12417,122 @@
         }
       }
     },
+    "paywall.trial.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayer gratuitement"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try for Free"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kostenlos testen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratis testen"
+          }
+        }
+      }
+    },
+    "paywall.trial.free" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ d'essai gratuit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ free trial"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kostenlos testen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gratis testen"
+          }
+        }
+      }
+    },
+    "paywall.trial.legal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans résiliation au moins 24 h avant la fin de l'essai, l'abonnement payant démarre automatiquement. L'essai est proposé une seule fois par compte Apple."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unless cancelled at least 24 hours before the trial ends, the paid subscription starts automatically. The trial is available once per Apple Account."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Kündigung mindestens 24 Stunden vor Ende der Testphase beginnt automatisch das kostenpflichtige Abonnement. Die Testphase gibt es einmal pro Apple Account."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Kündigung mindestens 24 Stunden vor Ende der Testphase beginnt automatisch das kostenpflichtige Abonnement. Die Testphase gibt es einmal pro Apple Account."
+          }
+        }
+      }
+    },
+    "paywall.trial.terms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gratuits, puis %@ %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ free, then %@ %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kostenlos, danach %@ %@"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gratis, danach %@ %@"
+          }
+        }
+      }
+    },
     "pdf.bonus" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13551,28 +13667,28 @@
     "privacy.encryption" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ende-zu-Ende-Verschlüsselung über iCloud"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ende-zu-Ende-Verschlüsselung über iCloud"
+            "value" : "Synchronisation sécurisée par le chiffrement d'Apple"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "End-to-end encryption via iCloud"
+            "value" : "Sync secured by Apple's encryption"
           }
         },
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chiffrement de bout en bout via iCloud"
+            "value" : "Synchronisierung durch Apple-Verschlüsselung geschützt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisierung durch Apple-Verschlüsselung geschützt"
           }
         }
       }
@@ -14885,28 +15001,28 @@
     "settings.privacy.message" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihre Daten werden lokal gespeichert und über iCloud mit Ende-zu-Ende-Verschlüsselung synchronisiert."
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ihre Daten werden lokal gespeichert und über iCloud mit Ende-zu-Ende-Verschlüsselung synchronisiert."
+            "value" : "Vos données sont stockées sur votre appareil et synchronisées via votre compte iCloud, protégées par le chiffrement d'Apple."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your data is stored locally on your device and synced via iCloud with end-to-end encryption."
+            "value" : "Your data is stored on your device and synced via your iCloud account, protected by Apple's encryption."
           }
         },
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos données sont stockées localement sur votre appareil et synchronisées via iCloud de manière chiffrée de bout en bout."
+            "value" : "Ihre Daten werden auf Ihrem Gerät gespeichert und über Ihr iCloud-Konto synchronisiert, geschützt durch die Verschlüsselung von Apple."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ihre Daten werden auf Ihrem Gerät gespeichert und über Ihr iCloud-Konto synchronisiert, geschützt durch die Verschlüsselung von Apple."
           }
         }
       }

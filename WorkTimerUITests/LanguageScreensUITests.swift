@@ -20,27 +20,70 @@ final class LanguageScreensUITests: XCTestCase {
         let headline: String
         let plans: [String]
         let restore: String
+        let trial: String
+        let trialDays: String
+        let subscribe: String
     }
 
     func testFrench() throws {
         try check(Language(code: "fr", locale: "fr_CH",
             tabs: ["Accueil", "Journées", "Calendrier", "Statistiques", "Réglages"],
             subscription: "Abonnement", upgrade: "Passer à Pro", headline: "Passez à Pro",
-            plans: ["Mensuel", "Annuel", "À vie"], restore: "Restaurer les achats"))
+            plans: ["Mensuel", "Annuel", "À vie"], restore: "Restaurer les achats",
+            trial: "Essayer gratuitement", trialDays: "14 jours", subscribe: "S'abonner"))
     }
 
     func testEnglish() throws {
         try check(Language(code: "en", locale: "en_CH",
             tabs: ["Home", "Work Days", "Calendar", "Statistics", "Settings"],
             subscription: "Subscription", upgrade: "Upgrade to Pro", headline: "Go Pro",
-            plans: ["Monthly", "Annual", "Lifetime"], restore: "Restore Purchases"))
+            plans: ["Monthly", "Annual", "Lifetime"], restore: "Restore Purchases",
+            trial: "Try for Free", trialDays: "14 days", subscribe: "Subscribe"))
+    }
+
+    /// Un abonnement qui expire pendant que l'app est ouverte retire Pro au retour
+    /// au premier plan, et l'essai n'est plus proposé.
+    func testExpiredSubscriptionLosesProAndTrial() async throws {
+        continueAfterFailure = false
+        let session = try makeSession(locale: "fr_CH")
+        let transaction = try await session.buyProduct(identifier: "com.worktimer.pro.annual")
+        try session.disableAutoRenewForTransaction(identifier: UInt(transaction.id))
+        let app = await MainActor.run { () -> XCUIApplication in
+            let app = XCUIApplication()
+            app.launchArguments = ["UI_TESTING", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_CH", "-liveTimer.startDate", "0"]
+            app.launch()
+            app.tabBars.buttons["Réglages"].tap()
+            app.buttons["Abonnement"].firstMatch.tap()
+            XCTAssertTrue(app.staticTexts["PRO"].waitForExistence(timeout: 5), "Pro attendu pendant l'abonnement")
+            return app
+        }
+        try session.expireSubscription(productIdentifier: "com.worktimer.pro.annual")
+        await MainActor.run {
+            let upgrade = app.buttons["Passer à Pro"].firstMatch
+            // Le StoreKit de test signale l'expiration avec un délai variable.
+            for _ in 0..<8 where !upgrade.exists {
+                XCUIDevice.shared.press(.home)
+                sleep(3)
+                app.activate()
+                _ = upgrade.waitForExistence(timeout: 3)
+            }
+            XCTAssertTrue(upgrade.exists, "Pro toujours actif après expiration")
+            upgrade.tap()
+            let purchase = app.buttons["paywall.purchase"]
+            XCTAssertTrue(app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Annuel'")).firstMatch.waitForExistence(timeout: 10))
+            XCTAssertTrue(purchase.label.hasPrefix("S'abonner"), purchase.label)
+            XCTAssertFalse(app.staticTexts["paywall.trial.terms"].exists)
+            keep(app, "fr-sans-essai")
+        }
+        session.clearTransactions()
     }
 
     func testSwissGerman() throws {
         try check(Language(code: "de-CH", locale: "de_CH",
             tabs: ["Übersicht", "Tage", "Kalender", "Statistik", "Einstellungen"],
             subscription: "Abonnement", upgrade: "Zu Pro wechseln", headline: "Pro werden",
-            plans: ["Monatlich", "Jährlich", "Lebenslang"], restore: "Käufe wiederherstellen"))
+            plans: ["Monatlich", "Jährlich", "Lebenslang"], restore: "Käufe wiederherstellen",
+            trial: "Gratis testen", trialDays: "14 Tage", subscribe: "Abonnieren"))
     }
 
     func testSecondaryScreensSwissGerman() throws { try checkSecondaryScreens("de-CH", "de_CH") }
@@ -163,14 +206,8 @@ final class LanguageScreensUITests: XCTestCase {
 
     private func check(_ language: Language) throws {
         continueAfterFailure = false
-        let configuration = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("WorkTimer/Products.storekit")
-        let session = try SKTestSession(contentsOf: configuration)
-        session.resetToDefaultState()
-        session.clearTransactions()
-        session.storefront = "CHE"
-        session.locale = Locale(identifier: language.locale)
+        let session = try makeSession(locale: language.locale)
+        defer { session.clearTransactions() }
 
         let app = XCUIApplication()
         app.launchArguments = [
@@ -200,10 +237,36 @@ final class LanguageScreensUITests: XCTestCase {
             XCTAssertTrue(card.waitForExistence(timeout: 10), "Offre absente : \(plan)")
             XCTAssertTrue(card.label.contains("CHF"), "Prix sans CHF : \(card.label)")
         }
+        // L'annuel est choisi par défaut : essai annoncé, avec le prix qui suit.
+        let purchase = app.buttons["paywall.purchase"]
+        XCTAssertEqual(purchase.label, language.trial)
+        let terms = app.staticTexts["paywall.trial.terms"]
+        let termsLabel = terms.label.replacingOccurrences(of: "\u{00A0}", with: " ")
+            .replacingOccurrences(of: "\u{202F}", with: " ")
+        XCTAssertTrue(termsLabel.hasPrefix(language.trialDays), terms.label)
+        XCTAssertTrue(terms.label.contains("CHF"), terms.label)
         keep(app, "\(language.code)-7-achat-haut")
+        // Le mensuel n'a pas d'essai : prix normal.
+        app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", language.plans[0])).firstMatch.tap()
+        XCTAssertTrue(purchase.label.hasPrefix(language.subscribe), purchase.label)
+        XCTAssertFalse(terms.exists)
+        app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", language.plans[1])).firstMatch.tap()
         app.swipeUp()
         XCTAssertTrue(app.buttons[language.restore].firstMatch.waitForExistence(timeout: 3))
         keep(app, "\(language.code)-8-achat-bas")
+    }
+
+    private func makeSession(locale: String) throws -> SKTestSession {
+        let configuration = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("WorkTimer/Products.storekit")
+        let session = try SKTestSession(contentsOf: configuration)
+        session.resetToDefaultState()
+        session.disableDialogs = true
+        session.clearTransactions()
+        session.storefront = "CHE"
+        session.locale = Locale(identifier: locale)
+        return session
     }
 
     private func keep(_ app: XCUIApplication, _ name: String) {

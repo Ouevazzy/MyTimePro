@@ -28,6 +28,8 @@ final class StoreManager {
     private(set) var activeProductID: String? = nil
     private(set) var products: [Product] = []
     private(set) var productsState: ProductsState = .loading
+    /// Vrai si ce compte Apple peut encore bénéficier de l'offre d'essai du groupe.
+    private(set) var isEligibleForTrial = false
 
     static let monthlyID  = "com.worktimer.pro.subscription.monthly"
     static let annualID   = "com.worktimer.pro.annual"
@@ -70,6 +72,7 @@ final class StoreManager {
             // Une liste vide (IDs inconnus, config StoreKit absente) est un échec
             // du point de vue de l'utilisateur : rien à acheter.
             productsState = fetched.isEmpty ? .failed : .loaded
+            await refreshTrialEligibility()
         } catch {
             productsState = .failed
             AppLogger.error("StoreKit: chargement produits échoué", category: AppLogger.data, error: error)
@@ -132,6 +135,40 @@ final class StoreManager {
         }
         isPro = hasPro
         activeProductID = foundID
+        await refreshTrialEligibility()
+    }
+
+    /// L'éligibilité vaut pour tout le groupe d'abonnements.
+    private func refreshTrialEligibility() async {
+        let subscription = products.compactMap(\.subscription).first { $0.introductoryOffer?.paymentMode == .freeTrial }
+        isEligibleForTrial = await subscription?.isEligibleForIntroOffer ?? false
+    }
+
+    /// Durée de l'essai gratuit de ce produit dans la langue de l'app (« 14 jours »),
+    /// nil s'il n'y en a pas ou si le compte l'a déjà utilisé.
+    func trialDuration(for product: Product) -> String? {
+        guard isEligibleForTrial,
+              let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial else { return nil }
+        return Self.duration(value: offer.period.value * offer.periodCount, unit: offer.period.unit)
+    }
+
+    static func duration(value: Int, unit: Product.SubscriptionPeriod.Unit, locale: Locale = .current) -> String? {
+        var components = DateComponents()
+        let units: NSCalendar.Unit
+        switch unit {
+        case .day: components.day = value; units = .day
+        case .week: components.day = value * 7; units = .day
+        case .month: components.month = value; units = .month
+        case .year: components.year = value; units = .year
+        @unknown default: return nil
+        }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = locale
+        let formatter = DateComponentsFormatter()
+        formatter.calendar = calendar
+        formatter.allowedUnits = units
+        formatter.unitsStyle = .full
+        return formatter.string(from: components)
     }
 
     @discardableResult
