@@ -1,4 +1,4 @@
-# WorkTimer 1.8.0 (build 61)
+# WorkTimer 1.8.0 (build 62)
 
 ## Notes de version
 
