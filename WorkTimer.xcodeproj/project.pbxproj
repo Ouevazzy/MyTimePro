@@ -490,7 +490,7 @@
 		172C0F612D0A22840006B730 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Midnight AppIcon-Amber AppIcon-SmokedGlass AppIcon-Sapphire AppIcon-Frosted";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Midnight AppIcon-Amber AppIcon-SmokedGlass AppIcon-Sapphire AppIcon-Frosted AppIcon-Aurora AppIcon-Mint AppIcon-Paper AppIcon-TimeCard AppIcon-Dusk AppIcon-Calendar";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = WorkTimer/WorkTimer.entitlements;
@@ -525,7 +525,7 @@
 		172C0F622D0A22840006B730 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Midnight AppIcon-Amber AppIcon-SmokedGlass AppIcon-Sapphire AppIcon-Frosted";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Midnight AppIcon-Amber AppIcon-SmokedGlass AppIcon-Sapphire AppIcon-Frosted AppIcon-Aurora AppIcon-Mint AppIcon-Paper AppIcon-TimeCard AppIcon-Dusk AppIcon-Calendar";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = WorkTimer/WorkTimer.entitlements;

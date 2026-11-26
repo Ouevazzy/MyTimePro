@@ -13,11 +13,17 @@ final class AppIconSettingsUITests: XCTestCase {
         select("smokedGlass", named: "Sablier fumé", from: pickerRow, in: app)
         select("sapphire", named: "Chrono saphir", from: pickerRow, in: app)
         select("frosted", named: "Pointage givré", from: pickerRow, in: app)
+        select("aurora", named: "Aurore", from: pickerRow, in: app)
+        select("mint", named: "Menthe", from: pickerRow, in: app)
+        select("paper", named: "Papier", from: pickerRow, in: app)
+        select("timeCard", named: "Pointeuse", from: pickerRow, in: app)
+        select("dusk", named: "Crépuscule", from: pickerRow, in: app)
+        select("calendar", named: "Calendrier", from: pickerRow, in: app)
 
         app.terminate()
         app.launch()
         let relaunchedPickerRow = openDisplaySettings(in: app)
-        XCTAssertEqual(relaunchedPickerRow.value as? String, "Pointage givré")
+        XCTAssertEqual(relaunchedPickerRow.value as? String, "Calendrier")
         select("graphite", named: "Graphite", from: relaunchedPickerRow, in: app)
     }
 
@@ -40,7 +46,12 @@ final class AppIconSettingsUITests: XCTestCase {
     private func select(_ icon: String, named name: String, from row: XCUIElement, in app: XCUIApplication) {
         row.tap()
         let option = app.buttons["settings.appIcon.option.\(icon)"]
-        XCTAssertTrue(option.waitForExistence(timeout: 5))
+        // La liste compte 12 icônes : les dernières n'apparaissent qu'après défilement.
+        XCTAssertTrue(app.buttons["settings.appIcon.option.graphite"].waitForExistence(timeout: 5))
+        for _ in 0..<6 where !(option.exists && option.isHittable) {
+            app.swipeUp()
+        }
+        XCTAssertTrue(option.isHittable)
         option.tap()
 
         let confirmation = app.alerts.buttons["OK"].firstMatch

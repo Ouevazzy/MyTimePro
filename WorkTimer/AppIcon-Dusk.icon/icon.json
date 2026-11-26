@@ -1,0 +1,149 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.35294,0.17647,0.56863,1.00000",
+          "extended-srgb:1.00000,0.54118,0.23922,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.16471,0.07843,0.27451,1.00000",
+          "extended-srgb:0.43137,0.18824,0.07843,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Hands",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.25
+      },
+      "layers": [
+        {
+          "name": "Hands",
+          "image-name": "Hands.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sun",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "layers": [
+        {
+          "name": "Sun",
+          "image-name": "Sun.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:1.00000,0.88627,0.47843,1.00000",
+                  "extended-srgb:1.00000,0.47843,0.23922,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.84706,0.84706,0.84706,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Horizon",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.0
+      },
+      "layers": [
+        {
+          "name": "Horizon",
+          "image-name": "Horizon.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.60392,0.60392,0.60392,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.35
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

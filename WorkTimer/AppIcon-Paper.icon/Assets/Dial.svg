@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 497.0 212.0 L 497.0 262.0 A 15.0 15.0 0 0 0 527.0 262.0 L 527.0 212.0 A 15.0 15.0 0 0 0 497.0 212.0 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 654.2 247.7 L 640.2 271.9 A 9.0 9.0 0 0 0 655.8 280.9 L 669.8 256.7 A 9.0 9.0 0 0 0 654.2 247.7 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 767.3 354.2 L 743.1 368.2 A 9.0 9.0 0 0 0 752.1 383.8 L 776.3 369.8 A 9.0 9.0 0 0 0 767.3 354.2 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 812.0 497.0 L 762.0 497.0 A 15.0 15.0 0 0 0 762.0 527.0 L 812.0 527.0 A 15.0 15.0 0 0 0 812.0 497.0 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 776.3 654.2 L 752.1 640.2 A 9.0 9.0 0 0 0 743.1 655.8 L 767.3 669.8 A 9.0 9.0 0 0 0 776.3 654.2 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 669.8 767.3 L 655.8 743.1 A 9.0 9.0 0 0 0 640.2 752.1 L 654.2 776.3 A 9.0 9.0 0 0 0 669.8 767.3 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 527.0 812.0 L 527.0 762.0 A 15.0 15.0 0 0 0 497.0 762.0 L 497.0 812.0 A 15.0 15.0 0 0 0 527.0 812.0 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 369.8 776.3 L 383.8 752.1 A 9.0 9.0 0 0 0 368.2 743.1 L 354.2 767.3 A 9.0 9.0 0 0 0 369.8 776.3 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 256.7 669.8 L 280.9 655.8 A 9.0 9.0 0 0 0 271.9 640.2 L 247.7 654.2 A 9.0 9.0 0 0 0 256.7 669.8 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 212.0 527.0 L 262.0 527.0 A 15.0 15.0 0 0 0 262.0 497.0 L 212.0 497.0 A 15.0 15.0 0 0 0 212.0 527.0 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 247.7 369.8 L 271.9 383.8 A 9.0 9.0 0 0 0 280.9 368.2 L 256.7 354.2 A 9.0 9.0 0 0 0 247.7 369.8 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 354.2 256.7 L 368.2 280.9 A 9.0 9.0 0 0 0 383.8 271.9 L 369.8 247.7 A 9.0 9.0 0 0 0 354.2 256.7 Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 174.0 512.0 A 338 338 0 1 0 850.0 512.0 A 338 338 0 1 0 174.0 512.0 Z M 198.0 512.0 A 314 314 0 1 0 826.0 512.0 A 314 314 0 1 0 198.0 512.0 Z"/>
+</svg>

@@ -1,0 +1,149 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.48627,0.94118,0.78824,1.00000",
+          "extended-srgb:0.05490,0.62353,0.54118,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.06667,0.34118,0.29804,1.00000",
+          "extended-srgb:0.02353,0.16471,0.14510,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Play",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "layers": [
+        {
+          "name": "Play",
+          "image-name": "Play.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "layers": [
+        {
+          "name": "Progress",
+          "image-name": "Progress.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+                  "extended-srgb:0.90980,1.00000,0.97255,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Track",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.0
+      },
+      "layers": [
+        {
+          "name": "Track",
+          "image-name": "Track.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:0.03922,0.43137,0.37255,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.35294,0.35294,0.35294,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.25
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

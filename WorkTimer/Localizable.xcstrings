@@ -14195,6 +14195,93 @@
         }
       }
     },
+    "settings.appIcon.aurora" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgenrot"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgenrot"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dawn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aurore"
+          }
+        }
+      }
+    },
+    "settings.appIcon.calendar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalender"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalender"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendrier"
+          }
+        }
+      }
+    },
+    "settings.appIcon.dusk" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abenddämmerung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abenddämmerung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dusk"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crépuscule"
+          }
+        }
+      }
+    },
     "settings.appIcon.error" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14311,6 +14398,64 @@
         }
       }
     },
+    "settings.appIcon.mint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minze"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menthe"
+          }
+        }
+      }
+    },
+    "settings.appIcon.paper" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papier"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papier"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papier"
+          }
+        }
+      }
+    },
     "settings.appIcon.sapphire" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14365,6 +14510,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sablier fumé"
+          }
+        }
+      }
+    },
+    "settings.appIcon.timeCard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stempelkarte"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stempelkarte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Card"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pointeuse"
           }
         }
       }

@@ -8,6 +8,12 @@ private enum AppIcon: String, CaseIterable, Identifiable {
     case smokedGlass
     case sapphire
     case frosted
+    case aurora
+    case mint
+    case paper
+    case timeCard
+    case dusk
+    case calendar
 
     var id: String { rawValue }
     var title: String { "settings.appIcon.\(rawValue)".localized }
@@ -21,6 +27,12 @@ private enum AppIcon: String, CaseIterable, Identifiable {
         case .smokedGlass: "AppIcon-SmokedGlass"
         case .sapphire: "AppIcon-Sapphire"
         case .frosted: "AppIcon-Frosted"
+        case .aurora: "AppIcon-Aurora"
+        case .mint: "AppIcon-Mint"
+        case .paper: "AppIcon-Paper"
+        case .timeCard: "AppIcon-TimeCard"
+        case .dusk: "AppIcon-Dusk"
+        case .calendar: "AppIcon-Calendar"
         }
     }
 

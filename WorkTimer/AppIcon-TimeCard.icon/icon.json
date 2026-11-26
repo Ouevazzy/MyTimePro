@@ -1,0 +1,186 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:1.00000,0.83137,0.36078,1.00000",
+          "extended-srgb:0.94902,0.58431,0.04314,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.41961,0.29020,0.05490,1.00000",
+          "extended-srgb:0.18039,0.11765,0.01569,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "BadgeHands",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      },
+      "layers": [
+        {
+          "name": "BadgeHands",
+          "image-name": "BadgeHands.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Badge",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.4
+      },
+      "layers": [
+        {
+          "name": "Badge",
+          "image-name": "Badge.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.18039,0.29020,0.47843,1.00000",
+                  "extended-srgb:0.10588,0.17255,0.29804,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.22745,0.22745,0.22745,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rows",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.0
+      },
+      "layers": [
+        {
+          "name": "Rows",
+          "image-name": "Rows.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:0.16863,0.22745,0.33333,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.90980,0.90980,0.90980,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.35
+      },
+      "layers": [
+        {
+          "name": "Card",
+          "image-name": "Card.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+                  "extended-srgb:0.95294,0.93725,0.90196,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.47843,0.47843,0.47843,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

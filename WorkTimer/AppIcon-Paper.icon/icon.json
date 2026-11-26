@@ -1,0 +1,196 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:1.00000,1.00000,1.00000,1.00000",
+          "extended-srgb:0.89020,0.90196,0.92549,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.23137,0.24706,0.27843,1.00000",
+          "extended-srgb:0.10196,0.10980,0.12549,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Second",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.25
+      },
+      "layers": [
+        {
+          "name": "Second",
+          "image-name": "Second.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "extended-srgb:0.89804,0.19608,0.17647,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hands",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "layers": [
+        {
+          "name": "Hands",
+          "image-name": "Hands.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.22745,0.24706,0.28235,1.00000",
+                  "extended-srgb:0.11765,0.13333,0.15686,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.95686,0.96078,0.96863,1.00000",
+                  "extended-srgb:0.78824,0.80392,0.83137,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.87843,0.87843,0.87843,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dial",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.15
+      },
+      "layers": [
+        {
+          "name": "Dial",
+          "image-name": "Dial.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.27059,0.29020,0.32941,1.00000",
+                  "extended-srgb:0.16471,0.18039,0.20784,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.85098,0.86275,0.88627,1.00000",
+                  "extended-srgb:0.63922,0.65882,0.69804,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.5,
+                    "y": 0
+                  },
+                  "stop": {
+                    "x": 0.5,
+                    "y": 1
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.62745,0.62745,0.62745,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}
