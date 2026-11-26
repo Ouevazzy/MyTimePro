@@ -29,7 +29,10 @@ final class EntryCheckUITests: XCTestCase {
     func testEnglish() throws { try check(english) }
     func testSwissGerman() throws { try check(german) }
 
-    func testRequiresPro() {
+    func testRequiresPro() throws {
+        // Un achat de test resté d'une série précédente rendrait l'app Pro.
+        let session = try StoreKitTestSupport.cleanSession()
+        defer { session.clearTransactions() }
         let app = launch(french, pro: false)
         XCTAssertFalse(app.buttons["home.entryCheck"].exists)
         openFromSettings(app, french)

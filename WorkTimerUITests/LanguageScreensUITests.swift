@@ -75,7 +75,9 @@ final class LanguageScreensUITests: XCTestCase {
             XCTAssertFalse(app.staticTexts["paywall.trial.terms"].exists)
             keep(app, "fr-sans-essai")
         }
+        // L'achat effacé, l'essai doit revenir avant le test suivant.
         session.clearTransactions()
+        await StoreKitTestSupport.waitForTrialAgain(in: app, trialLabel: "Essayer gratuitement")
     }
 
     func testSwissGerman() throws {
@@ -257,16 +259,7 @@ final class LanguageScreensUITests: XCTestCase {
     }
 
     private func makeSession(locale: String) throws -> SKTestSession {
-        let configuration = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("WorkTimer/Products.storekit")
-        let session = try SKTestSession(contentsOf: configuration)
-        session.resetToDefaultState()
-        session.disableDialogs = true
-        session.clearTransactions()
-        session.storefront = "CHE"
-        session.locale = Locale(identifier: locale)
-        return session
+        try StoreKitTestSupport.cleanSession(locale: locale)
     }
 
     private func keep(_ app: XCUIApplication, _ name: String) {
