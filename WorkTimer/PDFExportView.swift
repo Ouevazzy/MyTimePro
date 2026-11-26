@@ -157,6 +157,7 @@ struct PDFExportView: View {
                             )
                         }
                         .disabled(isGenerating)
+                        .accessibilityIdentifier("export.generate")
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                         .buttonStyle(.plain)
@@ -169,6 +170,7 @@ struct PDFExportView: View {
                     Divider()
                     
                     PDFKitView(data: pdfData)
+                        .accessibilityIdentifier("export.preview")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding()
                 }

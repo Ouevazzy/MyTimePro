@@ -95,6 +95,13 @@
 			);
 			target = A10000000000000000000007 /* WorkTimerWidget */;
 		};
+		A10000000000000000000020 /* Exceptions for "WorkTimerWidget" folder in "WorkTimer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TimerIntents.swift,
+			);
+			target = 172C0F4E2D0A22830006B730 /* WorkTimer */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -115,6 +122,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				A10000000000000000000003 /* Exceptions for "WorkTimerWidget" folder in "WorkTimerWidget" target */,
+				A10000000000000000000020 /* Exceptions for "WorkTimerWidget" folder in "WorkTimer" target */,
 			);
 			path = WorkTimerWidget;
 			sourceTree = "<group>";

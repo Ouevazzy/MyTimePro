@@ -286,26 +286,39 @@ final class WorkTimerUITests: XCTestCase {
     // MARK: - PDF Export Tests
     
     func testPDFExportFlow() throws {
+        // Relance avec Pro débloqué et une journée saisie, sinon l'export n'a rien à produire.
+        app.terminate()
+        app.launchArguments += ["-WorkTimerDebugProUnlocked"]
+        app.launch()
+        app.tabBars.buttons["Calendrier"].tap()
+        app.buttons["calendar.add"].tap()
+        app.buttons["Enregistrer"].firstMatch.tap()
+
         app.tabBars.buttons["Réglages"].tap()
-        sleep(2)
-        
-        // Chercher le bouton d'export PDF
-        let scrollView = app.scrollViews.firstMatch
-        scrollView.swipeUp()
-        
-        let pdfButton = app.buttons["Générer un rapport PDF"]
-        if pdfButton.waitForExistence(timeout: 3) {
-            pdfButton.tap()
-            
-            // Vérifier l'ouverture de la vue d'export
-            sleep(2)
-            
-            // Fermer si possible
-            if app.buttons["Fermer"].exists {
-                app.buttons["Fermer"].tap()
-            } else if app.buttons["Annuler"].exists {
-                app.buttons["Annuler"].tap()
-            }
+        let export = app.buttons["Exportation"].firstMatch
+        reveal(export)
+        export.tap()
+
+        let monthly = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", "Export mensuel")).firstMatch
+        XCTAssertTrue(monthly.waitForExistence(timeout: 3), "Bouton d'export mensuel introuvable")
+        reveal(monthly)
+        monthly.tap()
+
+        let generate = app.buttons["export.generate"]
+        XCTAssertTrue(generate.waitForExistence(timeout: 5), "Bouton de génération introuvable")
+        generate.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["export.preview"].waitForExistence(timeout: 10),
+                      "Aucun aperçu PDF après la génération")
+        XCTAssertTrue(app.navigationBars.buttons["Partager"].waitForExistence(timeout: 3))
+        app.navigationBars.buttons["Annuler"].tap()
+    }
+
+    private func reveal(_ element: XCUIElement) {
+        var attempts = 0
+        while !(element.exists && element.isHittable) && attempts < 8 {
+            app.swipeUp(velocity: .slow)
+            attempts += 1
         }
     }
     

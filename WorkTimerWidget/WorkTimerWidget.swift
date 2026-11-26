@@ -179,7 +179,7 @@ struct WorkTimerWidgetEntryView: View {
             statColumn(
                 icon: "sun.max.fill",
                 color: .orange,
-                value: String(format: "%.1f j", entry.vacationBalance),
+                value: String(format: String(localized: "widget.days.short"), entry.vacationBalance),
                 label: String(localized: "widget.vacationRemaining")
             )
         }
@@ -223,6 +223,8 @@ struct WorkTimerWidget: Widget {
 struct WorkTimerWidgetBundle: WidgetBundle {
     var body: some Widget {
         WorkTimerWidget()
+        TimerWidget()
+        TimerControl()
     }
 }
 

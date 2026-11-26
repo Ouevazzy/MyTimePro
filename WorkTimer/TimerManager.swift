@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 /// Source de vérité unique du chronomètre « en direct ».
 ///
@@ -50,7 +51,10 @@ final class TimerManager {
     private let store = UserDefaults.standard
 
     // MARK: - Init
-    private init() { load() }
+    private init() {
+        load()
+        publishSharedState()
+    }
 
     // MARK: - Derived state
     var state: RunState {
@@ -199,11 +203,23 @@ final class TimerManager {
             store.removeObject(forKey: Keys.pauseStartedAt)
         }
 
+        publishSharedState()
+
         // Tient la montre informée de l'état du chrono.
         Task { @MainActor in
             PhoneWatchConnectivity.shared.pushSummary()
             NotificationService.shared.refreshForgottenTimerReminder()
         }
+    }
+
+    /// Publie l'état pour le widget « Chrono » et la commande du Centre de contrôle.
+    /// Ne recharge que si l'état a changé.
+    func publishSharedState() {
+        let state = SharedTimerState(startDate: startDate, pausedAccumulated: pausedAccumulated, pauseStartedAt: pauseStartedAt)
+        guard state != SharedTimerState.read() else { return }
+        state.write()
+        WidgetCenter.shared.reloadTimelines(ofKind: SharedTimerState.widgetKind)
+        ControlCenter.shared.reloadControls(ofKind: SharedTimerState.controlKind)
     }
 
     private func load() {

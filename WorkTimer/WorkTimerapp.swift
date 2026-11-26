@@ -81,6 +81,7 @@ struct WorkTimerApp: App {
         }
 
         isCloudKitEnabled = cloudEnabled
+        AppModelContainer.shared = container
     }
     
     var body: some Scene {
