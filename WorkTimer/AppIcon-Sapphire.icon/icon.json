@@ -1,0 +1,179 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.09020,0.21176,0.36863,1.00000",
+          "extended-srgb:0.03137,0.08235,0.14510,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.22,
+            "y": 1
+          },
+          "stop": {
+            "x": 0.78,
+            "y": 0
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.03529,0.16078,0.28627,1.00000",
+          "extended-srgb:0.01961,0.05098,0.10980,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.22,
+            "y": 1
+          },
+          "stop": {
+            "x": 0.78,
+            "y": 0
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Needle",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.22
+      },
+      "layers": [
+        {
+          "name": "Needle",
+          "image-name": "Needle.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.89020,0.98431,1.00000,1.00000",
+                  "extended-srgb:0.38039,0.79216,0.97647,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.99216,0.99216,0.99216,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Case",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.32
+      },
+      "layers": [
+        {
+          "name": "Case",
+          "image-name": "Case.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.55294,0.88235,1.00000,1.00000",
+                  "extended-srgb:0.12549,0.47843,0.77255,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.78039,0.78039,0.78039,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.11
+      }
+    },
+    {
+      "name": "Dial",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.32
+      },
+      "layers": [
+        {
+          "name": "Dial",
+          "image-name": "Dial.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.09412,0.27451,0.41961,1.00000",
+                  "extended-srgb:0.05098,0.13725,0.25490,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.29412,0.29412,0.29412,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.3
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

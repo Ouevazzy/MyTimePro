@@ -1,0 +1,179 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.18824,0.19608,0.21176,1.00000",
+          "extended-srgb:0.06667,0.06667,0.07843,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.22,
+            "y": 1
+          },
+          "stop": {
+            "x": 0.78,
+            "y": 0
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "extended-srgb:0.13333,0.13725,0.15294,1.00000",
+          "extended-srgb:0.03137,0.03137,0.03529,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.22,
+            "y": 1
+          },
+          "stop": {
+            "x": 0.78,
+            "y": 0
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Grains",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.14
+      },
+      "layers": [
+        {
+          "name": "Grains",
+          "image-name": "Grains.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.97647,0.87059,0.61961,1.00000",
+                  "extended-srgb:0.72941,0.54118,0.31373,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.80392,0.80392,0.80392,1.00000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GlassRim",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      },
+      "layers": [
+        {
+          "name": "GlassRim",
+          "image-name": "GlassRim.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.92941,0.93725,0.95294,1.00000",
+                  "extended-srgb:0.49804,0.54118,0.60784,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.93333,0.93333,0.93333,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.08
+      }
+    },
+    {
+      "name": "Vessel",
+      "lighting": "individual",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.32
+      },
+      "layers": [
+        {
+          "name": "Vessel",
+          "image-name": "Vessel.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "extended-srgb:0.54902,0.56471,0.59608,1.00000",
+                  "extended-srgb:0.20392,0.21569,0.25098,1.00000"
+                ],
+                "orientation": {
+                  "start": {
+                    "x": 0.22,
+                    "y": 1
+                  },
+                  "stop": {
+                    "x": 0.78,
+                    "y": 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-srgb:0.31373,0.31373,0.31373,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "translucency": {
+        "enabled": true,
+        "value": 0.35
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

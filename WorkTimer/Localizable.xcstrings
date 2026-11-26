@@ -1,19 +1,28 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
+    "" : {
+      "shouldTranslate" : false
+    },
+    "·" : {
+      "shouldTranslate" : false
+    },
     "%@" : {
       "shouldTranslate" : false
     },
     "%@  (%@)" : {
       "shouldTranslate" : false
     },
-    "%@ %@" : {
+    "%@ - %@" : {
       "shouldTranslate" : false
     },
     "%@ (%@)" : {
       "shouldTranslate" : false
     },
-    "%@ - %@" : {
+    "%@ %@" : {
+      "shouldTranslate" : false
+    },
+    "%@–%@" : {
       "shouldTranslate" : false
     },
     "%@, %@" : {
@@ -28,9 +37,6 @@
     "%@: %@  •  %@: %@" : {
       "shouldTranslate" : false
     },
-    "%@–%@" : {
-      "shouldTranslate" : false
-    },
     "%lld" : {
       "shouldTranslate" : false
     },
@@ -40,6 +46,12 @@
     "%lldh%@" : {
       "shouldTranslate" : false
     },
+    "•" : {
+      "shouldTranslate" : false
+    },
+    "• %@" : {
+      "shouldTranslate" : false
+    },
     "+%lld" : {
       "shouldTranslate" : false
     },
@@ -47,21 +59,6 @@
       "shouldTranslate" : false
     },
     "80h" : {
-      "shouldTranslate" : false
-    },
-    "CSV" : {
-      "shouldTranslate" : false
-    },
-    "OK" : {
-      "shouldTranslate" : false
-    },
-    "PDF" : {
-      "shouldTranslate" : false
-    },
-    "PRO" : {
-      "shouldTranslate" : false
-    },
-    "WorkTimer Pro" : {
       "shouldTranslate" : false
     },
     "accessibility.calendar.hint" : {
@@ -3083,18 +3080,6 @@
     "cloud.firstSync.securityDesc" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos données sont protégées par le chiffrement d'Apple dans votre compte iCloud."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your data is protected by Apple's encryption in your iCloud account."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3105,6 +3090,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ihre Daten sind in Ihrem iCloud-Konto durch die Verschlüsselung von Apple geschützt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data is protected by Apple's encryption in your iCloud account."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données sont protégées par le chiffrement d'Apple dans votre compte iCloud."
           }
         }
       }
@@ -4674,6 +4671,9 @@
           }
         }
       }
+    },
+    "CSV" : {
+      "shouldTranslate" : false
     },
     "day.friday" : {
       "extractionState" : "manual",
@@ -7336,10 +7336,16 @@
     "entryCheck.disclaimer" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cette liste est une aide : elle ne garantit pas le respect de la loi. L'enregistrement du temps de travail incombe à l'employeur. Une pause peut compter comme travail si vous ne pouvez pas quitter votre place."
+            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
           }
         },
         "en" : {
@@ -7348,16 +7354,10 @@
             "value" : "This list is an aid: it does not guarantee legal compliance. Recording working time is the employer's duty. A break may count as work if you cannot leave your workplace."
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diese Liste ist eine Hilfe und garantiert nicht die Einhaltung des Gesetzes. Die Arbeitszeiterfassung obliegt dem Arbeitgeber. Eine Pause kann als Arbeit gelten, wenn Sie den Arbeitsplatz nicht verlassen dürfen."
+            "value" : "Cette liste est une aide : elle ne garantit pas le respect de la loi. L'enregistrement du temps de travail incombe à l'employeur. Une pause peut compter comme travail si vous ne pouvez pas quitter votre place."
           }
         }
       }
@@ -7365,10 +7365,16 @@
     "entryCheck.empty" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien à vérifier"
+            "value" : "Nichts zu prüfen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts zu prüfen"
           }
         },
         "en" : {
@@ -7377,16 +7383,10 @@
             "value" : "Nothing to check"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nichts zu prüfen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nichts zu prüfen"
+            "value" : "Rien à vérifier"
           }
         }
       }
@@ -7394,18 +7394,6 @@
     "entryCheck.help" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touchez un jour pour le compléter, balayez-le pour l'ignorer. Les %lld derniers jours sont examinés, sauf aujourd'hui, les absences, les jours non travaillés et les jours fériés du canton choisi."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap a day to complete it, swipe to ignore it. The last %lld days are checked, except today, absences, days off, and the holidays of the selected canton."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7417,25 +7405,55 @@
             "state" : "translated",
             "value" : "Tippen Sie auf einen Tag, um ihn zu ergänzen, wischen Sie, um ihn zu ignorieren. Geprüft werden die letzten %lld Tage, ausser heute, Absenzen, arbeitsfreie Tage und Feiertage des gewählten Kantons."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a day to complete it, swipe to ignore it. The last %lld days are checked, except today, absences, days off, and the holidays of the selected canton."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez un jour pour le compléter, balayez-le pour l'ignorer. Les %lld derniers jours sont examinés, sauf aujourd'hui, les absences, les jours non travaillés et les jours fériés du canton choisi."
+          }
         }
       }
     },
     "entryCheck.home" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld jour à vérifier"
+                  "value" : "%lld Tag zu prüfen"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld jours à vérifier"
+                  "value" : "%lld Tage zu prüfen"
+                }
+              }
+            }
+          }
+        },
+        "de-CH" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tag zu prüfen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tage zu prüfen"
                 }
               }
             }
@@ -7459,37 +7477,19 @@
             }
           }
         },
-        "de" : {
+        "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Tag zu prüfen"
+                  "value" : "%lld jour à vérifier"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Tage zu prüfen"
-                }
-              }
-            }
-          }
-        },
-        "de-CH" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld Tag zu prüfen"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld Tage zu prüfen"
+                  "value" : "%lld jours à vérifier"
                 }
               }
             }
@@ -7500,10 +7500,16 @@
     "entryCheck.ignore" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ignorer"
+            "value" : "Ignorieren"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorieren"
           }
         },
         "en" : {
@@ -7512,16 +7518,10 @@
             "value" : "Ignore"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ignorieren"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ignorieren"
+            "value" : "Ignorer"
           }
         }
       }
@@ -7529,10 +7529,16 @@
     "entryCheck.missingDay" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucune saisie"
+            "value" : "Kein Eintrag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Eintrag"
           }
         },
         "en" : {
@@ -7541,16 +7547,10 @@
             "value" : "No entry"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kein Eintrag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein Eintrag"
+            "value" : "Aucune saisie"
           }
         }
       }
@@ -7558,10 +7558,16 @@
     "entryCheck.missingEnd" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Heure de début ou de fin manquante"
+            "value" : "Beginn oder Ende fehlt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginn oder Ende fehlt"
           }
         },
         "en" : {
@@ -7570,16 +7576,10 @@
             "value" : "Start or end time missing"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beginn oder Ende fehlt"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beginn oder Ende fehlt"
+            "value" : "Heure de début ou de fin manquante"
           }
         }
       }
@@ -7587,19 +7587,37 @@
     "entryCheck.restoreIgnored" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Réafficher %lld jour ignoré"
+                  "value" : "%lld ignorierten Tag anzeigen"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Réafficher %lld jours ignorés"
+                  "value" : "%lld ignorierte Tage anzeigen"
+                }
+              }
+            }
+          }
+        },
+        "de-CH" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierten Tag anzeigen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ignorierte Tage anzeigen"
                 }
               }
             }
@@ -7623,37 +7641,19 @@
             }
           }
         },
-        "de" : {
+        "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld ignorierten Tag anzeigen"
+                  "value" : "Réafficher %lld jour ignoré"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld ignorierte Tage anzeigen"
-                }
-              }
-            }
-          }
-        },
-        "de-CH" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ignorierten Tag anzeigen"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ignorierte Tage anzeigen"
+                  "value" : "Réafficher %lld jours ignorés"
                 }
               }
             }
@@ -7664,10 +7664,16 @@
     "entryCheck.shortBreak" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pause de %lld min, minimum %lld min (art. 15 LTr)"
+            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
           }
         },
         "en" : {
@@ -7676,16 +7682,10 @@
             "value" : "%lld min break, minimum %lld min (Labour Act, art. 15)"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Min. Pause, Minimum %lld Min. (Art. 15 ArG)"
+            "value" : "Pause de %lld min, minimum %lld min (art. 15 LTr)"
           }
         }
       }
@@ -7693,10 +7693,16 @@
     "entryCheck.showOnHome" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rappel sur l'accueil"
+            "value" : "Hinweis auf der Übersicht"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinweis auf der Übersicht"
           }
         },
         "en" : {
@@ -7705,16 +7711,10 @@
             "value" : "Reminder on Home"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hinweis auf der Übersicht"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hinweis auf der Übersicht"
+            "value" : "Rappel sur l'accueil"
           }
         }
       }
@@ -7722,10 +7722,16 @@
     "entryCheck.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jours, fins et pauses à compléter"
+            "value" : "Tage, Endzeiten und Pausen ergänzen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tage, Endzeiten und Pausen ergänzen"
           }
         },
         "en" : {
@@ -7734,16 +7740,10 @@
             "value" : "Days, end times, and breaks to complete"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tage, Endzeiten und Pausen ergänzen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tage, Endzeiten und Pausen ergänzen"
+            "value" : "Jours, fins et pauses à compléter"
           }
         }
       }
@@ -7751,10 +7751,16 @@
     "entryCheck.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Contrôle de saisie"
+            "value" : "Erfassungskontrolle"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfassungskontrolle"
           }
         },
         "en" : {
@@ -7763,16 +7769,10 @@
             "value" : "Entry Check"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erfassungskontrolle"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erfassungskontrolle"
+            "value" : "Contrôle de saisie"
           }
         }
       }
@@ -9027,10 +9027,16 @@
     "firstLaunch.icloud.text" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vos données sont synchronisées et sécurisées sur tous vos appareils"
+            "value" : "Ihre Daten sind auf allen Ihren Geräten synchronisiert und geschützt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ihre Daten sind auf allen Ihren Geräten synchronisiert und geschützt"
           }
         },
         "en" : {
@@ -9039,16 +9045,10 @@
             "value" : "Your data is synced and secured on all your devices"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihre Daten sind auf allen Ihren Geräten synchronisiert und geschützt"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ihre Daten sind auf allen Ihren Geräten synchronisiert und geschützt"
+            "value" : "Vos données sont synchronisées et sécurisées sur tous vos appareils"
           }
         }
       }
@@ -9056,10 +9056,16 @@
     "firstLaunch.icloud.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Synchronisation iCloud"
+            "value" : "iCloud-Synchronisierung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud-Synchronisierung"
           }
         },
         "en" : {
@@ -9068,16 +9074,10 @@
             "value" : "iCloud Sync"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iCloud-Synchronisierung"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud-Synchronisierung"
+            "value" : "Synchronisation iCloud"
           }
         }
       }
@@ -9085,18 +9085,6 @@
     "firstLaunch.leave.text" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suivez vos congés, RTT et absences en un coup d'œil"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep track of vacation, time off in lieu, and absences at a glance"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9108,24 +9096,24 @@
             "state" : "translated",
             "value" : "Ferien, Kompensation und Absenzen auf einen Blick"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep track of vacation, time off in lieu, and absences at a glance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivez vos congés, RTT et absences en un coup d'œil"
+          }
         }
       }
     },
     "firstLaunch.leave.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestion des congés"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Leave Management"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9137,16 +9125,34 @@
             "state" : "translated",
             "value" : "Ferienverwaltung"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave Management"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestion des congés"
+          }
         }
       }
     },
     "firstLaunch.next" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suivant"
+            "value" : "Weiter"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
           }
         },
         "en" : {
@@ -9155,16 +9161,10 @@
             "value" : "Next"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weiter"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weiter"
+            "value" : "Suivant"
           }
         }
       }
@@ -9172,10 +9172,16 @@
     "firstLaunch.skip" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Passer"
+            "value" : "Überspringen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überspringen"
           }
         },
         "en" : {
@@ -9184,16 +9190,10 @@
             "value" : "Skip"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Überspringen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Überspringen"
+            "value" : "Passer"
           }
         }
       }
@@ -9201,10 +9201,16 @@
     "firstLaunch.start" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Commencer"
+            "value" : "Los geht’s"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los geht’s"
           }
         },
         "en" : {
@@ -9213,16 +9219,10 @@
             "value" : "Get Started"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los geht’s"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los geht’s"
+            "value" : "Commencer"
           }
         }
       }
@@ -9230,10 +9230,16 @@
     "firstLaunch.stats.text" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analysez vos heures avec des graphiques et rapports exportables"
+            "value" : "Analysieren Sie Ihre Stunden mit Diagrammen und exportierbaren Berichten"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysieren Sie Ihre Stunden mit Diagrammen und exportierbaren Berichten"
           }
         },
         "en" : {
@@ -9242,16 +9248,10 @@
             "value" : "Analyze your hours with charts and exportable reports"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analysieren Sie Ihre Stunden mit Diagrammen und exportierbaren Berichten"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analysieren Sie Ihre Stunden mit Diagrammen und exportierbaren Berichten"
+            "value" : "Analysez vos heures avec des graphiques et rapports exportables"
           }
         }
       }
@@ -9259,10 +9259,16 @@
     "firstLaunch.stats.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Statistiques détaillées"
+            "value" : "Detaillierte Statistiken"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detaillierte Statistiken"
           }
         },
         "en" : {
@@ -9271,16 +9277,10 @@
             "value" : "Detailed Statistics"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Detaillierte Statistiken"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detaillierte Statistiken"
+            "value" : "Statistiques détaillées"
           }
         }
       }
@@ -9288,10 +9288,16 @@
     "firstLaunch.time.text" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enregistrez facilement vos heures de travail, pauses et heures supplémentaires"
+            "value" : "Erfassen Sie Arbeitszeit, Pausen und Überstunden ganz einfach"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfassen Sie Arbeitszeit, Pausen und Überstunden ganz einfach"
           }
         },
         "en" : {
@@ -9300,16 +9306,10 @@
             "value" : "Easily record your work hours, breaks, and overtime"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erfassen Sie Arbeitszeit, Pausen und Überstunden ganz einfach"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erfassen Sie Arbeitszeit, Pausen und Überstunden ganz einfach"
+            "value" : "Enregistrez facilement vos heures de travail, pauses et heures supplémentaires"
           }
         }
       }
@@ -9317,10 +9317,16 @@
     "firstLaunch.time.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suivi du temps"
+            "value" : "Zeiterfassung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeiterfassung"
           }
         },
         "en" : {
@@ -9329,16 +9335,10 @@
             "value" : "Time Tracking"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zeiterfassung"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeiterfassung"
+            "value" : "Suivi du temps"
           }
         }
       }
@@ -11170,6 +11170,9 @@
         }
       }
     },
+    "OK" : {
+      "shouldTranslate" : false
+    },
     "paywall.close" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11405,18 +11408,6 @@
     "paywall.feature.entryCheck.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repérez les jours, fins et pauses oubliés"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spot missing days, end times, and breaks"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11427,6 +11418,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vergessene Tage, Endzeiten und Pausen finden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spot missing days, end times, and breaks"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repérez les jours, fins et pauses oubliés"
           }
         }
       }
@@ -11492,18 +11495,6 @@
     "paywall.feature.holidays.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours fériés de votre canton dans le calendrier"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your canton's holidays in the calendar"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11514,6 +11505,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feiertage Ihres Kantons im Kalender"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your canton's holidays in the calendar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours fériés de votre canton dans le calendrier"
           }
         }
       }
@@ -11608,18 +11611,6 @@
     "paywall.feature.timesheet.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Par semaine ou par mois, prête à signer"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "By week or month, ready to sign"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11630,6 +11621,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pro Woche oder Monat, bereit zur Unterschrift"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By week or month, ready to sign"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par semaine ou par mois, prête à signer"
           }
         }
       }
@@ -12420,18 +12423,6 @@
     "paywall.trial.button" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Essayer gratuitement"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try for Free"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12443,24 +12434,24 @@
             "state" : "translated",
             "value" : "Gratis testen"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try for Free"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayer gratuitement"
+          }
         }
       }
     },
     "paywall.trial.free" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ d'essai gratuit"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ free trial"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12472,24 +12463,24 @@
             "state" : "translated",
             "value" : "%@ gratis testen"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ free trial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ d'essai gratuit"
+          }
         }
       }
     },
     "paywall.trial.legal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sans résiliation au moins 24 h avant la fin de l'essai, l'abonnement payant démarre automatiquement. L'essai est proposé une seule fois par compte Apple."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unless cancelled at least 24 hours before the trial ends, the paid subscription starts automatically. The trial is available once per Apple Account."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12501,24 +12492,24 @@
             "state" : "translated",
             "value" : "Ohne Kündigung mindestens 24 Stunden vor Ende der Testphase beginnt automatisch das kostenpflichtige Abonnement. Die Testphase gibt es einmal pro Apple Account."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unless cancelled at least 24 hours before the trial ends, the paid subscription starts automatically. The trial is available once per Apple Account."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans résiliation au moins 24 h avant la fin de l'essai, l'abonnement payant démarre automatiquement. L'essai est proposé une seule fois par compte Apple."
+          }
         }
       }
     },
     "paywall.trial.terms" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ gratuits, puis %@ %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ free, then %@ %@"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12530,8 +12521,23 @@
             "state" : "translated",
             "value" : "%@ gratis, danach %@ %@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ free, then %@ %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gratuits, puis %@ %@"
+          }
         }
       }
+    },
+    "PDF" : {
+      "shouldTranslate" : false
     },
     "pdf.bonus" : {
       "extractionState" : "manual",
@@ -13667,18 +13673,6 @@
     "privacy.encryption" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synchronisation sécurisée par le chiffrement d'Apple"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync secured by Apple's encryption"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13689,6 +13683,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Synchronisierung durch Apple-Verschlüsselung geschützt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync secured by Apple's encryption"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation sécurisée par le chiffrement d'Apple"
           }
         }
       }
@@ -13779,6 +13785,9 @@
           }
         }
       }
+    },
+    "PRO" : {
+      "shouldTranslate" : false
     },
     "search.placeholder" : {
       "extractionState" : "manual",
@@ -14153,6 +14162,238 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustement précis"
+          }
+        }
+      }
+    },
+    "settings.appIcon.amber" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bernstein"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bernstein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amber"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambre"
+          }
+        }
+      }
+    },
+    "settings.appIcon.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das App-Symbol konnte nicht geändert werden."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das App-Symbol konnte nicht geändert werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t change the app icon."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de modifier l’icône de l’app."
+          }
+        }
+      }
+    },
+    "settings.appIcon.frosted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frostglas-Uhr"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frostglas-Uhr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frosted Clock"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pointage givré"
+          }
+        }
+      }
+    },
+    "settings.appIcon.graphite" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphit"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphite"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphite"
+          }
+        }
+      }
+    },
+    "settings.appIcon.midnight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitternachtsblau"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitternachtsblau"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midnight Blue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bleu nuit"
+          }
+        }
+      }
+    },
+    "settings.appIcon.sapphire" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saphir-Stoppuhr"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saphir-Stoppuhr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sapphire Stopwatch"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chrono saphir"
+          }
+        }
+      }
+    },
+    "settings.appIcon.smokedGlass" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rauchglas-Sanduhr"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rauchglas-Sanduhr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smoked Glass Hourglass"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sablier fumé"
+          }
+        }
+      }
+    },
+    "settings.appIcon.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Symbol"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Symbol"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Icon"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icône de l’app"
           }
         }
       }
@@ -15001,18 +15242,6 @@
     "settings.privacy.message" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vos données sont stockées sur votre appareil et synchronisées via votre compte iCloud, protégées par le chiffrement d'Apple."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your data is stored on your device and synced via your iCloud account, protected by Apple's encryption."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15023,6 +15252,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ihre Daten werden auf Ihrem Gerät gespeichert und über Ihr iCloud-Konto synchronisiert, geschützt durch die Verschlüsselung von Apple."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data is stored on your device and synced via your iCloud account, protected by Apple's encryption."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données sont stockées sur votre appareil et synchronisées via votre compte iCloud, protégées par le chiffrement d'Apple."
           }
         }
       }
@@ -16332,6 +16573,35 @@
         }
       }
     },
+    "settings.workingDays" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitstage"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitstage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working Days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours travaillés"
+          }
+        }
+      }
+    },
     "settings.workTime" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16942,35 +17212,6 @@
       }
     },
     "settings.workTime.workingDays" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeitstage"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeitstage"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Working Days"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours travaillés"
-          }
-        }
-      }
-    },
-    "settings.workingDays" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
@@ -19670,18 +19911,6 @@
     "swissCanton.AG" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Argovie"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aargau"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19692,6 +19921,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aargau"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aargau"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argovie"
           }
         }
       }
@@ -19699,18 +19940,6 @@
     "swissCanton.AI" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appenzell Rhodes-Intérieures"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appenzell Innerrhoden"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19721,6 +19950,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appenzell Innerrhoden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appenzell Innerrhoden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appenzell Rhodes-Intérieures"
           }
         }
       }
@@ -19728,18 +19969,6 @@
     "swissCanton.AR" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appenzell Rhodes-Extérieures"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appenzell Ausserrhoden"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19750,6 +19979,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appenzell Ausserrhoden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appenzell Ausserrhoden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appenzell Rhodes-Extérieures"
           }
         }
       }
@@ -19757,18 +19998,6 @@
     "swissCanton.BE" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Berne"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bern"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19779,6 +20008,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bern"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berne"
           }
         }
       }
@@ -19786,18 +20027,6 @@
     "swissCanton.BL" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bâle-Campagne"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basel-Landschaft"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19808,6 +20037,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Basel-Landschaft"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basel-Landschaft"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bâle-Campagne"
           }
         }
       }
@@ -19815,18 +20056,6 @@
     "swissCanton.BS" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bâle-Ville"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basel-Stadt"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19837,6 +20066,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Basel-Stadt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basel-Stadt"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bâle-Ville"
           }
         }
       }
@@ -19844,18 +20085,6 @@
     "swissCanton.FR" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fribourg"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fribourg"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19867,16 +20096,34 @@
             "state" : "translated",
             "value" : "Freiburg"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fribourg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fribourg"
+          }
         }
       }
     },
     "swissCanton.GE" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genève"
+            "value" : "Genf"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genf"
           }
         },
         "en" : {
@@ -19885,16 +20132,10 @@
             "value" : "Geneva"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genf"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Genf"
+            "value" : "Genève"
           }
         }
       }
@@ -19902,18 +20143,6 @@
     "swissCanton.GL" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glaris"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glarus"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19924,6 +20153,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glarus"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glarus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glaris"
           }
         }
       }
@@ -19931,18 +20172,6 @@
     "swissCanton.GR" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grisons"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Graubünden"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19953,6 +20182,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Graubünden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graubünden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grisons"
           }
         }
       }
@@ -19960,7 +20201,13 @@
     "swissCanton.JU" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jura"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jura"
@@ -19972,13 +20219,7 @@
             "value" : "Jura"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jura"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jura"
@@ -19989,18 +20230,6 @@
     "swissCanton.LU" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lucerne"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lucerne"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20011,6 +20240,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Luzern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lucerne"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lucerne"
           }
         }
       }
@@ -20018,18 +20259,6 @@
     "swissCanton.NE" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neuchâtel"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neuchâtel"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20040,6 +20269,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Neuenburg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuchâtel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuchâtel"
           }
         }
       }
@@ -20047,18 +20288,6 @@
     "swissCanton.NW" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nidwald"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nidwalden"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20069,6 +20298,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nidwalden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nidwalden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nidwald"
           }
         }
       }
@@ -20076,18 +20317,6 @@
     "swissCanton.OW" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Obwald"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Obwalden"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20098,6 +20327,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Obwalden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obwalden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obwald"
           }
         }
       }
@@ -20105,18 +20346,6 @@
     "swissCanton.SG" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saint-Gall"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "St. Gallen"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20127,6 +20356,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "St. Gallen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "St. Gallen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saint-Gall"
           }
         }
       }
@@ -20134,18 +20375,6 @@
     "swissCanton.SH" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schaffhouse"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schaffhausen"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20156,6 +20385,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schaffhausen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schaffhausen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schaffhouse"
           }
         }
       }
@@ -20163,18 +20404,6 @@
     "swissCanton.SO" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soleure"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solothurn"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20185,6 +20414,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Solothurn"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solothurn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soleure"
           }
         }
       }
@@ -20192,18 +20433,6 @@
     "swissCanton.SZ" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schwytz"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schwyz"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20214,6 +20443,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schwyz"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwyz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwytz"
           }
         }
       }
@@ -20221,18 +20462,6 @@
     "swissCanton.TG" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thurgovie"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thurgau"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20244,13 +20473,31 @@
             "state" : "translated",
             "value" : "Thurgau"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thurgau"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thurgovie"
+          }
         }
       }
     },
     "swissCanton.TI" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tessin"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tessin"
@@ -20262,13 +20509,7 @@
             "value" : "Ticino"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tessin"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tessin"
@@ -20279,7 +20520,13 @@
     "swissCanton.UR" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uri"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uri"
@@ -20291,13 +20538,7 @@
             "value" : "Uri"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uri"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uri"
@@ -20308,18 +20549,6 @@
     "swissCanton.VD" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vaud"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vaud"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20330,6 +20559,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Waadt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaud"
           }
         }
       }
@@ -20337,18 +20578,6 @@
     "swissCanton.VS" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valais"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valais"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20359,6 +20588,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wallis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valais"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valais"
           }
         }
       }
@@ -20366,18 +20607,6 @@
     "swissCanton.ZG" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zoug"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zug"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20388,6 +20617,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zug"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zug"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoug"
           }
         }
       }
@@ -20395,18 +20636,6 @@
     "swissCanton.ZH" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zurich"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zurich"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20418,16 +20647,34 @@
             "state" : "translated",
             "value" : "Zürich"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurich"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurich"
+          }
         }
       }
     },
     "swissHoliday.allSaints" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toussaint"
+            "value" : "Allerheiligen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allerheiligen"
           }
         },
         "en" : {
@@ -20436,16 +20683,10 @@
             "value" : "All Saints' Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allerheiligen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allerheiligen"
+            "value" : "Toussaint"
           }
         }
       }
@@ -20453,10 +20694,16 @@
     "swissHoliday.ascension" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ascension"
+            "value" : "Auffahrt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auffahrt"
           }
         },
         "en" : {
@@ -20465,16 +20712,10 @@
             "value" : "Ascension Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auffahrt"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auffahrt"
+            "value" : "Ascension"
           }
         }
       }
@@ -20482,10 +20723,16 @@
     "swissHoliday.assumption" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Assomption"
+            "value" : "Mariä Himmelfahrt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mariä Himmelfahrt"
           }
         },
         "en" : {
@@ -20494,16 +20741,10 @@
             "value" : "Assumption Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mariä Himmelfahrt"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mariä Himmelfahrt"
+            "value" : "Assomption"
           }
         }
       }
@@ -20511,10 +20752,16 @@
     "swissHoliday.berchtold" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saint-Berchtold"
+            "value" : "Berchtoldstag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berchtoldstag"
           }
         },
         "en" : {
@@ -20523,16 +20770,10 @@
             "value" : "Berchtold's Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Berchtoldstag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Berchtoldstag"
+            "value" : "Saint-Berchtold"
           }
         }
       }
@@ -20540,10 +20781,16 @@
     "swissHoliday.christmas" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Noël"
+            "value" : "Weihnachtstag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weihnachtstag"
           }
         },
         "en" : {
@@ -20552,16 +20799,10 @@
             "value" : "Christmas Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weihnachtstag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weihnachtstag"
+            "value" : "Noël"
           }
         }
       }
@@ -20569,10 +20810,16 @@
     "swissHoliday.corpusChristi" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fête-Dieu"
+            "value" : "Fronleichnam"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fronleichnam"
           }
         },
         "en" : {
@@ -20581,16 +20828,10 @@
             "value" : "Corpus Christi"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fronleichnam"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fronleichnam"
+            "value" : "Fête-Dieu"
           }
         }
       }
@@ -20598,10 +20839,16 @@
     "swissHoliday.easterMonday" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lundi de Pâques"
+            "value" : "Ostermontag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ostermontag"
           }
         },
         "en" : {
@@ -20610,16 +20857,10 @@
             "value" : "Easter Monday"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ostermontag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ostermontag"
+            "value" : "Lundi de Pâques"
           }
         }
       }
@@ -20627,10 +20868,16 @@
     "swissHoliday.epiphany" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Épiphanie"
+            "value" : "Dreikönigstag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dreikönigstag"
           }
         },
         "en" : {
@@ -20639,16 +20886,10 @@
             "value" : "Epiphany"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dreikönigstag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dreikönigstag"
+            "value" : "Épiphanie"
           }
         }
       }
@@ -20656,7 +20897,13 @@
     "swissHoliday.fahrtsfest" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrtsfest"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fahrtsfest"
@@ -20668,13 +20915,7 @@
             "value" : "Fahrtsfest"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fahrtsfest"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fahrtsfest"
@@ -20685,10 +20926,16 @@
     "swissHoliday.federalFastMonday" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lundi du Jeûne fédéral"
+            "value" : "Bettagsmontag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bettagsmontag"
           }
         },
         "en" : {
@@ -20697,16 +20944,10 @@
             "value" : "Federal Fast Monday"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bettagsmontag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bettagsmontag"
+            "value" : "Lundi du Jeûne fédéral"
           }
         }
       }
@@ -20714,10 +20955,16 @@
     "swissHoliday.genevaFast" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jeûne genevois"
+            "value" : "Genfer Bettag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genfer Bettag"
           }
         },
         "en" : {
@@ -20726,16 +20973,10 @@
             "value" : "Geneva Fast"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genfer Bettag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Genfer Bettag"
+            "value" : "Jeûne genevois"
           }
         }
       }
@@ -20743,10 +20984,16 @@
     "swissHoliday.genevaRestoration" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restauration de la République"
+            "value" : "Wiederherstellung der Republik"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung der Republik"
           }
         },
         "en" : {
@@ -20755,16 +21002,10 @@
             "value" : "Restoration of the Republic"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wiederherstellung der Republik"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wiederherstellung der Republik"
+            "value" : "Restauration de la République"
           }
         }
       }
@@ -20772,10 +21013,16 @@
     "swissHoliday.goodFriday" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vendredi saint"
+            "value" : "Karfreitag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karfreitag"
           }
         },
         "en" : {
@@ -20784,16 +21031,10 @@
             "value" : "Good Friday"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karfreitag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karfreitag"
+            "value" : "Vendredi saint"
           }
         }
       }
@@ -20801,10 +21042,16 @@
     "swissHoliday.immaculateConception" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Immaculée Conception"
+            "value" : "Mariä Empfängnis"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mariä Empfängnis"
           }
         },
         "en" : {
@@ -20813,16 +21060,10 @@
             "value" : "Immaculate Conception"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mariä Empfängnis"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mariä Empfängnis"
+            "value" : "Immaculée Conception"
           }
         }
       }
@@ -20830,10 +21071,16 @@
     "swissHoliday.labourDay" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fête du travail"
+            "value" : "Tag der Arbeit"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag der Arbeit"
           }
         },
         "en" : {
@@ -20842,16 +21089,10 @@
             "value" : "Labour Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tag der Arbeit"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tag der Arbeit"
+            "value" : "Fête du travail"
           }
         }
       }
@@ -20859,10 +21100,16 @@
     "swissHoliday.nationalDay" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fête nationale"
+            "value" : "Bundesfeiertag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bundesfeiertag"
           }
         },
         "en" : {
@@ -20871,16 +21118,10 @@
             "value" : "Swiss National Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bundesfeiertag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bundesfeiertag"
+            "value" : "Fête nationale"
           }
         }
       }
@@ -20888,10 +21129,16 @@
     "swissHoliday.neuchatelRepublic" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instauration de la République"
+            "value" : "Ausrufung der Republik"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausrufung der Republik"
           }
         },
         "en" : {
@@ -20900,16 +21147,10 @@
             "value" : "Republic Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ausrufung der Republik"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausrufung der Republik"
+            "value" : "Instauration de la République"
           }
         }
       }
@@ -20917,10 +21158,16 @@
     "swissHoliday.newYear" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouvel an"
+            "value" : "Neujahr"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neujahr"
           }
         },
         "en" : {
@@ -20929,16 +21176,10 @@
             "value" : "New Year's Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neujahr"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neujahr"
+            "value" : "Nouvel an"
           }
         }
       }
@@ -20946,10 +21187,16 @@
     "swissHoliday.saintJoseph" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saint-Joseph"
+            "value" : "Josephstag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Josephstag"
           }
         },
         "en" : {
@@ -20958,16 +21205,10 @@
             "value" : "Saint Joseph's Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Josephstag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Josephstag"
+            "value" : "Saint-Joseph"
           }
         }
       }
@@ -20975,10 +21216,16 @@
     "swissHoliday.saintStephen" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saint-Étienne"
+            "value" : "Stephanstag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stephanstag"
           }
         },
         "en" : {
@@ -20987,16 +21234,10 @@
             "value" : "St. Stephen's Day"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stephanstag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stephanstag"
+            "value" : "Saint-Étienne"
           }
         }
       }
@@ -21004,10 +21245,16 @@
     "swissHoliday.whitMonday" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lundi de Pentecôte"
+            "value" : "Pfingstmontag"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pfingstmontag"
           }
         },
         "en" : {
@@ -21016,16 +21263,10 @@
             "value" : "Whit Monday"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pfingstmontag"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pfingstmontag"
+            "value" : "Lundi de Pentecôte"
           }
         }
       }
@@ -21033,10 +21274,16 @@
     "swissHolidays.add" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter"
+            "value" : "Hinzufügen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinzufügen"
           }
         },
         "en" : {
@@ -21045,16 +21292,10 @@
             "value" : "Add"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hinzufügen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hinzufügen"
+            "value" : "Ajouter"
           }
         }
       }
@@ -21062,19 +21303,37 @@
     "swissHolidays.addAll" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Ajouter %lld jour férié"
+                  "value" : "%lld Feiertag hinzufügen"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Ajouter %lld jours fériés"
+                  "value" : "%lld Feiertage hinzufügen"
+                }
+              }
+            }
+          }
+        },
+        "de-CH" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Feiertag hinzufügen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Feiertage hinzufügen"
                 }
               }
             }
@@ -21098,37 +21357,19 @@
             }
           }
         },
-        "de" : {
+        "fr" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Feiertag hinzufügen"
+                  "value" : "Ajouter %lld jour férié"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Feiertage hinzufügen"
-                }
-              }
-            }
-          }
-        },
-        "de-CH" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld Feiertag hinzufügen"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld Feiertage hinzufügen"
+                  "value" : "Ajouter %lld jours fériés"
                 }
               }
             }
@@ -21139,10 +21380,16 @@
     "swissHolidays.addAll.help" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seuls les jours normalement travaillés et sans saisie sont ajoutés, au plus un an à l'avance."
+            "value" : "Es werden nur reguläre Arbeitstage ohne Eintrag hinzugefügt, höchstens ein Jahr im Voraus."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es werden nur reguläre Arbeitstage ohne Eintrag hinzugefügt, höchstens ein Jahr im Voraus."
           }
         },
         "en" : {
@@ -21151,16 +21398,10 @@
             "value" : "Only scheduled work days without an entry are added, up to one year ahead."
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es werden nur reguläre Arbeitstage ohne Eintrag hinzugefügt, höchstens ein Jahr im Voraus."
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es werden nur reguläre Arbeitstage ohne Eintrag hinzugefügt, höchstens ein Jahr im Voraus."
+            "value" : "Seuls les jours normalement travaillés et sans saisie sont ajoutés, au plus un an à l'avance."
           }
         }
       }
@@ -21168,10 +21409,16 @@
     "swissHolidays.afternoonOnly" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ (après-midi)"
+            "value" : "%@ (Nachmittag)"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (Nachmittag)"
           }
         },
         "en" : {
@@ -21180,16 +21427,10 @@
             "value" : "%@ (afternoon)"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ (Nachmittag)"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ (Nachmittag)"
+            "value" : "%@ (après-midi)"
           }
         }
       }
@@ -21197,18 +21438,6 @@
     "swissHolidays.canton" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Canton"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Canton"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21220,48 +21449,24 @@
             "state" : "translated",
             "value" : "Kanton"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canton"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canton"
+          }
         }
       }
     },
     "swissHolidays.confirm.message" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld journée sera enregistrée comme « Férié »."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld journées seront enregistrées comme « Férié »."
-                }
-              }
-            }
-          }
-        },
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld day will be saved as “Holiday”."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld days will be saved as “Holiday”."
-                }
-              }
-            }
-          }
-        },
         "de" : {
           "variations" : {
             "plural" : {
@@ -21297,16 +21502,58 @@
               }
             }
           }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day will be saved as “Holiday”."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days will be saved as “Holiday”."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld journée sera enregistrée comme « Férié »."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld journées seront enregistrées comme « Férié »."
+                }
+              }
+            }
+          }
         }
       }
     },
     "swissHolidays.confirm.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter les jours fériés ?"
+            "value" : "Feiertage hinzufügen?"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feiertage hinzufügen?"
           }
         },
         "en" : {
@@ -21315,16 +21562,10 @@
             "value" : "Add public holidays?"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feiertage hinzufügen?"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feiertage hinzufügen?"
+            "value" : "Ajouter les jours fériés ?"
           }
         }
       }
@@ -21332,10 +21573,16 @@
     "swissHolidays.dayOff" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Non travaillé"
+            "value" : "Arbeitsfrei"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitsfrei"
           }
         },
         "en" : {
@@ -21344,16 +21591,10 @@
             "value" : "Day off"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arbeitsfrei"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeitsfrei"
+            "value" : "Non travaillé"
           }
         }
       }
@@ -21361,10 +21602,16 @@
     "swissHolidays.none" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun"
+            "value" : "Keiner"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keiner"
           }
         },
         "en" : {
@@ -21373,16 +21620,10 @@
             "value" : "None"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keiner"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keiner"
+            "value" : "Aucun"
           }
         }
       }
@@ -21390,10 +21631,16 @@
     "swissHolidays.region" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "District ou commune"
+            "value" : "Bezirk oder Gemeinde"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bezirk oder Gemeinde"
           }
         },
         "en" : {
@@ -21402,16 +21649,10 @@
             "value" : "District or municipality"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bezirk oder Gemeinde"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bezirk oder Gemeinde"
+            "value" : "District ou commune"
           }
         }
       }
@@ -21419,18 +21660,6 @@
     "swissHolidays.source" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours assimilés au dimanche, d'après la liste du SECO (état au 12.12.2024). Votre employeur peut en accorder d'autres."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Days treated as Sundays, based on the SECO list (as of 12.12.2024). Your employer may grant others."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21442,16 +21671,34 @@
             "state" : "translated",
             "value" : "Den Sonntagen gleichgestellte Tage gemäss SECO-Liste (Stand 12.12.2024). Ihr Arbeitgeber kann weitere gewähren."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days treated as Sundays, based on the SECO list (as of 12.12.2024). Your employer may grant others."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours assimilés au dimanche, d'après la liste du SECO (état au 12.12.2024). Votre employeur peut en accorder d'autres."
+          }
         }
       }
     },
     "swissHolidays.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Par canton"
+            "value" : "Nach Kanton"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach Kanton"
           }
         },
         "en" : {
@@ -21460,16 +21707,10 @@
             "value" : "By canton"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nach Kanton"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nach Kanton"
+            "value" : "Par canton"
           }
         }
       }
@@ -21477,10 +21718,16 @@
     "swissHolidays.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jours fériés suisses"
+            "value" : "Schweizer Feiertage"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schweizer Feiertage"
           }
         },
         "en" : {
@@ -21489,16 +21736,10 @@
             "value" : "Swiss Public Holidays"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schweizer Feiertage"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schweizer Feiertage"
+            "value" : "Jours fériés suisses"
           }
         }
       }
@@ -21506,7 +21747,13 @@
     "swissRegion.AG-aarau" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aarau, Brugg, Kulm, Lenzburg, Zofingen, Bergdietikon"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aarau, Brugg, Kulm, Lenzburg, Zofingen, Bergdietikon"
@@ -21518,13 +21765,7 @@
             "value" : "Aarau, Brugg, Kulm, Lenzburg, Zofingen, Bergdietikon"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aarau, Brugg, Kulm, Lenzburg, Zofingen, Bergdietikon"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aarau, Brugg, Kulm, Lenzburg, Zofingen, Bergdietikon"
@@ -21535,10 +21776,16 @@
     "swissRegion.AG-baden" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Baden (sans Bergdietikon)"
+            "value" : "Baden (ohne Bergdietikon)"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baden (ohne Bergdietikon)"
           }
         },
         "en" : {
@@ -21547,16 +21794,10 @@
             "value" : "Baden (except Bergdietikon)"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Baden (ohne Bergdietikon)"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Baden (ohne Bergdietikon)"
+            "value" : "Baden (sans Bergdietikon)"
           }
         }
       }
@@ -21564,7 +21805,13 @@
     "swissRegion.AG-bremgarten" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bremgarten"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bremgarten"
@@ -21576,13 +21823,7 @@
             "value" : "Bremgarten"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bremgarten"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bremgarten"
@@ -21593,7 +21834,13 @@
     "swissRegion.AG-fricktal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hellikon, Mumpf, Obermumpf, Schupfart, Stein, Wegenstetten"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hellikon, Mumpf, Obermumpf, Schupfart, Stein, Wegenstetten"
@@ -21605,13 +21852,7 @@
             "value" : "Hellikon, Mumpf, Obermumpf, Schupfart, Stein, Wegenstetten"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hellikon, Mumpf, Obermumpf, Schupfart, Stein, Wegenstetten"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hellikon, Mumpf, Obermumpf, Schupfart, Stein, Wegenstetten"
@@ -21622,7 +21863,13 @@
     "swissRegion.AG-muri" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laufenburg, Muri"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laufenburg, Muri"
@@ -21634,13 +21881,7 @@
             "value" : "Laufenburg, Muri"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laufenburg, Muri"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laufenburg, Muri"
@@ -21651,7 +21892,13 @@
     "swissRegion.AG-rheinfelden" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaiseraugst, Magden, Möhlin, Olsberg, Rheinfelden, Wallbach, Zeiningen, Zuzgen"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaiseraugst, Magden, Möhlin, Olsberg, Rheinfelden, Wallbach, Zeiningen, Zuzgen"
@@ -21663,13 +21910,7 @@
             "value" : "Kaiseraugst, Magden, Möhlin, Olsberg, Rheinfelden, Wallbach, Zeiningen, Zuzgen"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaiseraugst, Magden, Möhlin, Olsberg, Rheinfelden, Wallbach, Zeiningen, Zuzgen"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaiseraugst, Magden, Möhlin, Olsberg, Rheinfelden, Wallbach, Zeiningen, Zuzgen"
@@ -21680,7 +21921,13 @@
     "swissRegion.AG-zurzach" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurzach"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zurzach"
@@ -21692,13 +21939,7 @@
             "value" : "Zurzach"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zurzach"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zurzach"
@@ -21709,10 +21950,16 @@
     "swissRegion.FR-catholic" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Communes à majorité catholique"
+            "value" : "Gemeinden mit vorwiegend katholischer Bevölkerung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeinden mit vorwiegend katholischer Bevölkerung"
           }
         },
         "en" : {
@@ -21721,16 +21968,10 @@
             "value" : "Mainly Catholic municipalities"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gemeinden mit vorwiegend katholischer Bevölkerung"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gemeinden mit vorwiegend katholischer Bevölkerung"
+            "value" : "Communes à majorité catholique"
           }
         }
       }
@@ -21738,10 +21979,16 @@
     "swissRegion.FR-reformed" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Communes à majorité réformée"
+            "value" : "Gemeinden mit vorwiegend reformierter Bevölkerung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeinden mit vorwiegend reformierter Bevölkerung"
           }
         },
         "en" : {
@@ -21750,16 +21997,10 @@
             "value" : "Mainly Reformed municipalities"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gemeinden mit vorwiegend reformierter Bevölkerung"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gemeinden mit vorwiegend reformierter Bevölkerung"
+            "value" : "Communes à majorité réformée"
           }
         }
       }
@@ -21767,10 +22008,16 @@
     "swissRegion.NE" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Canton, sauf Le Landeron"
+            "value" : "Kanton ohne Le Landeron"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanton ohne Le Landeron"
           }
         },
         "en" : {
@@ -21779,16 +22026,10 @@
             "value" : "Canton, except Le Landeron"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kanton ohne Le Landeron"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kanton ohne Le Landeron"
+            "value" : "Canton, sauf Le Landeron"
           }
         }
       }
@@ -21796,7 +22037,13 @@
     "swissRegion.NE-landeron" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Landeron"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le Landeron"
@@ -21808,13 +22055,7 @@
             "value" : "Le Landeron"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le Landeron"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le Landeron"
@@ -21825,10 +22066,16 @@
     "swissRegion.SO" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Canton, sauf Bucheggberg"
+            "value" : "Kanton ohne Bucheggberg"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanton ohne Bucheggberg"
           }
         },
         "en" : {
@@ -21837,16 +22084,10 @@
             "value" : "Canton, except Bucheggberg"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kanton ohne Bucheggberg"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kanton ohne Bucheggberg"
+            "value" : "Canton, sauf Bucheggberg"
           }
         }
       }
@@ -21854,7 +22095,13 @@
     "swissRegion.SO-bucheggberg" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bucheggberg"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bucheggberg"
@@ -21866,13 +22113,7 @@
             "value" : "Bucheggberg"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bucheggberg"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bucheggberg"
@@ -23536,18 +23777,6 @@
     "timesheet.absences" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Absences : %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Absences: %@"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23559,24 +23788,24 @@
             "state" : "translated",
             "value" : "Absenzen: %@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absences: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absences : %@"
+          }
         }
       }
     },
     "timesheet.column.balance" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solde"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Balance"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23588,13 +23817,31 @@
             "state" : "translated",
             "value" : "Saldo"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solde"
+          }
         }
       }
     },
     "timesheet.column.break" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "de-CH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pause"
@@ -23606,13 +23853,7 @@
             "value" : "Break"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause"
-          }
-        },
-        "de-CH" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pause"
@@ -23623,18 +23864,6 @@
     "timesheet.column.date" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23646,24 +23875,24 @@
             "state" : "translated",
             "value" : "Datum"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
         }
       }
     },
     "timesheet.column.dayTotal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total jour"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Day total"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23675,16 +23904,34 @@
             "state" : "translated",
             "value" : "Tagestotal"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total jour"
+          }
         }
       }
     },
     "timesheet.column.end" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fin"
+            "value" : "Ende"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ende"
           }
         },
         "en" : {
@@ -23693,16 +23940,10 @@
             "value" : "End"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ende"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ende"
+            "value" : "Fin"
           }
         }
       }
@@ -23710,18 +23951,6 @@
     "timesheet.column.name" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nom"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23732,6 +23961,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Name"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
           }
         }
       }
@@ -23739,18 +23980,6 @@
     "timesheet.column.note" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Note"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Note"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23762,16 +23991,34 @@
             "state" : "translated",
             "value" : "Notiz"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
         }
       }
     },
     "timesheet.column.remark" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remarque"
+            "value" : "Bemerkung"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bemerkung"
           }
         },
         "en" : {
@@ -23780,16 +24027,10 @@
             "value" : "Remark"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bemerkung"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bemerkung"
+            "value" : "Remarque"
           }
         }
       }
@@ -23797,10 +24038,16 @@
     "timesheet.column.start" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Début"
+            "value" : "Beginn"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginn"
           }
         },
         "en" : {
@@ -23809,16 +24056,10 @@
             "value" : "Start"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beginn"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beginn"
+            "value" : "Début"
           }
         }
       }
@@ -23826,10 +24067,16 @@
     "timesheet.column.type" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Type"
+            "value" : "Art"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
           }
         },
         "en" : {
@@ -23838,16 +24085,10 @@
             "value" : "Type"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Art"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Art"
+            "value" : "Type"
           }
         }
       }
@@ -23855,10 +24096,16 @@
     "timesheet.column.week" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Semaine"
+            "value" : "Woche"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woche"
           }
         },
         "en" : {
@@ -23867,16 +24114,10 @@
             "value" : "Week"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Woche"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Woche"
+            "value" : "Semaine"
           }
         }
       }
@@ -23884,18 +24125,6 @@
     "timesheet.column.weekTotal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total semaine"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week total"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23907,16 +24136,34 @@
             "state" : "translated",
             "value" : "Wochentotal"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total semaine"
+          }
         }
       }
     },
     "timesheet.column.worked" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Travaillé"
+            "value" : "Gearbeitet"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gearbeitet"
           }
         },
         "en" : {
@@ -23925,16 +24172,10 @@
             "value" : "Worked"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gearbeitet"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gearbeitet"
+            "value" : "Travaillé"
           }
         }
       }
@@ -23942,10 +24183,16 @@
     "timesheet.company" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entreprise"
+            "value" : "Unternehmen"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unternehmen"
           }
         },
         "en" : {
@@ -23954,16 +24201,10 @@
             "value" : "Company"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unternehmen"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unternehmen"
+            "value" : "Entreprise"
           }
         }
       }
@@ -23971,10 +24212,16 @@
     "timesheet.dayTotal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "jour : %@"
+            "value" : "Tag: %@"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag: %@"
           }
         },
         "en" : {
@@ -23983,16 +24230,10 @@
             "value" : "day: %@"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tag: %@"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tag: %@"
+            "value" : "jour : %@"
           }
         }
       }
@@ -24000,18 +24241,6 @@
     "timesheet.employee" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nom"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24023,24 +24252,24 @@
             "state" : "translated",
             "value" : "Name"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
+          }
         }
       }
     },
     "timesheet.empty" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune journée enregistrée sur cette période."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No days recorded for this period."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24052,24 +24281,24 @@
             "state" : "translated",
             "value" : "Keine Tage in dieser Periode erfasst."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No days recorded for this period."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune journée enregistrée sur cette période."
+          }
         }
       }
     },
     "timesheet.includeNotes" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inclure mes notes"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Include my notes"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24081,24 +24310,24 @@
             "state" : "translated",
             "value" : "Meine Notizen einschliessen"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include my notes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclure mes notes"
+          }
         }
       }
     },
     "timesheet.next" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Période suivante"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next period"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24110,16 +24339,34 @@
             "state" : "translated",
             "value" : "Nächste Periode"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next period"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période suivante"
+          }
         }
       }
     },
     "timesheet.period.month" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mois"
+            "value" : "Monat"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monat"
           }
         },
         "en" : {
@@ -24128,16 +24375,10 @@
             "value" : "Month"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monat"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Monat"
+            "value" : "Mois"
           }
         }
       }
@@ -24145,10 +24386,16 @@
     "timesheet.period.week" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Semaine"
+            "value" : "Woche"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woche"
           }
         },
         "en" : {
@@ -24157,16 +24404,10 @@
             "value" : "Week"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Woche"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Woche"
+            "value" : "Semaine"
           }
         }
       }
@@ -24174,10 +24415,16 @@
     "timesheet.preview" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aperçu"
+            "value" : "Vorschau"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschau"
           }
         },
         "en" : {
@@ -24186,16 +24433,10 @@
             "value" : "Preview"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vorschau"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorschau"
+            "value" : "Aperçu"
           }
         }
       }
@@ -24203,18 +24444,6 @@
     "timesheet.previous" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Période précédente"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Previous period"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24226,24 +24455,24 @@
             "state" : "translated",
             "value" : "Vorherige Periode"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous period"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période précédente"
+          }
         }
       }
     },
     "timesheet.privacy" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les bonus et la rémunération n'apparaissent jamais sur cette feuille."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bonuses and earnings never appear on this sheet."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24255,16 +24484,34 @@
             "state" : "translated",
             "value" : "Bonus und Lohn erscheinen nie auf diesem Blatt."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonuses and earnings never appear on this sheet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les bonus et la rémunération n'apparaissent jamais sur cette feuille."
+          }
         }
       }
     },
     "timesheet.signature.date" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lieu et date"
+            "value" : "Ort und Datum"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort und Datum"
           }
         },
         "en" : {
@@ -24273,16 +24520,10 @@
             "value" : "Place and date"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ort und Datum"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ort und Datum"
+            "value" : "Lieu et date"
           }
         }
       }
@@ -24290,10 +24531,16 @@
     "timesheet.signature.employee" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Signature du collaborateur ou de la collaboratrice"
+            "value" : "Unterschrift Mitarbeiterin oder Mitarbeiter"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterschrift Mitarbeiterin oder Mitarbeiter"
           }
         },
         "en" : {
@@ -24302,16 +24549,10 @@
             "value" : "Employee signature"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unterschrift Mitarbeiterin oder Mitarbeiter"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unterschrift Mitarbeiterin oder Mitarbeiter"
+            "value" : "Signature du collaborateur ou de la collaboratrice"
           }
         }
       }
@@ -24319,10 +24560,16 @@
     "timesheet.signature.employer" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Signature de l'employeur"
+            "value" : "Unterschrift Arbeitgeber"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterschrift Arbeitgeber"
           }
         },
         "en" : {
@@ -24331,16 +24578,10 @@
             "value" : "Employer signature"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unterschrift Arbeitgeber"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unterschrift Arbeitgeber"
+            "value" : "Signature de l'employeur"
           }
         }
       }
@@ -24348,10 +24589,16 @@
     "timesheet.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour l'employeur, par semaine ou par mois"
+            "value" : "Für den Arbeitgeber, pro Woche oder Monat"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für den Arbeitgeber, pro Woche oder Monat"
           }
         },
         "en" : {
@@ -24360,16 +24607,10 @@
             "value" : "For your employer, by week or month"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für den Arbeitgeber, pro Woche oder Monat"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für den Arbeitgeber, pro Woche oder Monat"
+            "value" : "Pour l'employeur, par semaine ou par mois"
           }
         }
       }
@@ -24377,10 +24618,16 @@
     "timesheet.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feuille d'heures"
+            "value" : "Stundenblatt"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stundenblatt"
           }
         },
         "en" : {
@@ -24389,16 +24636,10 @@
             "value" : "Timesheet"
           }
         },
-        "de" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stundenblatt"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stundenblatt"
+            "value" : "Feuille d'heures"
           }
         }
       }
@@ -24406,18 +24647,6 @@
     "timesheet.total" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total de la période"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Period total"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24429,24 +24658,24 @@
             "state" : "translated",
             "value" : "Total der Periode"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Period total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total de la période"
+          }
         }
       }
     },
     "timesheet.week.title" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine %lld : %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %lld: %@"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24458,24 +24687,24 @@
             "state" : "translated",
             "value" : "Woche %lld: %@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week %lld: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine %lld : %@"
+          }
         }
       }
     },
     "timesheet.weekTotal" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total semaine %lld"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %lld total"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24487,24 +24716,24 @@
             "state" : "translated",
             "value" : "Total Woche %lld"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week %lld total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total semaine %lld"
+          }
         }
       }
     },
     "timesheet.weekTotal.partial" : {
       "extractionState" : "manual",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total semaine %lld (partielle)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %lld total (partial)"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24515,6 +24744,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Total Woche %lld (Teilwoche)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week %lld total (partial)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total semaine %lld (partielle)"
           }
         }
       }
@@ -25766,6 +26007,64 @@
         }
       }
     },
+    "workDays.entries.count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d Einträge"
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d Einträge"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d entries"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d entrées"
+          }
+        }
+      }
+    },
+    "workdays.readError" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tage konnten nicht geladen werden."
+          }
+        },
+        "de-CH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tage konnten nicht geladen werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not load entries."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les journées."
+          }
+        }
+      }
+    },
     "workDayType.compensatory" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25969,71 +26268,7 @@
         }
       }
     },
-    "workDays.entries.count" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d Einträge"
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d Einträge"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d entries"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d entrées"
-          }
-        }
-      }
-    },
-    "workdays.readError" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Tage konnten nicht geladen werden."
-          }
-        },
-        "de-CH" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Tage konnten nicht geladen werden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not load entries."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de charger les journées."
-          }
-        }
-      }
-    },
-    "·" : {
-      "shouldTranslate" : false
-    },
-    "•" : {
-      "shouldTranslate" : false
-    },
-    "• %@" : {
+    "WorkTimer Pro" : {
       "shouldTranslate" : false
     }
   },

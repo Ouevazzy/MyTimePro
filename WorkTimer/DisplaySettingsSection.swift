@@ -27,6 +27,11 @@ struct DisplaySettingsSection: View {
                     Text("settings.display.showTimer.help".localized)
                         .font(.caption).foregroundStyle(.secondary)
                 }
+
+                if UIApplication.shared.supportsAlternateIcons {
+                    Divider()
+                    AppIconSettingsRow()
+                }
             }
             .padding(.vertical, 5).padding(.horizontal)
         }
